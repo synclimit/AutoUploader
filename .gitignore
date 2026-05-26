@@ -1,0 +1,35 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Build
+dist/
+build/
+
+# Upload Storage
+backend/storage/videos/
+backend/storage/thumbnails/
+
+# Sessions
+backend/sessions/
+
+# Logs
+logs/
+
+# Environment
+.env
+
+# VSCode
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Playwright
+playwright-report/
+test-results/
