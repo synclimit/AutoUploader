@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { Filter, ChevronDown, Sparkles, Clock, Trash2, Save, CloudUpload } from 'lucide-react'
+import { Filter, ChevronDown, Sparkles, Clock, Trash2, Save, CloudUpload, RotateCcw } from 'lucide-react'
 import ReviewVideoRow from './ReviewVideoRow'
 import ReviewCenterPanel from './ReviewCenterPanel'
 import ReviewMetadataPanel from './ReviewMetadataPanel'
@@ -421,10 +421,10 @@ export default function ReviewWorkspace() {
                buttonClass = "bg-green-500/20 text-green-400 cursor-not-allowed border border-green-500/30";
                disabled = true;
              } else if (status === 'FAILED') {
-               buttonText = "Upload Failed";
-               icon = null;
-               buttonClass = "bg-red-500/20 text-red-400 cursor-not-allowed border border-red-500/30";
-               disabled = true;
+               buttonText = "Retry Upload";
+               icon = <RotateCcw size={16} strokeWidth={2.5} />;
+               buttonClass = "bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)]";
+               disabled = false;
              }
 
              return (

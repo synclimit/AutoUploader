@@ -181,7 +181,8 @@ class UploadEngine(EngineBase):
                             return True
                         return False
 
-                    is_retryable = is_retryable_error(e)
+                    # For AutoUploader desktop client, we aggressively retry all errors up to the user's setting
+                    is_retryable = True
                     current_retry = getattr(task, 'retry_count', 0)
                     
                     settings = db.query(GlobalSettings).first()
