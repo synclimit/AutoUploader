@@ -702,6 +702,11 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                       }
                     }
                   }}
+                  onClick={(e) => {
+                    try {
+                      if (e.target.showPicker) e.target.showPicker();
+                    } catch (err) {}
+                  }}
                   className="w-full bg-[#0a0f1a]/80 border border-white/[0.05] rounded-[8px] px-3 h-[40px] text-[13px] text-white/90 outline-none hover:border-[var(--accent-500)]/30 focus:border-[var(--accent-500)]/50 transition-all cursor-pointer"
                />
                <span className="text-[10px] text-white/40 italic">Kosongkan (hapus nilai) jika ingin video langsung dipublikasikan.</span>
