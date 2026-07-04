@@ -12,12 +12,10 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react'
 export default function UploadsOverviewPanel() {
   const [selectedChannelId, setSelectedChannelId] = useState(null)
   const [isPickerOpen, setIsPickerOpen] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
   const setActiveModule = useAppStore((s) => s.setActiveModule)
 
   const { accounts, fetchAccounts } = useAccountsStore()
-  const { tasks, fetchTasks, createTask } = useQueueStore()
+  const { tasks, fetchTasks, isUploading, uploadProgress, uploadFiles } = useQueueStore()
 
   useEffect(() => {
     fetchAccounts()
@@ -35,42 +33,7 @@ export default function UploadsOverviewPanel() {
 
   const handleFilesImported = async (files) => {
     if (!selectedChannelId) return;
-    
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      formData.append('account_id', selectedChannelId);
-
-      Array.from(files).forEach(file => {
-        const path = file.customPath || file.webkitRelativePath || file.name;
-        formData.append('files', file, path);
-      });
-
-      const response = await apiClient.post('/import/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 0,
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setUploadProgress(percentCompleted);
-          }
-        }
-      });
-      
-      let message = 'Import finished.';
-      if (response && response.imported !== undefined) {
-        message = `Imported: ${response.imported}, Duplicates: ${response.duplicates}, Errors: ${response.errors}`;
-      }
-      showToast(message, 'success', 4000);
-    } catch (err) {
-      console.error('Import Error:', err);
-      showToast(`Import failed: ${err.message}`, 'error', 4000);
-    } finally {
-      setIsUploading(false);
-      fetchTasks();
-    }
+    await uploadFiles(selectedChannelId, files);
   }
 
   const handleContinueToReview = () => {

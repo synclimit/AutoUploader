@@ -52,6 +52,11 @@ export interface QueueStoreState {
   setActiveTask: (task: UploadTask | null) => void
   setLogs: (logs: any[]) => void
   fetchTaskLogs: (id: string) => Promise<void>
+  
+  // Global Upload State
+  isUploading: boolean
+  uploadProgress: number
+  uploadFiles: (account_id: string, files: File[]) => Promise<void>
 }
 
 export const useQueueStore = create<QueueStoreState>((set, get) => ({
@@ -61,6 +66,8 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
   loading: false,
   error: null,
   logs: [],
+  isUploading: false,
+  uploadProgress: 0,
 
   setFilters: (filters) => set({ filters }),
   
@@ -216,6 +223,45 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
       set({ logs: data })
     } catch (error: any) {
       console.error(error)
+    }
+  },
+  
+  uploadFiles: async (account_id, files) => {
+    set({ isUploading: true, uploadProgress: 0 });
+    try {
+      const formData = new FormData();
+      formData.append('account_id', account_id);
+
+      Array.from(files).forEach(file => {
+        // @ts-ignore - customPath added by directory reader
+        const path = file.customPath || file.webkitRelativePath || file.name;
+        formData.append('files', file, path);
+      });
+
+      const response = await apiClient.post('/import/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 0,
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            set({ uploadProgress: percentCompleted });
+          }
+        }
+      });
+      
+      const { showToast } = await import('../../components/common/NotificationToast');
+      let message = 'Import finished.';
+      if (response && response.imported !== undefined) {
+        message = `Imported: ${response.imported}, Duplicates: ${response.duplicates}, Errors: ${response.errors}`;
+      }
+      showToast(message, 'success', 4000);
+    } catch (err: any) {
+      console.error('Import Error:', err);
+      const { showToast } = await import('../../components/common/NotificationToast');
+      showToast(`Import failed: ${err.message}`, 'error', 4000);
+    } finally {
+      set({ isUploading: false });
+      await get().fetchTasks();
     }
   }
 }))
