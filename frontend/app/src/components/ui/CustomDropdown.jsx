@@ -16,7 +16,7 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const selectedOption = options.find(o => o.value === value)
+  const selectedOption = options.find(o => String(o.value) === String(value))
   const filteredOptions = options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()))
 
   return (
@@ -63,11 +63,11 @@ export default function CustomDropdown({ options, value, onChange, placeholder =
                     setSearch('')
                   }}
                   className={`flex items-center justify-between px-3 py-2 rounded-[6px] cursor-pointer text-[13px] transition-colors ${
-                    value === opt.value ? 'bg-[var(--accent-500)]/10 text-[var(--accent-400)] font-bold' : 'text-white/80 hover:bg-white/[0.04]'
+                    String(value) === String(opt.value) ? 'bg-[var(--accent-500)]/10 text-[var(--accent-400)] font-bold' : 'text-white/80 hover:bg-white/[0.04]'
                   }`}
                 >
                   <span className="truncate">{opt.label}</span>
-                  {value === opt.value && <Check size={14} />}
+                  {String(value) === String(opt.value) && <Check size={14} />}
                 </div>
               ))
             )}

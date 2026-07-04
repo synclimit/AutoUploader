@@ -109,6 +109,18 @@ class APIUploader(BaseUploader):
             youtube_url = f"https://youtube.com/watch?v={video_id}"
             context.logger.info(f"[APIUploader] Video uploaded successfully. ID: {video_id}")
             
+            # 3.5 Force refresh token if expired during upload
+            if credentials.expired or (credentials.expiry and credentials.expiry < datetime.datetime.utcnow() + datetime.timedelta(minutes=5)):
+                context.logger.info("[APIUploader] Token might be expired after long upload. Refreshing credentials...")
+                try:
+                    from google.auth.transport.requests import Request
+                    credentials.refresh(Request())
+                    with open(token_pickle, "wb") as token:
+                        pickle.dump(credentials, token)
+                    youtube = build("youtube", "v3", credentials=credentials)
+                except Exception as ref_err:
+                    context.logger.warning(f"[APIUploader] Token refresh failed: {ref_err}")
+            
             # 4. Upload Thumbnail
             thumbnail_uploaded = False
             if task.thumbnail_path and os.path.exists(task.thumbnail_path):
