@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, Plus, Sparkles, Save, Check, X, Search, MonitorPlay, Copy, ExternalLink, Activity, History } from 'lucide-react'
 import { useQueueStore } from '../../../store/upload/uploadStore'
 import { showToast } from '../../common/NotificationToast'
@@ -359,7 +360,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   </button>
 
                   {/* Preview Section Modal */}
-                  {suggestion && (
+                  {suggestion && createPortal(
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-8 animate-in fade-in duration-200">
                       <div className="bg-[#0a0f1a] w-full max-w-4xl max-h-[90vh] rounded-2xl border border-[var(--accent-500)]/30 shadow-[0_10px_50px_rgba(34,211,238,0.15)] flex flex-col overflow-hidden">
                         
@@ -515,7 +516,8 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </div>,
+                    document.body
                   )}
 
                </div>
