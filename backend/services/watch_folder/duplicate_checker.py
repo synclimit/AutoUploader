@@ -62,33 +62,35 @@ def check(video_id: str, package_folder: str, db: Session) -> DuplicateCheckResu
     # -----------------------------------------------------------------------
     # Step 1 — Primary: video_id lookup
     # -----------------------------------------------------------------------
-    existing = (
+    existing_tasks = (
         db.query(UploadTask)
         .filter(UploadTask.video_id == video_id)
-        .first()
+        .all()
     )
 
-    if existing:
-        if existing.status in ACTIVE_STATUSES:
-            logger.warning(
-                f"[DUPLICATE] Duplicate Skipped | "
-                f"video_id={video_id!r} | "
-                f"folder={package_folder!r} | "
-                f"existing_task={existing.id} | "
-                f"status={existing.status}"
-            )
-            return DuplicateCheckResult(
-                is_duplicate=True,
-                reason=f"video_id already imported (status={existing.status})",
-                existing_task_id=existing.id,
-            )
+    if existing_tasks:
+        # Check if ANY of the tasks are in an active status (including COMPLETED)
+        for existing in existing_tasks:
+            if existing.status in ACTIVE_STATUSES:
+                logger.warning(
+                    f"[DUPLICATE] Duplicate Skipped | "
+                    f"video_id={video_id!r} | "
+                    f"folder={package_folder!r} | "
+                    f"existing_task={existing.id} | "
+                    f"status={existing.status}"
+                )
+                return DuplicateCheckResult(
+                    is_duplicate=True,
+                    reason=f"video_id already imported (status={existing.status})",
+                    existing_task_id=existing.id,
+                )
 
-        if existing.status in RETRY_SAFE_STATUSES:
-            logger.info(
-                f"[DUPLICATE] Previous import {existing.status} — re-import allowed | "
-                f"video_id={video_id!r} | folder={package_folder!r}"
-            )
-            # Fall through — safe to re-import
+        # If we get here, all existing tasks are in RETRY_SAFE_STATUSES (FAILED/CANCELLED)
+        logger.info(
+            f"[DUPLICATE] Previous imports FAILED/CANCELLED — re-import allowed | "
+            f"video_id={video_id!r} | folder={package_folder!r}"
+        )
+        # Fall through — safe to re-import
 
     # -----------------------------------------------------------------------
     # Step 2 — Secondary: package_folder rescan guard

@@ -356,9 +356,6 @@ export default function GeneralTab({ draft, original, onChange, states }) {
                       <span className="text-white/20 text-[10px]">→</span>
                       <span className="text-[12px] font-mono text-white/50">{formatSchedulePreview(time, p)}</span>
                     </div>
-                    <button onClick={() => removeSchedule(key, idx)} className="w-6 h-6 flex items-center justify-center rounded-[4px] hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-colors">
-                      <Trash2 size={12} />
-                    </button>
                   </div>
                 ))}
               </div>

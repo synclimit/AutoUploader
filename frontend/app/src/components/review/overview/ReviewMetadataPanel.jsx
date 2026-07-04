@@ -797,41 +797,6 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                </div>
              ))}
              
-             <div className="flex items-center justify-between group neon-interactive p-1 -mx-1 rounded-[6px]">
-                 <div className="flex flex-col">
-                   <label className="text-[12px] text-white/60 group-hover:text-white/80 transition-colors">Recording Date</label>
-                 </div>
-                 <div className="w-[180px] h-[32px] bg-[#0a0f1a]/80 border border-white/[0.05] rounded-[6px] flex items-center px-2 hover:border-[var(--accent-500)]/30 transition-colors">
-                    <input 
-                      type="datetime-local"
-                      value={edits.recording_date !== undefined ? (edits.recording_date ? edits.recording_date.substring(0, 16) : '') : (video.recording_date ? video.recording_date.substring(0, 16) : '')} 
-                      onChange={(e) => handleChange('recording_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
-                      className="w-full bg-transparent border-none text-[11px] text-white/90 outline-none cursor-pointer"
-                    />
-                 </div>
-             </div>
- 
-             {/* Schedule */}
-             <div className="flex items-start justify-between group neon-interactive p-1 -mx-1 rounded-[6px] mt-2">
-                 <div className="flex flex-col">
-                   <label className="text-[12px] text-white/60 group-hover:text-white/80 transition-colors">Schedule</label>
-                 </div>
-                 <div className="w-[180px] flex flex-col gap-3">
-                    <label className="flex items-center gap-2 cursor-pointer group/radio" onClick={() => handleChange('scheduled_at', null)}>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${!edits.scheduled_at && !video.scheduled_at ? 'border-[var(--accent-500)]' : 'border-white/20'}`}>
-                        {!edits.scheduled_at && !video.scheduled_at && <div className="w-2 h-2 rounded-full bg-[var(--accent-400)] shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>}
-                      </div>
-                      <span className="text-[12px] text-white/90">Publish immediately</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer group/radio" onClick={() => handleChange('scheduled_at', new Date(Date.now() + 86400000).toISOString())}>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${edits.scheduled_at || video.scheduled_at ? 'border-[var(--accent-500)]' : 'border-white/20 group-hover/radio:border-white/40 transition-colors'}`}>
-                        {(edits.scheduled_at || video.scheduled_at) && <div className="w-2 h-2 rounded-full bg-[var(--accent-400)] shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>}
-                      </div>
-                      <span className="text-[12px] text-white/50 group-hover/radio:text-white/80 transition-colors">Schedule for later</span>
-                    </label>
-                 </div>
-             </div>
-
              {Object.keys(edits).length > 0 && (
               <button 
                 onClick={handleSave}

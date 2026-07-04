@@ -64,6 +64,21 @@ export default function ChannelDetailWorkspace({ channel }) {
     }
   }, [channel?.id, currentChannelId, channel?.authentication_status])
 
+  const [realtimeStates, setRealtimeStates] = useState(channel?.pipeline_states || '{}')
+  
+  useEffect(() => {
+    if (!channel?.id) return;
+    setRealtimeStates(channel.pipeline_states || '{}') // initial sync
+    const int = setInterval(async () => {
+      try {
+        const res = await apiClient.get(`/accounts`);
+        const acc = res.find(a => a.id === channel.id);
+        if (acc) setRealtimeStates(acc.pipeline_states || '{}');
+      } catch(e) {}
+    }, 5000)
+    return () => clearInterval(int)
+  }, [channel?.id, channel?.pipeline_states])
+
   if (!channel) {
     return (
       <div className="flex-1 h-full flex items-center justify-center bg-[#05080e] relative overflow-hidden">
@@ -252,14 +267,14 @@ export default function ChannelDetailWorkspace({ channel }) {
           ))}
         </div>
 
-        {/* TAB CONTENT */}
-        <div className="relative z-10">
+        {/* TAB CONTENTS */}
+        <div className="relative z-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
           {activeTab === 'general' && (
             <GeneralTab 
               draft={drafts.pipelines} 
-              original={original.pipelines}
-              onChange={(newDraft) => setDrafts(prev => ({ ...prev, pipelines: newDraft }))} 
-              states={channel.pipeline_states}
+              original={original.pipelines} 
+              onChange={(val) => setDrafts({...drafts, pipelines: val})}
+              states={realtimeStates}
             />
           )}
           {activeTab === 'upload_defaults' && (
