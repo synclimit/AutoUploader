@@ -1,0 +1,67 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        working-directory: ./frontend/app
+        run: |
+          npm install
+          npm run build
+          if (Test-Path ..\..\backend\frontend_dist) { Remove-Item ..\..\backend\frontend_dist -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path ..\..\backend\frontend_dist
+          Copy-Item -Path dist\* -Destination ..\..\backend\frontend_dist -Recurse -Force
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Backend (PyInstaller)
+        working-directory: ./backend
+        run: |
+          pyinstaller AutoUploader.spec
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup
+
+      - name: Compile Installer (Inno Setup)
+        working-directory: ./build
+        run: |
+          iscc installer.iss
+
+      - name: Create / Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest AutoUploader Build
+          body: "Automatically compiled latest build from master."
+          files: release/AutoUploader_Setup.exe
+          make_latest: true
