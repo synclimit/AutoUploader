@@ -546,14 +546,19 @@ class ChannelService:
         try:
             from googleapiclient.discovery import build
             youtube = build("youtube", "v3", credentials=credentials)
-            playlists_response = youtube.playlists().list(mine=True, part="snippet,id", maxResults=50).execute()
-            
             result = []
-            for item in playlists_response.get("items", []):
-                result.append({
-                    "id": item["id"],
-                    "title": item["snippet"]["title"]
-                })
+            request = youtube.playlists().list(mine=True, part="snippet,id", maxResults=50)
+            while request is not None:
+                playlists_response = request.execute()
+                for item in playlists_response.get("items", []):
+                    result.append({
+                        "id": item["id"],
+                        "title": item["snippet"]["title"]
+                    })
+                request = youtube.playlists().list_next(request, playlists_response)
+            
+            # Sort playlists alphabetically for better UX
+            result.sort(key=lambda x: x["title"].lower())
             return result
         except Exception as e:
             import logging
