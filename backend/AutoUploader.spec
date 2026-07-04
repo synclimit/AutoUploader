@@ -9,7 +9,6 @@ a = Analysis(
     datas=[
         ('frontend_dist', 'frontend_dist'),
         ('services/license/keys', 'services/license/keys'),
-        ('../app_v2.db', '.'),
         ('prompts', 'prompts'),
     ],
     hiddenimports=[
