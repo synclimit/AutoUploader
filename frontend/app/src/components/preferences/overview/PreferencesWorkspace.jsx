@@ -91,6 +91,53 @@ export default function PreferencesWorkspace() {
   }
 
   const [isSaving, setIsSaving] = useState(false)
+  
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
+  const [updateInfo, setUpdateInfo] = useState(null)
+  const [isInstalling, setIsInstalling] = useState(false)
+
+  const handleCheckUpdate = async () => {
+    setIsCheckingUpdate(true)
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/v1/system/update/check')
+      const data = await res.json()
+      if (data.success) {
+        setUpdateInfo(data)
+        if (!data.update_available) {
+          showToast(`You are on the latest version (${data.local_version})`, 'success')
+        }
+      } else {
+        showToast('Failed to check for updates', 'error')
+      }
+    } catch (e) {
+      showToast('Error checking update', 'error')
+    } finally {
+      setIsCheckingUpdate(false)
+    }
+  }
+
+  const handleInstallUpdate = async () => {
+    if (!updateInfo?.download_url) return
+    setIsInstalling(true)
+    try {
+      showToast('Downloading update... Please wait.', 'info', 5000)
+      const res = await fetch('http://127.0.0.1:8000/api/v1/system/update/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ download_url: updateInfo.download_url })
+      })
+      const data = await res.json()
+      if (data.success) {
+        showToast('Update downloaded. Application will restart shortly...', 'success', 8000)
+      } else {
+        showToast('Failed to install update', 'error')
+        setIsInstalling(false)
+      }
+    } catch (e) {
+      showToast('Error installing update', 'error')
+      setIsInstalling(false)
+    }
+  }
 
   const handleSave = async () => {
     if (config) {
@@ -295,8 +342,30 @@ export default function PreferencesWorkspace() {
             <PreferenceSection id="about" title="About AutoUploader" icon={Info} description="Application version and licensing information.">
               <div className="pl-4 py-2 border-l-2 border-[var(--accent-500)]/30">
                 <p className="text-white text-[14px] font-medium">AutoUploader Pro</p>
-                <p className="text-white/50 text-[12px] mt-1">Version 4.2.0-beta</p>
-                <p className="text-white/30 text-[11px] mt-4">Licensed to the current user.</p>
+                <p className="text-white/50 text-[12px] mt-1">Current Version: {updateInfo ? updateInfo.local_version : '1.0.0'}</p>
+                <p className="text-white/30 text-[11px] mt-4 mb-4">Licensed to the current user.</p>
+                
+                {updateInfo?.update_available ? (
+                  <div className="bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/20 rounded-xl p-4 mt-2">
+                    <p className="text-[var(--accent-400)] font-bold text-sm mb-1">New Version Available: {updateInfo.latest_version}</p>
+                    <p className="text-white/60 text-xs mb-4 whitespace-pre-line">{updateInfo.release_notes || 'Bug fixes and performance improvements.'}</p>
+                    <button 
+                      onClick={handleInstallUpdate}
+                      disabled={isInstalling}
+                      className="px-4 py-2 bg-[var(--accent-500)] text-white text-xs font-bold rounded-lg hover:bg-[var(--accent-600)] transition-colors disabled:opacity-50"
+                    >
+                      {isInstalling ? 'Downloading & Installing...' : 'Download & Install Update'}
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleCheckUpdate}
+                    disabled={isCheckingUpdate}
+                    className="px-4 py-2 border border-white/10 text-white/70 text-xs font-medium rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
+                  >
+                    {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
+                  </button>
+                )}
               </div>
             </PreferenceSection>
           )}
