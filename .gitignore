@@ -18,7 +18,7 @@ backend/storage/thumbnails/
 backend/sessions/
 
 # Logs
-logs/
+/logs/
 
 # Environment
 .env
