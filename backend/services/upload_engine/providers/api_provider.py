@@ -63,12 +63,18 @@ class APIUploader(BaseUploader):
             # Scheduling Support
             if task.privacy_status == "private" and getattr(task, "scheduled_at", None):
                 # YouTube API requires publishAt to be in ISO 8601 format with timezone, and privacyStatus must be 'private'
-                # Also, it must be in the future!
+                # Also, it must be at least 15 minutes in the future!
                 dt = task.scheduled_at
-                now_utc = datetime.datetime.utcnow()
+                import datetime as dt_module
+                now_utc = dt_module.datetime.utcnow()
                 if dt > now_utc:
                     if dt.tzinfo is None:
-                        dt = dt.replace(tzinfo=datetime.timezone.utc)
+                        dt = dt.replace(tzinfo=dt_module.timezone.utc)
+                    
+                    min_future = now_utc.replace(tzinfo=dt_module.timezone.utc) + dt_module.timedelta(minutes=16)
+                    if dt < min_future:
+                        dt = min_future
+                        
                     status["publishAt"] = dt.isoformat()
 
             if getattr(task, "license", None):
@@ -89,12 +95,15 @@ class APIUploader(BaseUploader):
             # 3. Upload Video
             context.logger.info(f"[APIUploader] Starting video upload for task {task.id}")
             media_file = MediaFileUpload(task.video_path, chunksize=-1, resumable=True)
+            
+            is_private = status.get("privacyStatus") == "private"
+            notify = False if is_private else getattr(task, "notify_subscribers", True)
                 
             request = youtube.videos().insert(
                 part=",".join(insert_parts),
                 body=request_body,
                 media_body=media_file,
-                notifySubscribers=getattr(task, "notify_subscribers", True)
+                notifySubscribers=notify
             )
             
             response = None
