@@ -65,11 +65,18 @@ from services.upload_engine.engine import get_engine as get_upload_engine
 from scheduler.upload_scheduler import get_scheduler_engine
 from services.ai.automation import get_ai_automation_engine
 
-# Configure logging so Watch Folder Engine output is visible
+# Configure logging so Watch Folder Engine output is visible and logs are saved to a file
+log_dir = PathService.get_logs_dir()
+log_file = os.path.join(log_dir, "autouploader.log")
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler(log_file, encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
 )
 
 app = FastAPI()

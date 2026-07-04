@@ -97,6 +97,34 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     }
   }
 
+  const handleTagPaste = (e) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData('text');
+    if (!pasteData) return;
+    
+    // Split by comma, semicolon, or newline
+    const pastedTags = pasteData
+      .split(/[,;\n]+/)
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    if (pastedTags.length > 0) {
+      const newTagsList = [...tagsArray];
+      pastedTags.forEach(tag => {
+        // cleanup trailing 'X' if copied from UI accidentally
+        let cleanTag = tag;
+        if (cleanTag.endsWith(' X')) cleanTag = cleanTag.slice(0, -2).trim();
+        else if (cleanTag.endsWith(' x')) cleanTag = cleanTag.slice(0, -2).trim();
+        
+        if (cleanTag && !newTagsList.includes(cleanTag)) {
+          newTagsList.push(cleanTag);
+        }
+      });
+      handleChange('tags', newTagsList.join(', '));
+      setNewTagInput('');
+    }
+  };
+
   const hasMetadata = currentTitleStr.trim() || currentDescStr.trim()
   
   // Realtime Analysis using deterministic rules
@@ -602,6 +630,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                     value={newTagInput}
                     onChange={(e) => setNewTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
+                    onPaste={handleTagPaste}
                     placeholder="Add tag..."
                     className="bg-transparent border-none outline-none text-[11px] text-white/80 w-[80px]"
                   />
