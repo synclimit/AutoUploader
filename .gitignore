@@ -8,7 +8,7 @@ node_modules/
 
 # Build
 dist/
-build/
+/backend/build/
 
 # Upload Storage
 backend/storage/videos/
