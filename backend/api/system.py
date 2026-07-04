@@ -104,29 +104,44 @@ def check_update():
 
         req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases/latest")
         req.add_header("User-Agent", "AutoUploader-App")
-        with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode())
-            
-            latest_version = data.get("tag_name", "")
-            download_url = ""
-            for asset in data.get("assets", []):
-                if asset.get("name", "").endswith(".exe"):
-                    download_url = asset.get("browser_download_url", "")
-                    break
-            
-            # Simple version comparison
-            update_available = False
-            if latest_version and latest_version != local_version:
-                update_available = True
+        
+        try:
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode())
                 
-            return {
-                "success": True,
-                "update_available": update_available,
-                "local_version": local_version,
-                "latest_version": latest_version,
-                "release_notes": data.get("body", ""),
-                "download_url": download_url
-            }
+                latest_version = data.get("tag_name", "")
+                download_url = ""
+                for asset in data.get("assets", []):
+                    if asset.get("name", "").endswith(".exe"):
+                        download_url = asset.get("browser_download_url", "")
+                        break
+                
+                # Simple version comparison
+                update_available = False
+                if latest_version and latest_version != local_version:
+                    update_available = True
+                    
+                return {
+                    "success": True,
+                    "update_available": update_available,
+                    "local_version": local_version,
+                    "latest_version": latest_version,
+                    "release_notes": data.get("body", ""),
+                    "download_url": download_url
+                }
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                # No releases yet
+                return {
+                    "success": True,
+                    "update_available": False,
+                    "local_version": local_version,
+                    "latest_version": local_version,
+                    "release_notes": "No public releases available yet on GitHub.",
+                    "download_url": ""
+                }
+            raise e
+            
     except Exception as e:
         print("Update check error:", e)
         return {"success": False, "error": str(e)}
