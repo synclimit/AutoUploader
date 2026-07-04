@@ -87,7 +87,12 @@ def create_task(
     p_advanced = defaults_json.get(pipeline_type, {}).get("advanced", {})
 
     final_title = result.title
-    if not final_title and p_defaults.get("title_template"): final_title = p_defaults.get("title_template")
+    title_tpl = p_defaults.get("title_template")
+    if title_tpl:
+        if "{filename}" in title_tpl:
+            final_title = title_tpl.replace("{filename}", result.title or "")
+        else:
+            final_title = title_tpl
     
     final_desc = result.description
     if not final_desc and p_defaults.get("description"): final_desc = p_defaults.get("description")

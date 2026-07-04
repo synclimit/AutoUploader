@@ -28,6 +28,7 @@ export default function ChannelDetailWorkspace({ channel }) {
   const [isSaving, setIsSaving] = useState(false)
 
   const [currentChannelId, setCurrentChannelId] = useState(null)
+  const [playlists, setPlaylists] = useState([])
 
   // Initialize state
   useEffect(() => {
@@ -44,8 +45,24 @@ export default function ChannelDetailWorkspace({ channel }) {
       setOriginal(initial)
       setDrafts(JSON.parse(JSON.stringify(initial))) // deep copy
       setCurrentChannelId(channel.id)
+
+      if (channel.authentication_status === 'Connected') {
+        const fetchPlaylists = async () => {
+          try {
+            const res = await apiClient.get(`/accounts/${channel.id}/playlists`)
+            if (res && Array.isArray(res)) {
+              setPlaylists(res.map(p => ({ label: p.title, value: p.id })))
+            }
+          } catch (e) {
+            console.error("Failed to fetch playlists:", e)
+          }
+        }
+        fetchPlaylists()
+      } else {
+        setPlaylists([])
+      }
     }
-  }, [channel?.id, currentChannelId])
+  }, [channel?.id, currentChannelId, channel?.authentication_status])
 
   if (!channel) {
     return (
@@ -250,6 +267,7 @@ export default function ChannelDetailWorkspace({ channel }) {
               draft={drafts.upload_defaults} 
               original={original.upload_defaults}
               onChange={(newDraft) => setDrafts(prev => ({ ...prev, upload_defaults: newDraft }))} 
+              playlists={playlists}
             />
           )}
           {activeTab === 'ai_identity' && (

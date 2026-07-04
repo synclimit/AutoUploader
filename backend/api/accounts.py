@@ -24,23 +24,7 @@ _temp_credentials = {}
 
 import os
 def debug_log(msg):
-    try:
-        # Write to Desktop
-        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-        log_path_desktop = os.path.join(desktop, 'AutoUploader_Debug.txt')
-        with open(log_path_desktop, 'a', encoding='utf-8') as f:
-            f.write(msg + '\n')
-    except:
-        pass
-    try:
-        # Write to AppData
-        appdata = os.path.join(os.environ['APPDATA'], 'AutoUploader', 'logs')
-        os.makedirs(appdata, exist_ok=True)
-        log_path_appdata = os.path.join(appdata, 'AutoUploader_Debug.txt')
-        with open(log_path_appdata, 'a', encoding='utf-8') as f:
-            f.write(msg + '\n')
-    except:
-        pass
+    pass
 
 @router.get("", response_model=List[AccountListResponse])
 def get_accounts(db: Session = Depends(get_db)):
@@ -114,3 +98,6 @@ def refresh_token(account_id: str, db: Session = Depends(get_db)):
 def confirm_channel(account_id: str, request: ConfirmChannelRequest, db: Session = Depends(get_db)):
     return ChannelService.confirm_channel(db, account_id, request, _temp_credentials)
 
+@router.get("/{account_id}/playlists")
+def get_playlists(account_id: str, db: Session = Depends(get_db)):
+    return ChannelService.get_playlists(db, account_id)

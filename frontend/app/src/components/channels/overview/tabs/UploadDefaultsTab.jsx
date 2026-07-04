@@ -1,7 +1,7 @@
 import { Copy, Sliders } from 'lucide-react'
 import CustomDropdown from '../../../ui/CustomDropdown'
 
-export default function UploadDefaultsTab({ draft, original, onChange }) {
+export default function UploadDefaultsTab({ draft, original, onChange, playlists = [] }) {
   
   const updateField = (pipeline, section, field, value) => {
     const updated = { ...draft }
@@ -32,7 +32,7 @@ export default function UploadDefaultsTab({ draft, original, onChange }) {
   const basicFields = [
     { id: 'title_template', label: 'Default Title Template', type: 'text', helpText: 'Format judul otomatis. Gunakan {filename} untuk menyisipkan nama file.' },
     { id: 'description', label: 'Default Description', type: 'textarea', helpText: 'Deskripsi bawaan yang akan selalu ditambahkan ke setiap video.' },
-    { id: 'playlist', label: 'Playlist', type: 'text', helpText: 'Nama playlist untuk memasukkan video secara otomatis.' },
+    { id: 'playlist', label: 'Playlist', type: 'select', searchable: true, helpText: 'Pilih playlist dari channel YouTube Anda.', options: [{ label: 'None', value: '' }, ...playlists] },
     { id: 'tags', label: 'Tags', type: 'text', helpText: 'Tag bawaan. Pisahkan dengan koma.' },
     { id: 'category', label: 'Category', type: 'select', searchable: true, helpText: 'Kategori video YouTube.', options: [
       { label: 'Film & Animation', value: '1' }, { label: 'Autos & Vehicles', value: '2' },

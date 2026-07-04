@@ -21,21 +21,7 @@ os.makedirs(ACCOUNTS_TOKEN_DIR, exist_ok=True)
 class ChannelService:
     @staticmethod
     def _debug_log(msg):
-        try:
-            desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-            log_path_desktop = os.path.join(desktop, 'AutoUploader_Debug.txt')
-            with open(log_path_desktop, 'a', encoding='utf-8') as f:
-                f.write(msg + '\n')
-        except:
-            pass
-        try:
-            appdata = os.path.join(os.environ['APPDATA'], 'AutoUploader', 'logs')
-            os.makedirs(appdata, exist_ok=True)
-            log_path_appdata = os.path.join(appdata, 'AutoUploader_Debug.txt')
-            with open(log_path_appdata, 'a', encoding='utf-8') as f:
-                f.write(msg + '\n')
-        except:
-            pass
+        pass
 
     @staticmethod
     def _populate_profile_name(account: Account, db: Session):
@@ -538,3 +524,38 @@ class ChannelService:
         ChannelService._populate_profile_name(account, db)
         ChannelService._populate_avatar_url(account, db)
         return account
+
+    @staticmethod
+    def get_playlists(db: Session, account_id: str) -> List[dict]:
+        account = db.query(Account).filter(Account.id == account_id).first()
+        if not account:
+            raise HTTPException(status_code=404, detail="Account not found")
+            
+        token_path = os.path.join(ACCOUNTS_TOKEN_DIR, f"{account_id}.pickle")
+        if not os.path.exists(token_path):
+            raise HTTPException(status_code=400, detail="Not connected to YouTube")
+            
+        with open(token_path, "rb") as token_file:
+            credentials = pickle.load(token_file)
+            
+        if credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+            with open(token_path, "wb") as token_file:
+                pickle.dump(credentials, token_file)
+                
+        try:
+            from googleapiclient.discovery import build
+            youtube = build("youtube", "v3", credentials=credentials)
+            playlists_response = youtube.playlists().list(mine=True, part="snippet,id", maxResults=50).execute()
+            
+            result = []
+            for item in playlists_response.get("items", []):
+                result.append({
+                    "id": item["id"],
+                    "title": item["snippet"]["title"]
+                })
+            return result
+        except Exception as e:
+            import logging
+            logging.getLogger("ChannelService").error(f"Failed to fetch playlists: {e}")
+            raise HTTPException(status_code=500, detail="Failed to fetch playlists from YouTube")
