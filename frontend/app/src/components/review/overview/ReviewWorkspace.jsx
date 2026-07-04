@@ -379,11 +379,22 @@ export default function ReviewWorkspace() {
          
          {/* Right: Primary Actions */}
          <div className="flex items-center gap-4">
-           {/* Metadata changes are auto-saved or saved via the Metadata panel, but we keep the button for UX */}
            <button 
              onClick={async () => {
-               const { showToast } = await import('../../common/NotificationToast');
-               showToast('Metadata saved successfully', 'success');
+               if (Object.keys(edits).length > 0) {
+                 try {
+                   await updateTask(activeTask.id, edits);
+                   setEdits({});
+                   const { showToast } = await import('../../common/NotificationToast');
+                   showToast('Metadata saved successfully', 'success');
+                 } catch (err) {
+                   const { showToast } = await import('../../common/NotificationToast');
+                   showToast('Failed to save metadata', 'error');
+                 }
+               } else {
+                 const { showToast } = await import('../../common/NotificationToast');
+                 showToast('No changes to save', 'info');
+               }
              }}
              className="flex items-center gap-2 px-6 py-2 rounded-[8px] text-white/80 hover:text-white border border-white/[0.1] hover:bg-white/[0.05] transition-colors text-[13px] font-bold neon-interactive"
            >

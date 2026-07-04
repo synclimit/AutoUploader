@@ -109,6 +109,9 @@ def create_task(
         final_privacy = "private"
         
     final_category = result.category
+    if final_category and not str(final_category).isdigit():
+        final_category = None
+        
     if not final_category and p_defaults.get("category"): final_category = p_defaults.get("category")
     if not final_category and account.category: final_category = account.category
     final_category_id = int(final_category) if final_category and str(final_category).isdigit() else 22

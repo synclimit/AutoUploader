@@ -48,7 +48,7 @@ export default function Select({
     };
   }, [isOpen]);
 
-  const selectedOption = options.find(opt => opt.val === value);
+  const selectedOption = options.find(opt => String(opt.val) === String(value));
   const displayLabel = selectedOption ? selectedOption.label : placeholder;
 
   const dropdownPortal = isOpen ? createPortal(
@@ -77,7 +77,7 @@ export default function Select({
       )}
 
       {options.map((opt) => {
-        const isSelected = opt.val === value;
+        const isSelected = String(opt.val) === String(value);
         return (
           <div
             key={opt.val}

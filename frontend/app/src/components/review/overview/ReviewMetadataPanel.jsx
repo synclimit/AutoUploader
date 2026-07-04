@@ -6,6 +6,7 @@ import { showToast } from '../../common/NotificationToast'
 import { YOUTUBE_CATEGORIES } from '../../../constants/youtubeCategories'
 import Select from '../../common/Select'
 import { analyzeSEO } from '../../../utils/seoAnalyzer'
+import apiClient from '../../../api/client'
 
 export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits = {}, setEdits }) {
   const [activeTab, setActiveTab] = useState('Basic Information')
@@ -26,6 +27,27 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
   
   // SEO Validation State
   const [seoDropdownOpen, setSeoDropdownOpen] = useState(false)
+  
+  // Playlists State
+  const [playlists, setPlaylists] = useState([{val: 'None', label: 'None'}])
+
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      if (!video?.account_id) return;
+      try {
+        const res = await apiClient.get(`/accounts/${video.account_id}/playlists`)
+        if (Array.isArray(res)) {
+          setPlaylists([
+            {val: 'None', label: 'None'},
+            ...res.map(p => ({ label: p.title, val: p.id }))
+          ])
+        }
+      } catch (e) {
+        console.error("Failed to fetch playlists:", e)
+      }
+    }
+    fetchPlaylists()
+  }, [video?.account_id])
   
   // Staggered loading simulation
   const runStaggeredLoading = async (target) => {
@@ -65,10 +87,16 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
 
   const handleSave = async () => {
     if (Object.keys(edits).length > 0) {
-      await updateTask(video.id, edits)
-      setEdits({})
+      try {
+        await updateTask(video.id, edits)
+        setEdits({})
+        showToast('Metadata saved successfully', 'success')
+      } catch (err) {
+        showToast('Failed to save metadata', 'error')
+      }
+    } else {
+      showToast('No changes to save', 'info')
     }
-    showToast('Metadata saved successfully', 'success')
   }
 
   const currentTitleStr = edits.title !== undefined ? edits.title : (video?.title || '')
@@ -754,7 +782,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                { label: 'Visibility', value: edits.privacy_status !== undefined ? edits.privacy_status : (video.privacy_status || 'public'), field: 'privacy_status', options: [{val: 'public', label: 'Public'}, {val: 'private', label: 'Private'}, {val: 'unlisted', label: 'Unlisted'}] },
                { label: 'Default Language', value: edits.default_language !== undefined ? edits.default_language : (video.default_language || 'en'), field: 'default_language', options: [{val: 'en', label: 'English'}, {val: 'id', label: 'Indonesian'}, {val: 'es', label: 'Spanish'}, {val: 'ja', label: 'Japanese'}, {val: 'ko', label: 'Korean'}] },
                { label: 'Audio Language', value: edits.audio_language !== undefined ? edits.audio_language : (video.audio_language || 'en'), field: 'audio_language', options: [{val: 'en', label: 'English'}, {val: 'id', label: 'Indonesian'}, {val: 'es', label: 'Spanish'}, {val: 'ja', label: 'Japanese'}, {val: 'ko', label: 'Korean'}] },
-               { label: 'Playlist', value: edits.playlist_title !== undefined ? edits.playlist_title : (video.playlist_title || 'None'), field: 'playlist_title', options: [{val: 'None', label: 'None'}, {val: 'Music', label: 'Music'}, {val: 'Gaming', label: 'Gaming'}, {val: 'Vlogs', label: 'Vlogs'}] },
+               { label: 'Playlist', value: edits.playlist_id !== undefined ? edits.playlist_id : (video.playlist_id || 'None'), field: 'playlist_id', options: playlists },
              ].map((item, idx) => (
                <div key={idx} className="flex items-center justify-between group neon-interactive p-1 -mx-1 rounded-[6px]">
                  <div className="flex flex-col">

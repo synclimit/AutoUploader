@@ -138,13 +138,14 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
 
   updateTask: async (id, updates) => {
     try {
-      await apiClient.put(`/queue/${id}`, updates)
-      await get().fetchTasks()
-      if (get().activeTask?.id === id) {
-        await get().fetchTask(id)
-      }
+      const updated = await apiClient.put(`/queue/${id}`, updates)
+      set((s) => ({
+        tasks: s.tasks.map((t) => t.id === id ? updated : t),
+        activeTask: s.activeTask?.id === id ? updated : s.activeTask,
+      }))
     } catch (error: any) {
       set({ error: error.message })
+      throw error;
     }
   },
 
