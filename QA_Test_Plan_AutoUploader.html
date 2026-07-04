@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AutoUploader QA Testing Plan</title>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+  h1, h2 { color: #333; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+  th, td { border: 1px solid #999; padding: 10px; text-align: left; vertical-align: top; }
+  th { background-color: #f2f2f2; }
+  .checkbox { width: 100px; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>AutoUploader QA Testing & Verification Plan (Ultimate Edition)</h1>
+<p>Dokumen ini adalah panduan Quality Assurance (QA) komprehensif untuk pengujian End-to-End (E2E) dan uji batas ekstrem (Edge Case) pada aplikasi AutoUploader.</p>
+<p><strong>Instruksi Tester:</strong> Uji setiap poin di bawah ini dan tuliskan <strong>LULUS</strong> atau <strong>GAGAL</strong> di kolom [HASIL].</p>
+
+<h2>1. Persiapan, Lisensi, & Update Sistem</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>STP-01</td><td>Install</td><td>Instalasi Bersih (Clean Install)</td><td>1. Instal dari AutoUploader_Setup.exe<br>2. Buka aplikasi.</td><td>Terbuka lancar, tidak ada pesan error database.</td><td></td></tr>
+  <tr><td>STP-02</td><td>License</td><td>Impor Lisensi Valid</td><td>1. Muncul pop-up minta .lic<br>2. Masukkan file lisensi asli.</td><td>Aplikasi terbuka, fitur Pro aktif, nama terdaftar di Settings.</td><td></td></tr>
+  <tr><td>STP-03</td><td>License</td><td>Impor Lisensi Palsu/Kedaluwarsa</td><td>1. Masukkan file .lic yang rusak/palsu.</td><td>Ditolak oleh sistem, muncul error "Invalid License".</td><td></td></tr>
+  <tr><td>STP-04</td><td>Update</td><td>Auto-Updater Normal</td><td>1. Buka Settings > About<br>2. Klik Check for Updates.</td><td>Muncul notifikasi versi terbaru atau rincian pembaruan.</td><td></td></tr>
+  <tr><td>STP-05</td><td>Network</td><td>Auto-Updater Tanpa Internet</td><td>1. Matikan Wi-Fi/LAN.<br>2. Klik Check for Updates.</td><td>Tombol kembali normal, muncul Error warna merah.</td><td></td></tr>
+</table>
+
+<h2>2. UI/UX & Sistem Notifikasi</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>UI-01</td><td>Layout</td><td>Responsivitas Window</td><td>1. Ubah ukuran aplikasi (Maximize, Resize).</td><td>Sidebar tidak terpotong, tata letak tetap proporsional.</td><td></td></tr>
+  <tr><td>UI-02</td><td>Theme</td><td>Real-time Theming</td><td>1. Di Settings > Appearance, ganti tema & Density.</td><td>Tampilan seketika berubah. Teks terbaca jelas.</td><td></td></tr>
+  <tr><td>NOT-01</td><td>Toast</td><td>Toast Bertumpuk (Spam Click)</td><td>1. Klik Save Settings 10 kali secara cepat.</td><td>Notifikasi bertumpuk rapi dan hilang otomatis.</td><td></td></tr>
+  <tr><td>NOT-02</td><td>Bell</td><td>Dropdown Lonceng Peringatan</td><td>1. Paksa gagalkan sebuah upload.<br>2. Klik ikon lonceng merah.</td><td>Muncul daftar kegagalan, lonceng normal jika kosong.</td><td></td></tr>
+</table>
+
+<h2>3. Manajemen Akun & Autentikasi (OAuth)</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>ACC-01</td><td>Auth</td><td>Login Normal</td><td>1. Klik Add Channel lalu selesaikan login Google.</td><td>Akun masuk dengan foto profil & status ACTIVE.</td><td></td></tr>
+  <tr><td>ACC-02</td><td>Auth</td><td>Batal / Menolak Akses</td><td>1. Login tapi tolak (Cancel) pemberian izin OAuth.</td><td>Muncul "Auth Failed", tidak ada akun masuk database.</td><td></td></tr>
+  <tr><td>ACC-03</td><td>Delete</td><td>Hapus Akun Berstatus Pending</td><td>1. Ada video di queue dengan akun X.<br>2. Hapus akun X.</td><td>Aplikasi menghentikan akses, video gagal diunggah.</td><td></td></tr>
+</table>
+
+<h2>4. Watch Folder & Fitur Impor File</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>WF-01</td><td>Import</td><td>Impor MP4 & Filter Ekstensi</td><td>1. Buka tab Upload, coba masukkan file pdf atau jpg.</td><td>File ditolak. Hanya menerima ekstensi video.</td><td></td></tr>
+  <tr><td>WF-02</td><td>Watch</td><td>Deteksi Folder Otomatis</td><td>1. Atur Watch Folder di Settings.<br>2. Copy video ke folder tersebut.</td><td>Aplikasi otomatis mendeteksi tanpa diklik.</td><td></td></tr>
+  <tr><td>WF-03</td><td>Size</td><td>Video Durasi Ekstrem/Besar</td><td>1. Impor video sebesar 5GB.</td><td>Sistem memproses dengan lancar, RAM tidak bocor.</td><td></td></tr>
+</table>
+
+<h2>5. Metadata, AI, & Penjadwalan (Upload Queue)</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>QUE-01</td><td>Edit</td><td>Injeksi Karakter Aneh</td><td>1. Ketik Judul dengan Emoji & tanda petik.</td><td>Karakter aman tersimpan tanpa error sistem.</td><td></td></tr>
+  <tr><td>QUE-02</td><td>Image</td><td>Batas Ekstrem Thumbnail</td><td>1. Upload thumbnail 12MB.</td><td>Muncul penolakan "Maximum thumbnail size is 10MB".</td><td></td></tr>
+  <tr><td>QUE-03</td><td>Time</td><td>Penjadwalan (Scheduling)</td><td>1. Di Detail Panel, klik Schedule, pilih waktu besok.</td><td>Status menjadi SCHEDULED, ikon waktu mundur aktif.</td><td></td></tr>
+  <tr><td>QUE-04</td><td>Link</td><td>VidIQ Keyword Search</td><td>1. Klik ikon [V] di sebelah kotak Title.</td><td>Tab Browser (Chrome) terbuka membawa judul ke YouTube.</td><td></td></tr>
+</table>
+
+<h2>6. Upload Engine & Uji Ketahanan (Stress Test)</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>UPL-01</td><td>Flow</td><td>Upload Lancar (End-to-End)</td><td>1. Klik Approve.<br>2. Tunggu proses selesai.</td><td>Siklus berjalan sampai status COMPLETED.</td><td></td></tr>
+  <tr><td>UPL-02</td><td>Cancel</td><td>Batal di Tengah Jalan</td><td>1. Saat status UPLOADING, tekan tombol Delete / Cancel.</td><td>Proses dibatalkan dengan aman (Graceful exit).</td><td></td></tr>
+  <tr><td>UPL-03</td><td>Chaos</td><td>Internet Mati saat Uploading</td><td>1. Saat 50% upload, matikan koneksi Wi-Fi.</td><td>Status tertahan, berubah jadi FAILED (Network Error).</td><td></td></tr>
+  <tr><td>UPL-04</td><td>Chaos</td><td>Tutup Aplikasi Paksa (Alt+F4)</td><td>1. Tutup aplikasi di tengah upload.<br>2. Buka lagi.</td><td>Video mereset status ke QUEUED/FAILED dengan aman.</td><td></td></tr>
+</table>
+
+<h2>7. Dashboard & History</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Skenario Tes (Test Case)</th><th>Langkah-Langkah</th><th>Ekspektasi Hasil</th><th class="checkbox">[ HASIL ]</th></tr>
+  <tr><td>DASH-01</td><td>Stats</td><td>Update Kartu Statistik</td><td>1. Buka Dashboard.<br>2. Upload 1 video sukses.</td><td>Angka Total Uploads & Success Rate otomatis naik.</td><td></td></tr>
+  <tr><td>HIS-01</td><td>Filter</td><td>Filter Status & Timezone</td><td>1. Klik Tab Completed -> Pilih Filter Failed.</td><td>Hanya video gagal yang tampil. Waktu lokal WIB.</td><td></td></tr>
+  <tr><td>HIS-02</td><td>Shortcut</td><td>Buka Tautan Video</td><td>1. Klik ikon Panah Eksternal di video COMPLETED.</td><td>Browser mengarah ke URL YouTube video terkait.</td><td></td></tr>
+</table>
+
+<h2>Catatan Final Tester</h2>
+<p>_________________________________________________________________________</p>
+<p>_________________________________________________________________________</p>
+<p>_________________________________________________________________________</p>
+
+</body>
+</html>

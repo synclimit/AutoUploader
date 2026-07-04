@@ -25,28 +25,32 @@ def open_url(req: OpenUrlRequest):
 @router.get("/browse-folder", response_model=BrowseFolderResponse)
 def browse_folder():
     """Opens a native folder picker dialog on the server machine."""
-    import subprocess
-    import sys
+    import tkinter as tk
+    from tkinter import filedialog
+    import threading
+
+    folder_path = [None]
+
+    def _open_dialog():
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            folder_path[0] = filedialog.askdirectory(title="Select Watch Folder")
+            root.destroy()
+        except Exception as e:
+            print("Tkinter error:", e)
+
     try:
-        script = """
-import tkinter as tk
-from tkinter import filedialog
-import sys
-root = tk.Tk()
-root.withdraw()
-root.attributes('-topmost', True)
-folder_path = filedialog.askdirectory(title="Select Watch Folder")
-root.destroy()
-sys.stdout.write(folder_path)
-sys.stdout.flush()
-"""
-        result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
-        folder_path = result.stdout.strip()
+        # Run in a separate thread to ensure Tkinter has its own mainloop if needed
+        t = threading.Thread(target=_open_dialog)
+        t.start()
+        t.join()
         
-        if not folder_path:
+        if not folder_path[0]:
             return BrowseFolderResponse(path=None)
             
-        return BrowseFolderResponse(path=folder_path)
+        return BrowseFolderResponse(path=folder_path[0])
     except Exception as e:
         print("Browse folder error:", e)
         return BrowseFolderResponse(path=None)
