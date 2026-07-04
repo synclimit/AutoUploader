@@ -676,7 +676,6 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   </div>
                 )}
               </div>
-              </div>
             </div>
 
             {/* Scheduled Time */}
