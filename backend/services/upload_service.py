@@ -171,12 +171,18 @@ class UploadService:
             EventLogger.log_event(db, task.id, "QUEUED", "Operator manually approved scheduled upload. Task bypassed scheduler.")
             task.status = QueueStatusEnum.queued
         else:
-            if task.schedule_mode == "application":
+            if not task.scheduled_at:
                 task.status = QueueStatusEnum.scheduled
-                EventLogger.log_event(db, task.id, "SCHEDULED", "Task approved. Waiting for scheduler to assign and wait for time.")
+                EventLogger.log_event(db, task.id, "SCHEDULED", "Task approved. Waiting for scheduler to assign time.")
             else:
-                task.status = QueueStatusEnum.queued
-                EventLogger.log_event(db, task.id, "QUEUED", "Task approved and moved to Queue")
+                if task.schedule_mode == "youtube":
+                    task.status = QueueStatusEnum.queued
+                    if getattr(task, "privacy_status", "private") != "private":
+                        task.privacy_status = "private"
+                    EventLogger.log_event(db, task.id, "QUEUED", "Task approved (YouTube mode). Moved to Queue.")
+                else:
+                    task.status = QueueStatusEnum.scheduled
+                    EventLogger.log_event(db, task.id, "SCHEDULED", "Task approved (App mode). Waiting for scheduled time.")
 
         db.commit()
         db.refresh(task)
@@ -238,8 +244,17 @@ class UploadService:
         if body.scheduled_at <= datetime.utcnow():
             raise HTTPException(status_code=400, detail="scheduled_at must be a future datetime")
 
-        task.status = QueueStatusEnum.scheduled
         task.scheduled_at = body.scheduled_at
+        
+        if task.schedule_mode == "youtube":
+            task.status = QueueStatusEnum.queued
+            if getattr(task, "privacy_status", "private") != "private":
+                task.privacy_status = "private"
+            EventLogger.log_event(db, task.id, "QUEUED", "Task scheduled via YouTube mode. Dispatching to Upload Engine immediately.")
+        else:
+            task.status = QueueStatusEnum.scheduled
+            EventLogger.log_event(db, task.id, "SCHEDULED", f"Task scheduled for {body.scheduled_at}. Waiting for app scheduler.")
+            
         db.commit()
         db.refresh(task)
         return task
