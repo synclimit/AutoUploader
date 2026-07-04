@@ -167,8 +167,11 @@ class UploadService:
             
         # If it was scheduled, this is a manual override
         if task.status == QueueStatusEnum.scheduled:
-            task.scheduled_at = None
-            EventLogger.log_event(db, task.id, "QUEUED", "Operator manually approved scheduled upload. Task bypassed scheduler.")
+            if task.schedule_mode != "youtube":
+                task.scheduled_at = None
+                EventLogger.log_event(db, task.id, "QUEUED", "Operator manually approved scheduled upload. Task bypassed scheduler.")
+            else:
+                EventLogger.log_event(db, task.id, "QUEUED", "Operator manually pushed YouTube scheduled upload to Queue.")
             task.status = QueueStatusEnum.queued
         else:
             if not task.scheduled_at:

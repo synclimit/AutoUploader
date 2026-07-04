@@ -422,10 +422,10 @@ export default function ReviewWorkspace() {
                buttonClass = "bg-[var(--accent-400)] text-black cursor-not-allowed";
                disabled = true;
              } else if (status === 'SCHEDULED') {
-               buttonText = "Scheduled";
-               icon = <Clock size={16} />;
-               buttonClass = "bg-purple-500/80 text-white cursor-not-allowed border border-purple-500";
-               disabled = true;
+               buttonText = "Upload Now (Override)";
+               icon = <CloudUpload size={16} strokeWidth={2.5} />;
+               buttonClass = "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)]";
+               disabled = false;
              } else if (status === 'COMPLETED') {
                buttonText = "✓ Uploaded";
                icon = null;
