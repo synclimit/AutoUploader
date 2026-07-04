@@ -34,7 +34,7 @@ from models import UploadTask
 logger = logging.getLogger("watch_folder.duplicate_checker")
 
 # Statuses that indicate the video has already been actively processed
-ACTIVE_STATUSES = {"PENDING_REVIEW", "REVIEW", "QUEUED", "UPLOADING", "SUCCESS", "SCHEDULED"}
+ACTIVE_STATUSES = {"WATCHED", "REVIEW", "QUEUED", "UPLOADING", "COMPLETED", "SCHEDULED"}
 # Statuses where a re-import is considered a safe retry
 RETRY_SAFE_STATUSES = {"FAILED", "CANCELLED"}
 

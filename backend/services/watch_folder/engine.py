@@ -216,7 +216,7 @@ class WatchFolderEngine(EngineBase):
                 
             state["today_intake"] = today_intake
 
-            if state.get("today_intake", 0) >= daily_limit:
+            if daily_limit > 0 and state.get("today_intake", 0) >= daily_limit:
                 health_service.record_log(account_id, p_key, "FAIL", "Daily Limit Reached")
                 health_service.update_status(account_id, p_key, "IDLE")
                 continue
@@ -270,7 +270,7 @@ class WatchFolderEngine(EngineBase):
             for folder_entry in valid_candidates:
                 if not self._running:
                     break
-                if state.get("today_intake", 0) >= daily_limit:
+                if daily_limit > 0 and state.get("today_intake", 0) >= daily_limit:
                     health_service.record_log(account_id, p_key, "FAIL", "Daily Limit Reached")
                     break
 
