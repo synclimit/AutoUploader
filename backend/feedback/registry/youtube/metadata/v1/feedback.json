@@ -1,0 +1,20 @@
+{
+  "scoring": {
+    "no_edits": 100,
+    "edit_below_5_percent": 95,
+    "edit_below_20_percent": 80,
+    "edit_above_50_percent": 40,
+    "discarded": 0
+  },
+  "thresholds": {
+    "override_penalty": 20,
+    "max_runtime_allowance": 15000
+  },
+  "normalization": {
+    "performance_weight": 0.5,
+    "feedback_weight": 0.5
+  },
+  "fallback_rules": {
+    "allow_null_performance": true
+  }
+}

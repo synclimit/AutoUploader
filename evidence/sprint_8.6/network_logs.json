@@ -1,0 +1,16 @@
+[
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"358886657\",\"date\":\"Thu, 25 Jun 2026 23:40:15 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 0-358886656/358886657\"}",
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"208129\",\"date\":\"Thu, 25 Jun 2026 23:40:15 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 358678528-358886656/358886657\"}",
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"358034689\",\"date\":\"Thu, 25 Jun 2026 23:40:15 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 851968-358886656/358886657\"}",
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"357903617\",\"date\":\"Thu, 25 Jun 2026 23:40:15 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 983040-358886656/358886657\"}",
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"357772545\",\"date\":\"Thu, 25 Jun 2026 23:40:15 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 1114112-358886656/358886657\"}",
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"357641473\",\"date\":\"Thu, 25 Jun 2026 23:40:15 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 1245184-358886656/358886657\"}",
+  "GET http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21",
+  "RESPONSE 206 http://localhost:8001/api/v1/media/video/0ac1a8c3-2dd5-4f2d-8788-d5554ff5ff21 headers: {\"accept-ranges\":\"bytes\",\"content-length\":\"357575937\",\"date\":\"Thu, 25 Jun 2026 23:40:18 GMT\",\"content-type\":\"video/mp4\",\"server\":\"uvicorn\",\"content-range\":\"bytes 1310720-358886656/358886657\"}"
+]

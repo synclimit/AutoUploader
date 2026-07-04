@@ -1,0 +1,7 @@
+[
+  {
+    "desc": "DELETE /accounts/{id} failed",
+    "status": 204,
+    "body": ""
+  }
+]

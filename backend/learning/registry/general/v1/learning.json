@@ -1,0 +1,11 @@
+{
+  "thresholds": {
+    "minimum_sample_size": 10,
+    "pattern_confidence_threshold": 0.85,
+    "user_edit_flag_percentage": 20.0,
+    "minimum_override_rate": 0.3
+  },
+  "learning_windows": {
+    "default_days": 30
+  }
+}

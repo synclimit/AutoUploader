@@ -1,0 +1,55 @@
+--- Executing Functional Workflow Transitions ---
+1. Browser Profile
+Failed to create profile 409 {"detail":"Profile Name Already Exists"}
+   Using existing Profile ID: 0ce5aa22-8053-444f-9e70-c1c7a8b8dec1
+2. Account Setup
+Failed to create account 409 {"detail":"Channel Name Already Exists"}
+   Using existing Account ID: d48b85bd-496a-44a3-b771-2a5b71184afe
+3. Watch Folder -> Import
+   Queued Task ID: 4c4f44c2-f384-4883-a844-333850a1a6b1
+4. Review -> Approve
+   Task Approved
+5. Upload Engine -> Scheduler
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+6. Completed -> History -> Dashboard
+
+STDERR:
+Traceback (most recent call last):
+  File "D:\AutoUploader\backend\venv\Lib\site-packages\requests\models.py", line 1116, in json
+    return complexjson.loads(self.text, **kwargs)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Python\Lib\json\__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "D:\Python\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Python\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\AutoUploader\backend\tests\run_step_3.py", line 97, in <module>
+    run_workflow()
+    ~~~~~~~~~~~~^^
+  File "D:\AutoUploader\backend\tests\run_step_3.py", line 92, in run_workflow
+    dashboard = requests.get(f"{BASE_URL}/dashboard").json()
+  File "D:\AutoUploader\backend\venv\Lib\site-packages\requests\models.py", line 1120, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)

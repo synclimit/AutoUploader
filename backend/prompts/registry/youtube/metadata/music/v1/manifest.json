@@ -1,0 +1,17 @@
+{
+    "id": "youtube_music",
+    "version": "1.0",
+    "status": "production",
+    "author": "Gravity",
+    "created_at": "2026-06-28",
+    "variables": [
+        "keyword",
+        "language",
+        "provider",
+        "content_type",
+        "strategy_rules"
+    ],
+    "notes": [
+        "Initial release."
+    ]
+}

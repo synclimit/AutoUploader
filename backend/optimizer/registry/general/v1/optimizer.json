@@ -1,0 +1,23 @@
+{
+  "minimum_confidence": 0.85,
+  "minimum_sample_size": 10,
+  "proposal_priority": {
+    "Strategy": "high",
+    "Prompt": "medium",
+    "Knowledge": "medium",
+    "Decision": "high"
+  },
+  "risk_thresholds": {
+    "max_risk_tolerance": 0.7
+  },
+  "approval_requirements": {
+    "require_human": true
+  },
+  "rollback_policy": {
+    "enabled": true
+  },
+  "experiment_defaults": {
+    "sample_size": 100,
+    "duration_days": 7
+  }
+}

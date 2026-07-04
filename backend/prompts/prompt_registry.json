@@ -1,0 +1,9 @@
+{
+    "youtube_metadata_music": {
+        "v1": "v1",
+        "latest": "v2",
+        "production": "v1",
+        "v2": "v2",
+        "experiment": "v2"
+    }
+}

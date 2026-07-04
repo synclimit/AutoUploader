@@ -1,0 +1,26 @@
+{
+  "approval_rules": {
+    "require_human_approval": true,
+    "require_experiment_passed": true,
+    "require_regression_passed": true,
+    "minimum_confidence": 0.85
+  },
+  "promotion_policy": {
+    "preserve_old_versions": true,
+    "maximum_concurrent_promotions": 1
+  },
+  "rollback_policy": {
+    "auto_generate_snapshot": true,
+    "snapshot_retention_days": 30
+  },
+  "production_aliases": {
+    "default": "production",
+    "fallback": "stable"
+  },
+  "version_retention": {
+    "max_versions": 50
+  },
+  "archive_policy": {
+    "enabled": true
+  }
+}

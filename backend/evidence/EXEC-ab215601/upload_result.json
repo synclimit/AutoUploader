@@ -1,0 +1,16 @@
+{
+  "success": false,
+  "youtube_video_id": "PFDK9WwFB3g",
+  "youtube_url": "https://youtu.be/PFDK9WwFB3g",
+  "visibility": null,
+  "publish_state": null,
+  "upload_duration": 32.47316098213196,
+  "thumbnail_uploaded": false,
+  "playlist_updated": false,
+  "metadata_updated": true,
+  "scheduled_time": null,
+  "steps_completed": 2,
+  "failed_step": "ExtractVideo",
+  "error_code": "PLAYWRIGHT_UPLOAD_ERROR",
+  "error_message": "Workflow failed at ExtractVideo: Validation failed"
+}

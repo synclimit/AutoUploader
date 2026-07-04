@@ -1,0 +1,196 @@
+[
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/store/settings/settingsStore.ts",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferenceToggle.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferenceSection.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/api/client.ts",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/node_modules/.vite/deps/lucide-react.js?v=2013c646",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/uploads/overview/ChannelPickerDialog.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferenceActionBar.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferenceSlider.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/history/archive/HistoryArchivePanel.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/dashboard/overview/FooterStatus.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/history/logs/HistoryLogsPanel.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/dashboard/overview/HomeHero.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/dashboard/overview/AnalyticsCard.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/channels/wizard/AddChannelWizard.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/completed/overview/CompletedStatCards.jsx?t=1782373676092",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/history/logs/HistoryLogItem.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/uploads/overview/UploadQueueItem.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/dashboard/overview/StatCard.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/uploads/overview/UploadDropZone.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/channels/overview/ChannelDetailWorkspace.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/store/accounts/accountsStore.ts?t=1782374783964",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/completed/overview/CompletedTable.jsx?t=1782374783964",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/store/upload/uploadStore.ts",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferencesNavigation.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferencesArtwork.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/ActivityLogs.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/review/overview/ReviewMetadataPanel.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/history/analytics/AnalyticsPanel.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/channels/overview/ChannelListPanel.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/dashboard/overview/QuickActionCard.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/history/archive/HistoryCard.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/preferences/overview/PreferenceDropdown.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/store/dashboard/dashboardStore.ts?t=1782373676092",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/common/NotificationToast.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/history/analytics/AnalyticsMetric.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/dashboard/overview/ActionCard.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/store/pollingManager.ts",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Network Error",
+    "url": "http://localhost:5173/src/components/completed/overview/CompletedFilterBar.jsx",
+    "error": "net::ERR_ABORTED"
+  },
+  {
+    "type": "Fatal Exception",
+    "message": "TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=\"Accounts\"')\u001b[22m\n"
+  }
+]

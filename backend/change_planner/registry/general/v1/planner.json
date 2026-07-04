@@ -1,0 +1,34 @@
+{
+  "supported_targets": [
+    "Strategy",
+    "Prompt",
+    "Knowledge",
+    "Decision"
+  ],
+  "supported_actions": [
+    "CREATE_VERSION",
+    "PATCH_VALUE",
+    "UPDATE_MANIFEST"
+  ],
+  "patch_templates": {
+    "strategy_update": {
+      "format": "json_diff",
+      "strict": true
+    }
+  },
+  "migration_rules": {
+    "require_changelog": true,
+    "preserve_parent_alias": true
+  },
+  "rollback_templates": {
+    "default_strategy": "DELETE_NEW_RESTORE_ALIAS"
+  },
+  "risk_thresholds": {
+    "max_dependency_depth": 3,
+    "max_patch_size_bytes": 10240
+  },
+  "experiment_defaults": {
+    "runner_type": "ab_test",
+    "fallback_timeout_ms": 5000
+  }
+}

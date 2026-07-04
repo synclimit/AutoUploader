@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "name": "Maximize CTR",
+  "description": "Decision profile that heavily prioritizes click-through rate over balance.",
+  "author": "AI Strategy Team",
+  "updated_at": "2026-06-28T00:00:00Z"
+}

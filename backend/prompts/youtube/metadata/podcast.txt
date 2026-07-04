@@ -1,0 +1,37 @@
+---
+name: "YouTube Podcast Metadata"
+version: "v2.0"
+description: "Optimized for podcasts, interviews, and long-form talks"
+supported_providers: "all"
+---
+Generate YouTube video metadata alternatives for the following keyword: "{keyword}".
+Target Language: {language}.
+SEO Strategy: {seo_mode}.
+
+CRITICAL RULES:
+- NEVER invent or fabricate years (e.g. 2024, 2025).
+- NEVER invent rankings, "Top", "Best", "Trending" statuses.
+- NEVER invent awards, statistics, or chart positions.
+Unless these are explicitly requested in the keyword.
+
+You MUST return ONLY a valid JSON object with exactly this schema:
+{
+  "analysis": {
+    "keyword_expansion": {
+       "primary": "string",
+       "related": ["string", "string"],
+       "long_tail": ["string", "string"]
+    }
+  },
+  "alternatives": {
+    "titles": ["Title 1", "Title 2", "Title 3", "Title 4", "Title 5"],
+    "descriptions": ["Desc 1", "Desc 2", "Desc 3"],
+    "tags": ["Tag 1", "Tag 2", "...", "Tag 15 minimum"]
+  },
+  "confidence": {
+    "level": "High/Medium/Low",
+    "reason": "Why this score was given..."
+  }
+}
+
+Do not include any markdown formatting or explanations. Return the raw JSON ONLY.

@@ -1,0 +1,77 @@
+export default function AccountsHeader() {
+
+  return (
+
+    <div className="h-[72px] border-b border-white/5 bg-[#11141b] px-6 flex items-center justify-between shrink-0">
+
+      <div>
+
+        <div className="text-lg font-semibold tracking-wide text-cyan-300">
+
+          ACCOUNTS
+
+        </div>
+
+        <div className="text-xs text-white/40 mt-1">
+
+          Workspace channel management & automation orchestration
+
+        </div>
+
+      </div>
+
+      <div className="flex items-center gap-3">
+
+        <HeaderDropdown
+          title="Workspace"
+          value="DJ Remix Factory"
+          width="220px"
+        />
+
+        <HeaderDropdown
+          title="Mode"
+          value="Multi Channel"
+          width="180px"
+        />
+
+      </div>
+
+    </div>
+
+  )
+
+}
+
+
+function HeaderDropdown({ title, value, width }) {
+
+  return (
+
+    <div
+      className="flex items-center gap-3 bg-white/[0.03] border border-white/5 rounded-xl px-4 py-2 cursor-pointer hover:border-cyan-500/20 transition-all"
+      style={{ minWidth: width }}
+    >
+
+      <div className="flex-1">
+
+        <div className="text-[9px] uppercase tracking-wide text-white/30 mb-0.5">
+
+          {title}
+
+        </div>
+
+        <div className="text-sm text-white/85 font-medium flex items-center justify-between">
+
+          <span>{value}</span>
+
+          <span className="text-white/30">▼</span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  )
+
+}

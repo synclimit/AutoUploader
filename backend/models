@@ -1,0 +1,45 @@
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import DateTime
+
+from datetime import datetime
+
+from database.db import Base
+
+
+class UploadTask(Base):
+
+    __tablename__ = "upload_tasks"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    title = Column(
+        String
+    )
+
+    description = Column(
+        String
+    )
+
+    visibility = Column(
+        String
+    )
+
+    video_path = Column(
+        String
+    )
+
+    status = Column(
+        String,
+        default="queued"
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )

@@ -1,0 +1,22 @@
+[
+    {"keyword": "lagu rock indonesia", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["rock", "indonesia"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "lagu hujan", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["hujan"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "musik tidur", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["tidur"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "lofi cafe", "content_type": "Music", "language": "English", "expected": {"must_contain": ["lofi", "cafe"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "relaxing piano", "content_type": "Music", "language": "English", "expected": {"must_contain": ["relaxing", "piano"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "lagu pop hits 2000an", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["pop", "2000"], "must_not_contain": ["2024", "2025", "trending"], "notes": "Year in keyword is okay"}},
+    {"keyword": "dj tiktok viral", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["dj", "tiktok", "viral"], "must_not_contain": ["2024", "2025", "best"], "notes": ""}},
+    {"keyword": "acoustic cover songs", "content_type": "Music", "language": "English", "expected": {"must_contain": ["acoustic", "cover"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "epic trailer music", "content_type": "Music", "language": "English", "expected": {"must_contain": ["epic", "trailer", "music"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "lagu galau putus cinta", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["galau", "cinta"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "jazz background music", "content_type": "Music", "language": "English", "expected": {"must_contain": ["jazz", "background"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "kpop dance cover", "content_type": "Music", "language": "English", "expected": {"must_contain": ["kpop", "dance", "cover"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "synthwave mix", "content_type": "Music", "language": "English", "expected": {"must_contain": ["synthwave", "mix"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "lagu anak indonesia", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["anak", "indonesia"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "wedding song acoustic", "content_type": "Music", "language": "English", "expected": {"must_contain": ["wedding", "acoustic"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "sholawat merdu", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["sholawat", "merdu"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "heavy metal instrumental", "content_type": "Music", "language": "English", "expected": {"must_contain": ["metal", "instrumental"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "lagu daerah jawa", "content_type": "Music", "language": "Indonesia", "expected": {"must_contain": ["daerah", "jawa"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "chillhop study beats", "content_type": "Music", "language": "English", "expected": {"must_contain": ["chillhop", "study", "beats"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}},
+    {"keyword": "live concert full", "content_type": "Music", "language": "English", "expected": {"must_contain": ["live", "concert", "full"], "must_not_contain": ["2024", "2025", "top", "best", "trending"], "notes": ""}}
+]

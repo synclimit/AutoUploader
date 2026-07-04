@@ -1,0 +1,99 @@
+[
+  {
+    "Keyword": "lagu rock indonesia",
+    "Content Type": "Music",
+    "Provider": "openai_compatible",
+    "Model": "cipher",
+    "Prompt Name": "YouTube Music Metadata",
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": 54.33021783828735,
+    "Raw Response": "{\"analysis\": {\"keyword_expansion\": {\"primary\": \"Lagu Rock Indonesia\", \"related\": [\"Musik Rock Indonesia\", \"Lagu Klasik Indonesia\", \"Band Rock Indonesia\"], \"long_tail\": [\"Daftar Lagu Rock Indonesia Terbaik\", \"Lagu Rock Indonesia yang Viral\", \"Rekomendasi Lagu Rock Indonesia\"]}}, \"alternatives\": {\"titles\": [\"Lagu Rock Indonesia Paling Terkenal\", \"Jadul Lagu Rock Indonesia yang Bikin Nostalgia\", \"Lagu Rock Indonesia dari Era 90an hingga Sekarang\", \"Rekomendasi Lagu Rock Indonesia untuk Semua Umur\", \"Lagu Rock Indonesia yang Masih Jadi Favorit\"], \"descriptions\": [\"Jelajahi genre rock Indonesia dari era awal hingga hari ini. Temukan lagu-lagu yang masih relevan dan populer di media sosial.\", \"Mau nostalgia dan juga dengar lagu-lagu baru? Ini adalah playlist rock Indonesia yang menggabungkan klasik dan modern.\", \"Lagu rock Indonesia memiliki jutaan penggemar di seluruh dunia. Ini adalah daftar lengkap yang bisa kamu dengar kapan saja.\"], \"tags\": [\"Lagu Rock Indonesia\", \"Musik Indonesia\", \"Lagu Klasik\", \"Band Rock\", \"Lagu Viral\", \"Lagu Nostalgia\", \"Musik 90an\", \"Lagu Terbaik\", \"Lagu Populer\", \"Lagu Favorit\", \"Lagu Indie\", \"Lagu Jadien\", \"Lagu Modern\", \"Lagu Online\", \"Lagu Gratis\"]}, \"confidence\": {\"level\": \"High\", \"reason\": \"Keyword 'Lagu Rock Indonesia' has strong search intent in Indonesia, supported by consistent usage in music content, YouTube playlists, and social media. Related terms align with actual Indonesian music discourse around rock genres.\"}, \"_provider\": \"openai_compatible\", \"_model\": \"cipher\", \"_timeMs\": 54142}",
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [
+        "Description too short (<150)"
+      ],
+      "failures": [
+        "Missing CTA"
+      ]
+    },
+    "Timestamp": "2026-06-27T13:59:06.256183"
+  },
+  {
+    "Keyword": "lagu hujan",
+    "Content Type": "Music",
+    "Provider": "openai_compatible",
+    "Model": "cipher",
+    "Prompt Name": "YouTube Music Metadata",
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": 53.639816761016846,
+    "Raw Response": "{\"analysis\": {\"keyword_expansion\": {\"primary\": \"lagu hujan\", \"related\": [\"musik malam\", \"lagu romantis\", \"dangdut hujan\"], \"long_tail\": [\"lagu hujan yang bikin sedih\", \"dengerin lagu hujan saat malam hari\"]}}, \"alternatives\": {\"titles\": [\"Lagu Hujan yang Membawa Kenangan\", \"Dengerin Lagu Hujan Malam Hari\", \"Lagu Hujan yang Terbaik untuk Malam Ini\", \"Musik Hujan yang Menenangkan Hati\", \"Lagu Hujan untuk Saat Sedih\"], \"descriptions\": [\"Lagu hujan yang bisa membuatmu merasa lebih tenang dan nyaman. Cocok untuk mendengarkan saat malam hari.\", \"Mendengarkan lagu hujan adalah cara terbaik untuk melepas penat. Nikmati musik yang menenangkan ini.\", \"Lagu hujan yang sempurna untuk mengisi waktu malam. Bisa juga sebagai background saat belajar atau kerja.\"], \"tags\": [\"lagu hujan\", \"musik malam\", \"dangdut hujan\", \"lagu romantis\", \"musik menenangkan\", \"dengerin lagu\", \"musik untuk malam hari\", \"lagu yang bikin sedih\", \"musik yang nyaman\", \"dangdut\", \"musik emosional\", \"lagu untuk waktu luang\", \"audio hujan\", \"backgorund music\", \"music for studying\"]}, \"confidence\": {\"level\": \"High\", \"reason\": \"Keyword expansion covers primary, related, and long-tail variations. Alternatives are regionally relevant, use natural Indonesian phrasing, and avoid keyword stuffing.\"}, \"_provider\": \"openai_compatible\", \"_model\": \"cipher\", \"_timeMs\": 53554}",
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [
+        "Description too short (<150)"
+      ],
+      "failures": [
+        "Missing CTA"
+      ]
+    },
+    "Timestamp": "2026-06-27T13:59:06.075079"
+  },
+  {
+    "Keyword": "musik tidur",
+    "Content Type": "Music",
+    "Provider": "openai_compatible",
+    "Model": "cipher",
+    "Prompt Name": "YouTube Music Metadata",
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": 59.64202523231506,
+    "Raw Response": "{\"analysis\": {\"keyword_expansion\": {\"primary\": \"musik tidur\", \"related\": [\"lagu tidur\", \"musik rileks\", \"sound sleeping\"], \"long_tail\": [\"musik tidur untuk anak\", \"lagu tidur alam\", \"musik rileks malam hari\"]}}, \"alternatives\": {\"titles\": [\"Musik Tidur Terbaik untuk Tidur Nyenyak Malam Hari\", \"Lagu Tidur Relaksasi yang Membuat Tidur Lebih Nyenyak\", \"Sound Sleeping Musik Rileks untuk Menenangkan Pikiran\", \"Musik Tidur Terpopuler yang Banyak Disukai\", \"Malam Hari yang Tenang dengan Musik Rileks Terbaik\"], \"descriptions\": [\"Cari musik tidur yang benar-benar membantu Anda tidur nyenyak? Ini adalah playlist paling rileks yang bisa Anda dengarkan setiap malam. Nikmati suasana tenang dan relaksasi sebelum tidur.\", \"Lagu tidur alami dan lembut yang dirancang khusus untuk menenangkan pikiran sebelum tidur. Cocok untuk siapa pun yang mencari kenyamanan malam hari.\", \"Sound sleeping yang dirancang untuk membantu Anda memulai hari dengan istirahat yang baik. Mendengarkan musik rileks sebelum tidur adalah kunci untuk tidur nyenyak.\"], \"tags\": [\"musik tidur\", \"lagu tidur\", \"musik rileks\", \"sound sleeping\", \"musik relaksasi\", \"tidur nyenyak\", \"musik alam\", \"lagu alam\", \"musik untuk tidur\", \"sound terapi\", \"sleep music\", \"relax music\", \"bedtime music\", \"musik menenangkan\", \"musik tenang\", \"musik malam hari\"]}, \"confidence\": {\"level\": \"High\", \"reason\": \"Keyword expansion covers primary, related, and long-tail variations. Title alternatives are optimized for Indonesian search intent with natural language patterns. Description content is structured for SEO with keyword placement without stuffing. Tags cover both Indonesian and English variations to maximize reach.\"}, \"_provider\": \"openai_compatible\", \"_model\": \"cipher\", \"_timeMs\": 59564}",
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Missing CTA"
+      ]
+    },
+    "Timestamp": "2026-06-27T13:59:12.159243"
+  },
+  {
+    "Keyword": "lofi cafe",
+    "Content Type": "Music",
+    "Provider": "openai_compatible",
+    "Model": "cipher",
+    "Prompt Name": "YouTube Music Metadata",
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": 31.255085229873657,
+    "Raw Response": "{\"analysis\": {\"keyword_expansion\": {\"primary\": \"lofi cafe\", \"related\": [\"lofi music\", \"chill cafe\", \"study music\"], \"long_tail\": [\"lofi cafe playlist\", \"lofi cafe background music\"]}}, \"alternatives\": {\"titles\": [\"Chill Lo-Fi Cafe Vibes | Study Music Background\", \"Lo-Fi Cafe Sounds | Perfect for Focus & Relaxation\", \"Cafe-Inspired Lo-Fi Mix | Immersive Listening Experience\", \"Lo-Fi Music for Work | Cafe Style Ambient Sounds\", \"Relax & Focus with Lo-Fi Cafe Background Music\"], \"descriptions\": [\"Lo-fi beats that feel like sitting inside a cozy Indian cafe. Perfect for studying, coding, or just winding down. No interruptions, just pure chill.\", \"Ambient lo-fi music designed to match the vibe of a quiet cafe. Ideal for concentration, meditation, or background listening during your downtime.\", \"Experience the serenity of a lo-fi cafe with this curated playlist. Blend of smooth beats and subtle ambient sounds to keep you calm and focused.\"], \"tags\": [\"lofi music\", \"lofi cafe\", \"chill beats\", \"study music\", \"ambient sounds\", \"focus music\", \"lofi playlist\", \"cafe vibes\", \"lofi background music\", \"lofi beats\", \"relax music\", \"study beats\", \"lofi mix\", \"lofi ambient\", \"lofi chill\"]}, \"confidence\": {\"level\": \"High\", \"reason\": \"Keyword is well-established and has strong semantic relationships with related terms like 'chill beats' and 'study music', which are proven high-performing in the lo-fi niche.\"}, \"_provider\": \"openai_compatible\", \"_model\": \"cipher\", \"_timeMs\": 31167}",
+    "Evaluation Result": {
+      "status": "WARNING",
+      "warnings": [
+        "Keyword not perfectly matched in Title",
+        "Description too short (<150)"
+      ],
+      "failures": []
+    },
+    "Timestamp": "2026-06-27T13:59:37.417693"
+  },
+  {
+    "Keyword": "relaxing piano",
+    "Content Type": "Music",
+    "Provider": "openai_compatible",
+    "Model": "cipher",
+    "Prompt Name": "YouTube Music Metadata",
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": 32.415101766586304,
+    "Raw Response": "{\"analysis\": {\"keyword_expansion\": {\"primary\": \"relaxing piano\", \"related\": [\"lofi piano\", \"calm piano music\", \"chill piano\"], \"long_tail\": [\"best relaxing piano music for sleep\", \"soothing piano tracks to focus\", \"chill piano music for studying\"]}}, \"alternatives\": {\"titles\": [\"Relaxing Piano Music | Sleep & Focus Sounds\", \"Chill Piano Playlist - Calm Ambient Vibes\", \"Soothing Piano Tracks for Meditation\", \"Lo-fi Piano Music to Keep You Calm\", \"Calm Piano Music for Studying & Working\"], \"descriptions\": [\"Lounge-style piano music perfect for winding down after a long day. Ideal for sleep, meditation, or just relaxing.\", \"Ambient piano compositions designed to create a peaceful atmosphere. Great for studying, working, or unwinding.\", \"Soft piano melodies that bring a sense of calm and tranquility. Perfect for anyone needing a moment to breathe.\", \"Chill piano music with a clean, minimalist vibe. No distractions, just pure relaxation.\", \"Calm piano tracks that help you focus without background noise. Great for work sessions and quiet evenings.\"], \"tags\": [\"relaxing piano music\", \"lofi piano\", \"calm piano\", \"soothing piano tracks\", \"chill piano music\", \"sleep music\", \"study music\", \"focus music\", \"ambient piano\", \"meditation music\", \"background music\", \"instrumental piano\", \"lo-fi beats\", \"quiet piano\", \"slow piano\"]}, \"confidence\": {\"level\": \"High\", \"reason\": \"Keyword expansion covers both primary and long-tail variants with SEO-optimized tags and titles that align with common YouTube search intent for this category.\"}, \"_provider\": \"openai_compatible\", \"_model\": \"cipher\", \"_timeMs\": 32326}",
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [
+        "Description too short (<150)"
+      ],
+      "failures": [
+        "Missing CTA"
+      ]
+    },
+    "Timestamp": "2026-06-27T13:59:38.752822"
+  }
+]

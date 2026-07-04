@@ -1,0 +1,12 @@
+{
+    "prompt": "youtube_metadata_music",
+    "version": "v2",
+    "provider": "Gemini",
+    "model": "gemini-3.1-pro",
+    "dataset": "music_benchmark",
+    "evaluation_profile": "full",
+    "created_at": "2026-06-27T22:28:50.728664",
+    "git_commit": "141cb0ca0c08bf6a47c4211a1bb20cf5a5f0869c",
+    "prompt_hash": "0e573adf8352258897640c05dc325c9fe48c151c21111064bfd00ea44f89b3b7",
+    "runtime": "3.4s"
+}

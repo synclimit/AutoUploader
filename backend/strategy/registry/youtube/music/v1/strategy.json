@@ -1,0 +1,64 @@
+{
+  "goals": {
+    "maximize_retention": {
+      "title_rules": {
+        "style": "emotional",
+        "hook": "question",
+        "keyword_position": "front",
+        "target_length": 58,
+        "emoji": false,
+        "capitalization": "sentence_case"
+      },
+      "description_rules": {
+        "paragraphs": 2,
+        "cta_position": "last",
+        "hashtags": 3,
+        "keyword_density": "medium",
+        "bullet_points": false
+      },
+      "tag_rules": {
+        "broad_tags": 5,
+        "longtail_tags": 10,
+        "brand_tags": 2,
+        "language": "id"
+      },
+      "thumbnail_rules": {
+        "text_overlay": true,
+        "face_presence": true
+      },
+      "language_rules": {
+        "slang_allowed": true
+      }
+    },
+    "maximize_seo": {
+      "title_rules": {
+        "style": "descriptive",
+        "hook": "statement",
+        "keyword_position": "front",
+        "target_length": 65,
+        "emoji": false,
+        "capitalization": "title_case"
+      },
+      "description_rules": {
+        "paragraphs": 4,
+        "cta_position": "first",
+        "hashtags": 5,
+        "keyword_density": "high",
+        "bullet_points": true
+      },
+      "tag_rules": {
+        "broad_tags": 10,
+        "longtail_tags": 15,
+        "brand_tags": 2,
+        "language": "id"
+      },
+      "thumbnail_rules": {
+        "text_overlay": false,
+        "face_presence": false
+      },
+      "language_rules": {
+        "slang_allowed": false
+      }
+    }
+  }
+}

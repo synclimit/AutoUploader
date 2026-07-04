@@ -1,0 +1,1902 @@
+[
+  {
+    "Keyword": "lagu rock indonesia",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:22.947741"
+  },
+  {
+    "Keyword": "lagu hujan",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:22.982634"
+  },
+  {
+    "Keyword": "musik tidur",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:23.017498"
+  },
+  {
+    "Keyword": "lofi cafe",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:25.052047"
+  },
+  {
+    "Keyword": "relaxing piano",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:25.085000"
+  },
+  {
+    "Keyword": "lagu pop hits 2000an",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:25.118865"
+  },
+  {
+    "Keyword": "dj tiktok viral",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:27.149870"
+  },
+  {
+    "Keyword": "acoustic cover songs",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:27.181643"
+  },
+  {
+    "Keyword": "epic trailer music",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:27.214222"
+  },
+  {
+    "Keyword": "lagu galau putus cinta",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:29.247656"
+  },
+  {
+    "Keyword": "jazz background music",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:29.279436"
+  },
+  {
+    "Keyword": "kpop dance cover",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:29.309261"
+  },
+  {
+    "Keyword": "synthwave mix",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:31.349303"
+  },
+  {
+    "Keyword": "lagu anak indonesia",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:31.380808"
+  },
+  {
+    "Keyword": "wedding song acoustic",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:31.412385"
+  },
+  {
+    "Keyword": "sholawat merdu",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:33.444925"
+  },
+  {
+    "Keyword": "heavy metal instrumental",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:33.478894"
+  },
+  {
+    "Keyword": "lagu daerah jawa",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:33.512823"
+  },
+  {
+    "Keyword": "chillhop study beats",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:35.549435"
+  },
+  {
+    "Keyword": "live concert full",
+    "Content Type": "Music",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:35.581001"
+  },
+  {
+    "Keyword": "minecraft survival 100 days",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:35.610777"
+  },
+  {
+    "Keyword": "gta roleplay indonesia",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:37.645683"
+  },
+  {
+    "Keyword": "valorant montage",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:37.681881"
+  },
+  {
+    "Keyword": "mobile legends bang bang gameplay",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:37.712444"
+  },
+  {
+    "Keyword": "elden ring boss guide",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:39.747658"
+  },
+  {
+    "Keyword": "roblox blox fruits update",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:39.778944"
+  },
+  {
+    "Keyword": "free fire booyah trick",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:39.811235"
+  },
+  {
+    "Keyword": "fortnite new season",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:41.850435"
+  },
+  {
+    "Keyword": "pubg mobile conqueror push",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:41.889325"
+  },
+  {
+    "Keyword": "genshin impact spiral abyss 12",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:41.936592"
+  },
+  {
+    "Keyword": "horror game jumpscares",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:43.968222"
+  },
+  {
+    "Keyword": "sims 4 house build",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:43.998940"
+  },
+  {
+    "Keyword": "cyberpunk 2077 phantom liberty",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:44.030923"
+  },
+  {
+    "Keyword": "call of duty warzone meta",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:46.068000"
+  },
+  {
+    "Keyword": "dota 2 highlights",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:46.100153"
+  },
+  {
+    "Keyword": "stardew valley tips and tricks",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:46.132637"
+  },
+  {
+    "Keyword": "league of legends faker",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:48.168124"
+  },
+  {
+    "Keyword": "animal crossing island tour",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:48.210815"
+  },
+  {
+    "Keyword": "fnaf lore explained",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:48.252168"
+  },
+  {
+    "Keyword": "racing sim setup assetto corsa",
+    "Content Type": "Gaming",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:50.294160"
+  },
+  {
+    "Keyword": "belajar python pemula",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:50.329588"
+  },
+  {
+    "Keyword": "cara edit video premiere pro",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:50.360072"
+  },
+  {
+    "Keyword": "how to tie a tie",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:52.392411"
+  },
+  {
+    "Keyword": "react js tutorial for beginners",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:52.423801"
+  },
+  {
+    "Keyword": "tips belajar bahasa inggris cepat",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:52.457721"
+  },
+  {
+    "Keyword": "photoshop manipulation tutorial",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:54.493239"
+  },
+  {
+    "Keyword": "matematika dasar cpns",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:54.528329"
+  },
+  {
+    "Keyword": "how to invest in stocks",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:54.562914"
+  },
+  {
+    "Keyword": "excel vlookup tutorial",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:56.595802"
+  },
+  {
+    "Keyword": "cara membuat cv lamaran kerja",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:56.626351"
+  },
+  {
+    "Keyword": "digital marketing course",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:56.658055"
+  },
+  {
+    "Keyword": "sejarah indonesia merdeka",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:58.690189"
+  },
+  {
+    "Keyword": "learn spanish fast",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:58.726890"
+  },
+  {
+    "Keyword": "cara mengatur keuangan pribadi",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:53:58.760022"
+  },
+  {
+    "Keyword": "css flexbox explained",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:00.794822"
+  },
+  {
+    "Keyword": "belajar mengemudi mobil manual",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:00.827255"
+  },
+  {
+    "Keyword": "guitar chords for beginners",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:00.861331"
+  },
+  {
+    "Keyword": "cara daftar npwp online",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:02.894721"
+  },
+  {
+    "Keyword": "machine learning full course",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:02.926846"
+  },
+  {
+    "Keyword": "belajar merajut untuk pemula",
+    "Content Type": "Education",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:02.958960"
+  },
+  {
+    "Keyword": "podcast horor indonesia",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:04.991006"
+  },
+  {
+    "Keyword": "interview bisnis startup",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:05.021715"
+  },
+  {
+    "Keyword": "true crime podcast full episodes",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:05.053734"
+  },
+  {
+    "Keyword": "joe rogan experience elon musk",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:07.087053"
+  },
+  {
+    "Keyword": "podcast komedi indonesia",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:07.116491"
+  },
+  {
+    "Keyword": "motivational speech podcast",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:07.147217"
+  },
+  {
+    "Keyword": "obrolan santai malam hari",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:09.179228"
+  },
+  {
+    "Keyword": "tech news podcast weekly",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:09.212101"
+  },
+  {
+    "Keyword": "mental health awareness podcast",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:09.244497"
+  },
+  {
+    "Keyword": "podcast misteri gunung",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:11.278578"
+  },
+  {
+    "Keyword": "finance and investing podcast",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:11.310944"
+  },
+  {
+    "Keyword": "bincang politik indonesia",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:11.342836"
+  },
+  {
+    "Keyword": "relationship advice podcast",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:13.378283"
+  },
+  {
+    "Keyword": "kisah sukses pengusaha muda",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:13.410072"
+  },
+  {
+    "Keyword": "sports talk radio full",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:13.441420"
+  },
+  {
+    "Keyword": "podcast kesehatan anak",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:15.476509"
+  },
+  {
+    "Keyword": "history documentary podcast",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:15.510712"
+  },
+  {
+    "Keyword": "cerita lucu mahasiswa",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:15.544847"
+  },
+  {
+    "Keyword": "game development podcast",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:17.582460"
+  },
+  {
+    "Keyword": "diskusi buku bestseller",
+    "Content Type": "Podcast",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:17.616414"
+  },
+  {
+    "Keyword": "rain sounds for sleep",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:17.648726"
+  },
+  {
+    "Keyword": "suara hujan deras di atap",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:19.689360"
+  },
+  {
+    "Keyword": "forest ambience nature sounds",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:19.727073"
+  },
+  {
+    "Keyword": "suara air mengalir gemericik",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:19.760430"
+  },
+  {
+    "Keyword": "cozy cabin snowstorm",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:21.796655"
+  },
+  {
+    "Keyword": "ocean waves relaxing sleep",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:21.830809"
+  },
+  {
+    "Keyword": "suara jangkrik malam hari",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:21.864582"
+  },
+  {
+    "Keyword": "library ambient noise study",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:23.899080"
+  },
+  {
+    "Keyword": "asmr keyboard typing fast",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:23.935952"
+  },
+  {
+    "Keyword": "suara kereta api malam",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:23.969290"
+  },
+  {
+    "Keyword": "crackling fireplace 10 hours",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:26.001466"
+  },
+  {
+    "Keyword": "tibetan singing bowls meditation",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:26.032358"
+  },
+  {
+    "Keyword": "suara angin sepoi sepoi",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:26.065445"
+  },
+  {
+    "Keyword": "white noise for babies",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:28.096744"
+  },
+  {
+    "Keyword": "brown noise ADHD focus",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:28.130973"
+  },
+  {
+    "Keyword": "suara burung pagi hari",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:28.162817"
+  },
+  {
+    "Keyword": "space ambient music deep sleep",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:30.195533"
+  },
+  {
+    "Keyword": "cyberpunk city rain ambience",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:30.233401"
+  },
+  {
+    "Keyword": "suara alam pedesaan",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:30.266333"
+  },
+  {
+    "Keyword": "binaural beats deep healing",
+    "Content Type": "Relaxation",
+    "Provider": null,
+    "Model": null,
+    "Prompt Name": null,
+    "Prompt Version": null,
+    "Prompt Hash": "7e45086ad3ea60d9c8237339a94c38b8cbca794815b6152b5dff239b4dcf6278",
+    "Runtime": null,
+    "Raw Response": null,
+    "Evaluation Result": {
+      "status": "FAIL",
+      "warnings": [],
+      "failures": [
+        "Empty response or JSON Parse Error"
+      ]
+    },
+    "Timestamp": "2026-06-27T12:54:32.297170"
+  }
+]

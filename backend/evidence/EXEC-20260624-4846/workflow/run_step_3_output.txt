@@ -1,0 +1,103 @@
+--- Executing Functional Workflow Transitions ---
+1. Browser Profile
+Failed to create profile 409 {"detail":"Profile Name Already Exists"}
+   Using existing Profile ID: 0ce5aa22-8053-444f-9e70-c1c7a8b8dec1
+2. Account Setup
+Failed to create account 409 {"detail":"Channel Name Already Exists"}
+   Using existing Account ID: d48b85bd-496a-44a3-b771-2a5b71184afe
+3. Watch Folder -> Import
+   Queued Task ID: 1159c9af-7192-4cda-be57-7e393a9569a1
+4. Review -> Approve
+   Task Approved
+5. Upload Engine -> Scheduler
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: QUEUED
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: UPLOADING
+   Status: COMPLETED
+6. Completed -> History -> Dashboard
+   Dashboard pending: 0, uploading: 0, completed: 0
+--- Workflow Completed Successfully ---
+
+STDERR:

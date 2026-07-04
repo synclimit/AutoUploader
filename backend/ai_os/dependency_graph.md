@@ -1,0 +1,14 @@
+# AI OS Dependency Graph
+
+* Keyword -> KnowledgeEngine
+* KnowledgeEngine -> StrategyEngine
+* StrategyEngine -> PromptCompiler
+* PromptCompiler -> ReviewEngine
+* ReviewEngine -> DecisionEngine
+* DecisionEngine -> FeedbackEngine
+* FeedbackEngine -> LearningEngine
+* LearningEngine -> OptimizerEngine
+* OptimizerEngine -> ChangePlanner
+* ChangePlanner -> ExperimentRunner
+* ExperimentRunner -> ProductionPromotion
+* ProductionPromotion -> Dashboard

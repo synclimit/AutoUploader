@@ -1,0 +1,18 @@
+{
+    "id": "youtube_music",
+    "version": "2.0",
+    "status": "experiment",
+    "author": "Gravity",
+    "created_at": "2026-06-28",
+    "variables": [
+        "keyword",
+        "language",
+        "provider",
+        "content_type",
+        "tone",
+        "strategy_rules"
+    ],
+    "notes": [
+        "Added tone variable and emoji instructions."
+    ]
+}

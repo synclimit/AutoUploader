@@ -1,0 +1,23 @@
+[
+  {
+    "timestamp": 1782387005.8088953,
+    "step": "OpenStudio",
+    "duration": 4.860890626907349,
+    "status": "PASS",
+    "error": ""
+  },
+  {
+    "timestamp": 1782387011.2068362,
+    "step": "UploadVideo",
+    "duration": 5.2407920360565186,
+    "status": "PASS",
+    "error": ""
+  },
+  {
+    "timestamp": 1782387023.5236146,
+    "step": "ExtractVideo",
+    "duration": 12.132927179336548,
+    "status": "FAIL",
+    "error": "Validation failed"
+  }
+]

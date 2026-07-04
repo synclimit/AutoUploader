@@ -1,0 +1,29 @@
+{
+  "dataset_version": "1.0",
+  "pass": 0,
+  "warning": 1,
+  "fail": 4,
+  "total_runtime_ms": 231282.24682807922,
+  "title_length_sum": 207,
+  "desc_length_sum": 679,
+  "tag_count_sum": 76,
+  "total_requests": 5,
+  "failures_breakdown": {
+    "Hallucinated Years": 0,
+    "Duplicate Tags": 0,
+    "Missing CTA": 4,
+    "Keyword Coverage": 0,
+    "JSON Parse Failures": 0,
+    "Timeout Count": 0,
+    "Provider Errors": 0
+  },
+  "average_runtime": 46.25644936561584,
+  "median_runtime": 53.639816761016846,
+  "average_title_length": 41,
+  "average_description_length": 135,
+  "average_tags": 15,
+  "provider": "openai_compatible",
+  "model": "cipher",
+  "prompt_name": "Mixed",
+  "prompt_version": "Mixed"
+}

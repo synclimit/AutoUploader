@@ -1,0 +1,22 @@
+[
+    {
+        "prompt": "youtube_metadata_music_latest",
+        "pass": 95,
+        "runtime": 3.4,
+        "hallucination": 0,
+        "keyword_coverage": 98,
+        "weighted_score": 86.7,
+        "commit": "141cb0ca0c08bf6a47c4211a1bb20cf5a5f0869c",
+        "hash": ""
+    },
+    {
+        "prompt": "youtube_metadata_music_v2",
+        "pass": 95,
+        "runtime": 3.4,
+        "hallucination": 0,
+        "keyword_coverage": 98,
+        "weighted_score": 86.7,
+        "commit": "141cb0ca0c08bf6a47c4211a1bb20cf5a5f0869c",
+        "hash": "0e573adf"
+    }
+]

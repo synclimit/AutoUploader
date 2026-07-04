@@ -1,0 +1,1636 @@
+[
+  {
+    "url": "http://localhost:5173/api/v1/dashboard",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "statistics": {
+          "pending_review": 1,
+          "queued": 0,
+          "scheduled": 0,
+          "uploading": 0,
+          "completed": 0,
+          "failed": 2
+        },
+        "connected_channels": {
+          "connected_channels": 1,
+          "authenticated_channels": 0,
+          "disconnected_channels": 1
+        },
+        "attention": {
+          "pending_review": [
+            {
+              "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+              "title": "Test Sprint 8.5 test-85-1782392241",
+              "video_id": "test-85-1782392241",
+              "platform": "Test Account",
+              "status": "review"
+            }
+          ],
+          "failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed"
+            }
+          ]
+        },
+        "analytics": {
+          "period": "7d",
+          "labels": [
+            "Fri",
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu"
+          ],
+          "uploads": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ],
+          "completed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "failed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        },
+        "engine": {
+          "status": "unknown",
+          "uptime": "0h 0m",
+          "worker_count": 1,
+          "queue_size": 0,
+          "active_uploads": 0,
+          "scheduler_status": "active",
+          "watch_folder_status": "active",
+          "last_poll": "2026-06-25T13:13:14Z"
+        },
+        "history": {
+          "latest_completed": [],
+          "latest_failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:39:28.487285"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:30:24.300778"
+            }
+          ],
+          "last_upload_time": null
+        },
+        "meta": {
+          "timestamp": "2026-06-25T13:13:14.087684Z",
+          "version": "1.0.0"
+        }
+      },
+      "meta": {
+        "timestamp": "2026-06-25T13:13:14.087695",
+        "version": "1.0"
+      }
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/dashboard",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "statistics": {
+          "pending_review": 1,
+          "queued": 0,
+          "scheduled": 0,
+          "uploading": 0,
+          "completed": 0,
+          "failed": 2
+        },
+        "connected_channels": {
+          "connected_channels": 1,
+          "authenticated_channels": 0,
+          "disconnected_channels": 1
+        },
+        "attention": {
+          "pending_review": [
+            {
+              "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+              "title": "Test Sprint 8.5 test-85-1782392241",
+              "video_id": "test-85-1782392241",
+              "platform": "Test Account",
+              "status": "review"
+            }
+          ],
+          "failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed"
+            }
+          ]
+        },
+        "analytics": {
+          "period": "7d",
+          "labels": [
+            "Fri",
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu"
+          ],
+          "uploads": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ],
+          "completed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "failed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        },
+        "engine": {
+          "status": "unknown",
+          "uptime": "0h 0m",
+          "worker_count": 1,
+          "queue_size": 0,
+          "active_uploads": 0,
+          "scheduler_status": "active",
+          "watch_folder_status": "active",
+          "last_poll": "2026-06-25T13:13:14Z"
+        },
+        "history": {
+          "latest_completed": [],
+          "latest_failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:39:28.487285"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:30:24.300778"
+            }
+          ],
+          "last_upload_time": null
+        },
+        "meta": {
+          "timestamp": "2026-06-25T13:13:14.108149Z",
+          "version": "1.0.0"
+        }
+      },
+      "meta": {
+        "timestamp": "2026-06-25T13:13:14.108160",
+        "version": "1.0"
+      }
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/dashboard",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "statistics": {
+          "pending_review": 1,
+          "queued": 0,
+          "scheduled": 0,
+          "uploading": 0,
+          "completed": 0,
+          "failed": 2
+        },
+        "connected_channels": {
+          "connected_channels": 1,
+          "authenticated_channels": 0,
+          "disconnected_channels": 1
+        },
+        "attention": {
+          "pending_review": [
+            {
+              "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+              "title": "Test Sprint 8.5 test-85-1782392241",
+              "video_id": "test-85-1782392241",
+              "platform": "Test Account",
+              "status": "review"
+            }
+          ],
+          "failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed"
+            }
+          ]
+        },
+        "analytics": {
+          "period": "7d",
+          "labels": [
+            "Fri",
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu"
+          ],
+          "uploads": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ],
+          "completed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "failed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        },
+        "engine": {
+          "status": "unknown",
+          "uptime": "0h 0m",
+          "worker_count": 1,
+          "queue_size": 0,
+          "active_uploads": 0,
+          "scheduler_status": "active",
+          "watch_folder_status": "active",
+          "last_poll": "2026-06-25T13:13:14Z"
+        },
+        "history": {
+          "latest_completed": [],
+          "latest_failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:39:28.487285"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:30:24.300778"
+            }
+          ],
+          "last_upload_time": null
+        },
+        "meta": {
+          "timestamp": "2026-06-25T13:13:14.127263Z",
+          "version": "1.0.0"
+        }
+      },
+      "meta": {
+        "timestamp": "2026-06-25T13:13:14.127278",
+        "version": "1.0"
+      }
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/dashboard",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "statistics": {
+          "pending_review": 1,
+          "queued": 0,
+          "scheduled": 0,
+          "uploading": 0,
+          "completed": 0,
+          "failed": 2
+        },
+        "connected_channels": {
+          "connected_channels": 1,
+          "authenticated_channels": 0,
+          "disconnected_channels": 1
+        },
+        "attention": {
+          "pending_review": [
+            {
+              "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+              "title": "Test Sprint 8.5 test-85-1782392241",
+              "video_id": "test-85-1782392241",
+              "platform": "Test Account",
+              "status": "review"
+            }
+          ],
+          "failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed"
+            }
+          ]
+        },
+        "analytics": {
+          "period": "7d",
+          "labels": [
+            "Fri",
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu"
+          ],
+          "uploads": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ],
+          "completed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "failed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        },
+        "engine": {
+          "status": "unknown",
+          "uptime": "0h 0m",
+          "worker_count": 1,
+          "queue_size": 0,
+          "active_uploads": 0,
+          "scheduler_status": "active",
+          "watch_folder_status": "active",
+          "last_poll": "2026-06-25T13:13:14Z"
+        },
+        "history": {
+          "latest_completed": [],
+          "latest_failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:39:28.487285"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:30:24.300778"
+            }
+          ],
+          "last_upload_time": null
+        },
+        "meta": {
+          "timestamp": "2026-06-25T13:13:14.145148Z",
+          "version": "1.0.0"
+        }
+      },
+      "meta": {
+        "timestamp": "2026-06-25T13:13:14.145161",
+        "version": "1.0"
+      }
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/accounts",
+    "status": 200,
+    "body": [
+      {
+        "id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "channel_name": "Test Account",
+        "channel_id": null,
+        "profile_name": null,
+        "source_type": "M1_VIDEO_SPLITTER",
+        "region": "Indonesia",
+        "authentication_status": "Disconnected"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/accounts",
+    "status": 200,
+    "body": [
+      {
+        "id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "channel_name": "Test Account",
+        "channel_id": null,
+        "profile_name": null,
+        "source_type": "M1_VIDEO_SPLITTER",
+        "region": "Indonesia",
+        "authentication_status": "Disconnected"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/settings",
+    "status": 200,
+    "body": {
+      "general_language": "en",
+      "general_theme": "dark",
+      "general_launch": true,
+      "general_update": true,
+      "upload_concurrent": 3,
+      "upload_retry": 5,
+      "ai_gemini": true,
+      "ai_temp": "0.7",
+      "notif_desktop": true,
+      "notif_sound": true,
+      "notif_success": true,
+      "notif_fail": true,
+      "perf_mode": "balanced",
+      "perf_workers": 4,
+      "perf_threads": 8,
+      "perf_gpu": true,
+      "perf_mem": 4096,
+      "app_density": "comfortable",
+      "app_color": "cyan",
+      "app_anim": true,
+      "app_compact": false,
+      "adv_dev": false,
+      "adv_logs": true,
+      "id": 1,
+      "updated_at": "2026-06-25T13:13:19.217725"
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/settings",
+    "status": 200,
+    "body": {
+      "general_language": "en",
+      "general_theme": "dark",
+      "general_launch": true,
+      "general_update": true,
+      "upload_concurrent": 3,
+      "upload_retry": 5,
+      "ai_gemini": true,
+      "ai_temp": "0.7",
+      "notif_desktop": true,
+      "notif_sound": true,
+      "notif_success": true,
+      "notif_fail": true,
+      "perf_mode": "balanced",
+      "perf_workers": 4,
+      "perf_threads": 8,
+      "perf_gpu": true,
+      "perf_mem": 4096,
+      "app_density": "comfortable",
+      "app_color": "cyan",
+      "app_anim": true,
+      "app_compact": false,
+      "adv_dev": false,
+      "adv_logs": true,
+      "id": 1,
+      "updated_at": "2026-06-25T13:13:19.217725"
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/accounts",
+    "status": 200,
+    "body": [
+      {
+        "id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "channel_name": "Test Account",
+        "channel_id": null,
+        "profile_name": null,
+        "source_type": "M1_VIDEO_SPLITTER",
+        "region": "Indonesia",
+        "authentication_status": "Disconnected"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/accounts",
+    "status": 200,
+    "body": [
+      {
+        "id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "channel_name": "Test Account",
+        "channel_id": null,
+        "profile_name": null,
+        "source_type": "M1_VIDEO_SPLITTER",
+        "region": "Indonesia",
+        "authentication_status": "Disconnected"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue",
+    "status": 200,
+    "body": [
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "REVIEW",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_sprint_8_5",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Sprint 8.5 test-85-1782392241",
+        "description": "verify",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-85-1782392241",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+        "retry_count": 0,
+        "failure_reason": null,
+        "created_at": "2026-06-25T12:57:21.285813",
+        "scheduled_at": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_api",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_api\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_api\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test API Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-api-1",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+        "retry_count": 0,
+        "failure_reason": "API_UPLOAD_ERROR: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\nTraceback (most recent call last):\n  File \"D:\\AutoUploader\\backend\\services\\upload_engine\\providers\\api_provider.py\", line 83, in upload\n    upload_status, response = request.next_chunk()\n                              ~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\_helpers.py\", line 130, in positional_wrapper\n    return wrapped(*args, **kwargs)\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\http.py\", line 1022, in next_chunk\n    raise ResumableUploadError(resp, content)\ngoogleapiclient.errors.ResumableUploadError: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\n",
+        "created_at": "2026-06-25T11:39:26.985093",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:39:27.162506",
+        "completed_at": "2026-06-25T11:39:28.487285"
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package",
+        "video_path": "D:\\AutoUploader\\backend\\test_package\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Playwright Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-123",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+        "retry_count": 0,
+        "failure_reason": "PLAYWRIGHT_UPLOAD_ERROR: Workflow failed at ExtractVideo: Validation failed",
+        "created_at": "2026-06-25T11:29:50.718393",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:29:50.960965",
+        "completed_at": "2026-06-25T11:30:24.300778"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue",
+    "status": 200,
+    "body": [
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "REVIEW",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_sprint_8_5",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Sprint 8.5 test-85-1782392241",
+        "description": "verify",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-85-1782392241",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+        "retry_count": 0,
+        "failure_reason": null,
+        "created_at": "2026-06-25T12:57:21.285813",
+        "scheduled_at": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_api",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_api\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_api\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test API Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-api-1",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+        "retry_count": 0,
+        "failure_reason": "API_UPLOAD_ERROR: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\nTraceback (most recent call last):\n  File \"D:\\AutoUploader\\backend\\services\\upload_engine\\providers\\api_provider.py\", line 83, in upload\n    upload_status, response = request.next_chunk()\n                              ~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\_helpers.py\", line 130, in positional_wrapper\n    return wrapped(*args, **kwargs)\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\http.py\", line 1022, in next_chunk\n    raise ResumableUploadError(resp, content)\ngoogleapiclient.errors.ResumableUploadError: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\n",
+        "created_at": "2026-06-25T11:39:26.985093",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:39:27.162506",
+        "completed_at": "2026-06-25T11:39:28.487285"
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package",
+        "video_path": "D:\\AutoUploader\\backend\\test_package\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Playwright Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-123",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+        "retry_count": 0,
+        "failure_reason": "PLAYWRIGHT_UPLOAD_ERROR: Workflow failed at ExtractVideo: Validation failed",
+        "created_at": "2026-06-25T11:29:50.718393",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:29:50.960965",
+        "completed_at": "2026-06-25T11:30:24.300778"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue/1e8f9188-09db-423c-aeb3-0b9cf0fc93ae/logs",
+    "status": 200,
+    "body": []
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue/1e8f9188-09db-423c-aeb3-0b9cf0fc93ae/logs",
+    "status": 200,
+    "body": []
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue",
+    "status": 200,
+    "body": [
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "REVIEW",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_sprint_8_5",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Sprint 8.5 test-85-1782392241",
+        "description": "verify",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-85-1782392241",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+        "retry_count": 0,
+        "failure_reason": null,
+        "created_at": "2026-06-25T12:57:21.285813",
+        "scheduled_at": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_api",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_api\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_api\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test API Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-api-1",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+        "retry_count": 0,
+        "failure_reason": "API_UPLOAD_ERROR: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\nTraceback (most recent call last):\n  File \"D:\\AutoUploader\\backend\\services\\upload_engine\\providers\\api_provider.py\", line 83, in upload\n    upload_status, response = request.next_chunk()\n                              ~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\_helpers.py\", line 130, in positional_wrapper\n    return wrapped(*args, **kwargs)\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\http.py\", line 1022, in next_chunk\n    raise ResumableUploadError(resp, content)\ngoogleapiclient.errors.ResumableUploadError: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\n",
+        "created_at": "2026-06-25T11:39:26.985093",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:39:27.162506",
+        "completed_at": "2026-06-25T11:39:28.487285"
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package",
+        "video_path": "D:\\AutoUploader\\backend\\test_package\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Playwright Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-123",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+        "retry_count": 0,
+        "failure_reason": "PLAYWRIGHT_UPLOAD_ERROR: Workflow failed at ExtractVideo: Validation failed",
+        "created_at": "2026-06-25T11:29:50.718393",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:29:50.960965",
+        "completed_at": "2026-06-25T11:30:24.300778"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/accounts",
+    "status": 200,
+    "body": [
+      {
+        "id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "channel_name": "Test Account",
+        "channel_id": null,
+        "profile_name": null,
+        "source_type": "M1_VIDEO_SPLITTER",
+        "region": "Indonesia",
+        "authentication_status": "Disconnected"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/dashboard",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "statistics": {
+          "pending_review": 1,
+          "queued": 0,
+          "scheduled": 0,
+          "uploading": 0,
+          "completed": 0,
+          "failed": 2
+        },
+        "connected_channels": {
+          "connected_channels": 1,
+          "authenticated_channels": 0,
+          "disconnected_channels": 1
+        },
+        "attention": {
+          "pending_review": [
+            {
+              "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+              "title": "Test Sprint 8.5 test-85-1782392241",
+              "video_id": "test-85-1782392241",
+              "platform": "Test Account",
+              "status": "review"
+            }
+          ],
+          "failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed"
+            }
+          ]
+        },
+        "analytics": {
+          "period": "7d",
+          "labels": [
+            "Fri",
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu"
+          ],
+          "uploads": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ],
+          "completed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "failed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        },
+        "engine": {
+          "status": "unknown",
+          "uptime": "0h 0m",
+          "worker_count": 1,
+          "queue_size": 0,
+          "active_uploads": 0,
+          "scheduler_status": "active",
+          "watch_folder_status": "active",
+          "last_poll": "2026-06-25T13:13:23Z"
+        },
+        "history": {
+          "latest_completed": [],
+          "latest_failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:39:28.487285"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:30:24.300778"
+            }
+          ],
+          "last_upload_time": null
+        },
+        "meta": {
+          "timestamp": "2026-06-25T13:13:23.491218Z",
+          "version": "1.0.0"
+        }
+      },
+      "meta": {
+        "timestamp": "2026-06-25T13:13:23.491230",
+        "version": "1.0"
+      }
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue",
+    "status": 200,
+    "body": [
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "REVIEW",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_sprint_8_5",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Sprint 8.5 test-85-1782392241",
+        "description": "verify",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-85-1782392241",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+        "retry_count": 0,
+        "failure_reason": null,
+        "created_at": "2026-06-25T12:57:21.285813",
+        "scheduled_at": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_api",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_api\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_api\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test API Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-api-1",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+        "retry_count": 0,
+        "failure_reason": "API_UPLOAD_ERROR: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\nTraceback (most recent call last):\n  File \"D:\\AutoUploader\\backend\\services\\upload_engine\\providers\\api_provider.py\", line 83, in upload\n    upload_status, response = request.next_chunk()\n                              ~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\_helpers.py\", line 130, in positional_wrapper\n    return wrapped(*args, **kwargs)\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\http.py\", line 1022, in next_chunk\n    raise ResumableUploadError(resp, content)\ngoogleapiclient.errors.ResumableUploadError: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\n",
+        "created_at": "2026-06-25T11:39:26.985093",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:39:27.162506",
+        "completed_at": "2026-06-25T11:39:28.487285"
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package",
+        "video_path": "D:\\AutoUploader\\backend\\test_package\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Playwright Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-123",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+        "retry_count": 0,
+        "failure_reason": "PLAYWRIGHT_UPLOAD_ERROR: Workflow failed at ExtractVideo: Validation failed",
+        "created_at": "2026-06-25T11:29:50.718393",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:29:50.960965",
+        "completed_at": "2026-06-25T11:30:24.300778"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/accounts",
+    "status": 200,
+    "body": [
+      {
+        "id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "channel_name": "Test Account",
+        "channel_id": null,
+        "profile_name": null,
+        "source_type": "M1_VIDEO_SPLITTER",
+        "region": "Indonesia",
+        "authentication_status": "Disconnected"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue/1e8f9188-09db-423c-aeb3-0b9cf0fc93ae/logs",
+    "status": 200,
+    "body": []
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue/1e8f9188-09db-423c-aeb3-0b9cf0fc93ae/logs",
+    "status": 200,
+    "body": []
+  },
+  {
+    "url": "http://localhost:5173/api/v1/dashboard",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "statistics": {
+          "pending_review": 1,
+          "queued": 0,
+          "scheduled": 0,
+          "uploading": 0,
+          "completed": 0,
+          "failed": 2
+        },
+        "connected_channels": {
+          "connected_channels": 1,
+          "authenticated_channels": 0,
+          "disconnected_channels": 1
+        },
+        "attention": {
+          "pending_review": [
+            {
+              "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+              "title": "Test Sprint 8.5 test-85-1782392241",
+              "video_id": "test-85-1782392241",
+              "platform": "Test Account",
+              "status": "review"
+            }
+          ],
+          "failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed"
+            }
+          ]
+        },
+        "analytics": {
+          "period": "7d",
+          "labels": [
+            "Fri",
+            "Sat",
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu"
+          ],
+          "uploads": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ],
+          "completed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "failed": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ]
+        },
+        "engine": {
+          "status": "unknown",
+          "uptime": "0h 0m",
+          "worker_count": 1,
+          "queue_size": 0,
+          "active_uploads": 0,
+          "scheduler_status": "active",
+          "watch_folder_status": "active",
+          "last_poll": "2026-06-25T13:13:23Z"
+        },
+        "history": {
+          "latest_completed": [],
+          "latest_failed": [
+            {
+              "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+              "title": "Test API Worker Final",
+              "video_id": "test-api-1",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:39:28.487285"
+            },
+            {
+              "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+              "title": "Test Playwright Worker Final",
+              "video_id": "test-123",
+              "platform": "Test Account",
+              "status": "failed",
+              "completed_at": "2026-06-25T11:30:24.300778"
+            }
+          ],
+          "last_upload_time": null
+        },
+        "meta": {
+          "timestamp": "2026-06-25T13:13:23.519191Z",
+          "version": "1.0.0"
+        }
+      },
+      "meta": {
+        "timestamp": "2026-06-25T13:13:23.519204",
+        "version": "1.0"
+      }
+    }
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue",
+    "status": 200,
+    "body": [
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "REVIEW",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_sprint_8_5",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Sprint 8.5 test-85-1782392241",
+        "description": "verify",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-85-1782392241",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+        "retry_count": 0,
+        "failure_reason": null,
+        "created_at": "2026-06-25T12:57:21.285813",
+        "scheduled_at": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_api",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_api\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_api\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test API Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-api-1",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+        "retry_count": 0,
+        "failure_reason": "API_UPLOAD_ERROR: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\nTraceback (most recent call last):\n  File \"D:\\AutoUploader\\backend\\services\\upload_engine\\providers\\api_provider.py\", line 83, in upload\n    upload_status, response = request.next_chunk()\n                              ~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\_helpers.py\", line 130, in positional_wrapper\n    return wrapped(*args, **kwargs)\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\http.py\", line 1022, in next_chunk\n    raise ResumableUploadError(resp, content)\ngoogleapiclient.errors.ResumableUploadError: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\n",
+        "created_at": "2026-06-25T11:39:26.985093",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:39:27.162506",
+        "completed_at": "2026-06-25T11:39:28.487285"
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package",
+        "video_path": "D:\\AutoUploader\\backend\\test_package\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Playwright Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-123",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+        "retry_count": 0,
+        "failure_reason": "PLAYWRIGHT_UPLOAD_ERROR: Workflow failed at ExtractVideo: Validation failed",
+        "created_at": "2026-06-25T11:29:50.718393",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:29:50.960965",
+        "completed_at": "2026-06-25T11:30:24.300778"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue",
+    "status": 200,
+    "body": [
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "REVIEW",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_sprint_8_5",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_sprint_8_5\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Sprint 8.5 test-85-1782392241",
+        "description": "verify",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-85-1782392241",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "1e8f9188-09db-423c-aeb3-0b9cf0fc93ae",
+        "retry_count": 0,
+        "failure_reason": null,
+        "created_at": "2026-06-25T12:57:21.285813",
+        "scheduled_at": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package_api",
+        "video_path": "D:\\AutoUploader\\backend\\test_package_api\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package_api\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test API Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-api-1",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "24f4f1e8-301f-477a-a776-14e891c228c1",
+        "retry_count": 0,
+        "failure_reason": "API_UPLOAD_ERROR: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\nTraceback (most recent call last):\n  File \"D:\\AutoUploader\\backend\\services\\upload_engine\\providers\\api_provider.py\", line 83, in upload\n    upload_status, response = request.next_chunk()\n                              ~~~~~~~~~~~~~~~~~~^^\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\_helpers.py\", line 130, in positional_wrapper\n    return wrapped(*args, **kwargs)\n  File \"D:\\AutoUploader\\backend\\venv\\Lib\\site-packages\\googleapiclient\\http.py\", line 1022, in next_chunk\n    raise ResumableUploadError(resp, content)\ngoogleapiclient.errors.ResumableUploadError: <HttpError 400 when requesting None returned \"The user has exceeded the number of videos they may upload.\". Details: \"[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]\">\n",
+        "created_at": "2026-06-25T11:39:26.985093",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:39:27.162506",
+        "completed_at": "2026-06-25T11:39:28.487285"
+      },
+      {
+        "account_id": "30efb286-fa8e-43c0-80a2-d56b0cf7e0d4",
+        "profile_id": null,
+        "status": "FAILED",
+        "upload_stage": "NONE",
+        "metadata_source": "RENDERER",
+        "source_type": "M1_VIDEO_SPLITTER",
+        "package_folder": "D:\\AutoUploader\\backend\\test_package",
+        "video_path": "D:\\AutoUploader\\backend\\test_package\\video.mp4",
+        "thumbnail_path": null,
+        "metadata_path": "D:\\AutoUploader\\backend\\test_package\\metadata.json",
+        "timestamps_path": null,
+        "title": "Test Playwright Worker Final",
+        "description": "desc",
+        "tags": null,
+        "privacy_status": "private",
+        "made_for_kids": false,
+        "video_id": "test-123",
+        "playlist_id": null,
+        "playlist_title": null,
+        "language": null,
+        "license": null,
+        "audience": null,
+        "notify_subscribers": true,
+        "embeddable": true,
+        "public_stats_viewable": true,
+        "youtube_video_id": null,
+        "youtube_url": null,
+        "id": "ab215601-4193-4a1a-a4e3-1c6a590d6561",
+        "retry_count": 0,
+        "failure_reason": "PLAYWRIGHT_UPLOAD_ERROR: Workflow failed at ExtractVideo: Validation failed",
+        "created_at": "2026-06-25T11:29:50.718393",
+        "scheduled_at": null,
+        "started_at": "2026-06-25T11:29:50.960965",
+        "completed_at": "2026-06-25T11:30:24.300778"
+      }
+    ]
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue/1e8f9188-09db-423c-aeb3-0b9cf0fc93ae/logs",
+    "status": 200,
+    "body": []
+  },
+  {
+    "url": "http://localhost:5173/api/v1/queue/1e8f9188-09db-423c-aeb3-0b9cf0fc93ae/logs",
+    "status": 200,
+    "body": []
+  }
+]

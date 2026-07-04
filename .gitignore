@@ -33,3 +33,23 @@ Desktop.ini
 # Playwright
 playwright-report/
 test-results/
+
+# Ignore large/binary files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.zip
+*.rar
+*.mp4
+*.lic
+
+# Explicit node_modules
+**/node_modules/
+
+# Ignore profiles and heavy assets
+browser_profiles/
+chrome-profile/
+test_assets/
+AutoUploade_UI_Design_System/
+DNA APLIKASI SAMPAI DEPLOY/

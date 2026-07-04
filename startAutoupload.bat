@@ -1,0 +1,6 @@
+@echo off
+echo Starting AutoUploader Production Mode...
+
+echo Starting Application...
+cd backend
+start "" venv\Scripts\pythonw.exe main.py

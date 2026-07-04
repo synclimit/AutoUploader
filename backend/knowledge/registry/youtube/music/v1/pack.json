@@ -1,0 +1,23 @@
+{
+  "genres": {
+    "rock": {"value": "Rock", "subgenres": ["indonesia", "classic", "metal"]},
+    "pop": {"value": "Pop", "subgenres": ["indonesia", "k-pop", "j-pop"]}
+  },
+  "audiences": {
+    "teen": {"keywords": ["remaja", "abg", "teen", "sekolah"]},
+    "adult": {"keywords": ["dewasa", "adult", "kerja", "santai"]}
+  },
+  "intents": {
+    "playlist": {"keywords": ["playlist", "kumpulan", "mix", "full album", "terbaik"]},
+    "cover": {"keywords": ["cover", "akustik", "live", "parodi"]}
+  },
+  "ctas": {
+    "playlist": "Listen to the full playlist now and subscribe for more!",
+    "cover": "Subscribe to support more acoustic covers!",
+    "default": "Don't forget to like, comment, and subscribe!"
+  },
+  "vocabulary": {
+    "high_ctr": ["Terbaru", "Terpopuler", "Full Album", "Bikin Baper", "Paling Enak didengar"],
+    "forbidden": ["Clickbait", "100% Work", "Link in description (spam)"]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "benchmark_dataset": "golden_100_keywords_v2",
+  "runtime_limits": {
+    "max_sandbox_latency_ms": 5000,
+    "max_experiment_duration_sec": 300
+  },
+  "rollback_policy": {
+    "auto_rollback_on_failure": true,
+    "preserve_logs_on_rollback": true
+  },
+  "isolation_mode": "strict_virtual",
+  "evaluation_profile": "general/v1",
+  "promotion_requirements": {
+    "minimum_acceptance_rate_improvement": 0.03,
+    "maximum_latency_regression_pct": 0.05
+  }
+}

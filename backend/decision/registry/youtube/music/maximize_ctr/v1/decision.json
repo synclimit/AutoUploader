@@ -1,0 +1,35 @@
+{
+  "optimization_goal": "maximize_ctr",
+  "weights": {
+    "intent": 1.0,
+    "keyword": 1.5,
+    "seo": 1.0,
+    "readability": 0.8,
+    "grammar": 0.5,
+    "naturalness": 0.5,
+    "cta": 1.2,
+    "audience": 1.0,
+    "clickbait": 2.0,
+    "policy": 1.0
+  },
+  "rules": {
+    "minimum_overall_score": 70,
+    "minimum_confidence": 0.8,
+    "maximum_clickbait": 100,
+    "required_policy_score": 100,
+    "minimum_grammar": 60,
+    "maximum_runtime_ms": 10000,
+    "reject_zero_score": true
+  },
+  "tie_break_priority": [
+    "confidence",
+    "policy",
+    "grammar",
+    "runtime",
+    "candidate_index"
+  ],
+  "fallback": {
+    "enabled": true,
+    "strategy": "highest_overall_unweighted"
+  }
+}

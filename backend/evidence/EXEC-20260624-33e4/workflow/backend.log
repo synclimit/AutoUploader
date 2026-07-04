@@ -1,0 +1,129 @@
+INFO:     Started server process [21936]
+INFO:     Waiting for application startup.
+2026-06-24 21:29:18 [INFO] watch_folder.engine: [ENGINE] WatchFolderEngine initialized
+2026-06-24 21:29:18 [INFO] watch_folder.engine: [ENGINE] Background thread started
+2026-06-24 21:29:18 [INFO] watch_folder.engine: [ENGINE] Started � scan interval: 15s
+2026-06-24 21:29:18 [INFO] upload_engine: [UPLOAD_ENGINE] Initialized
+2026-06-24 21:29:19 [INFO] upload_engine: [UPLOAD_ENGINE] Background thread started
+2026-06-24 21:29:19 [INFO] upload_engine: [UPLOAD_ENGINE] Started � polling interval: 15s
+2026-06-24 21:29:19 [INFO] upload_scheduler: [SCHEDULER_ENGINE] Initialized
+2026-06-24 21:29:19 [INFO] upload_scheduler: [SCHEDULER_ENGINE] Background thread started
+2026-06-24 21:29:19 [INFO] upload_scheduler: [SCHEDULER_ENGINE] Started � polling interval: 60s
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+INFO:     127.0.0.1:56396 - "POST /api/v1/profiles HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:56397 - "GET /api/v1/profiles HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56398 - "POST /api/v1/accounts HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:56399 - "GET /api/v1/accounts HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56400 - "POST /api/v1/queue HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56401 - "POST /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd/approve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56402 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56405 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:29:34 [INFO] upload_engine: [UPLOAD_ENGINE] Picked up task 3cd6cf07-d3c9-4f05-93af-17f579f635cd for processing
+2026-06-24 21:29:34 [INFO] upload_engine: [UPLOAD_ENGINE] Task 3cd6cf07-d3c9-4f05-93af-17f579f635cd is now UPLOADING
+2026-06-24 21:29:34 [INFO] upload_engine: [UPLOAD_ENGINE] Using provider: playwright
+2026-06-24 21:29:34 [INFO] upload_engine: [PlaywrightUploader] Launching browser with profile youtube_automation
+INFO:     127.0.0.1:56409 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:29:35 [INFO] upload_engine: [PlaywrightUploader] Validating YouTube Studio session...
+INFO:     127.0.0.1:56417 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56422 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:29:39 [INFO] upload_engine: [StudioNavigator] Navigating to upload page...
+INFO:     127.0.0.1:56431 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56440 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:29:44 [INFO] upload_engine: [StudioNavigator] Setting video file: ./tests/assets/720p.mp4
+INFO:     127.0.0.1:56465 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56483 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:29:49 [INFO] upload_engine: [StudioNavigator] Extracting Video ID...
+2026-06-24 21:29:49 [INFO] upload_engine: [StudioNavigator] Extracted Video ID: UNKNOWN_ID
+2026-06-24 21:29:49 [INFO] upload_engine: [StudioNavigator] Filling metadata...
+2026-06-24 21:29:50 [INFO] upload_engine: [StudioNavigator] Setting audience...
+INFO:     127.0.0.1:56505 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56507 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56509 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56513 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56514 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56515 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56516 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56518 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56519 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56520 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56521 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56522 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56524 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56526 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56527 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:30:20 [INFO] upload_engine: [StudioNavigator] Waiting for upload to complete...
+INFO:     127.0.0.1:56529 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56530 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56532 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56534 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56536 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56538 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56539 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56541 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56542 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56543 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56546 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56547 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56550 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56553 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56555 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56556 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56558 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56568 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56578 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56605 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56626 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56637 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56638 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56640 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56641 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56642 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56643 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56644 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56646 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56647 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:20 [INFO] upload_engine: [StudioNavigator] Timed out waiting for 'Upload complete' text, proceeding anyway.
+2026-06-24 21:31:20 [INFO] upload_engine: [StudioNavigator] Clicking Next...
+INFO:     127.0.0.1:56648 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56649 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:24 [INFO] upload_engine: [StudioNavigator] Clicking Next...
+INFO:     127.0.0.1:56652 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56655 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:28 [INFO] upload_engine: [StudioNavigator] Clicking Next...
+INFO:     127.0.0.1:56657 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56661 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:32 [INFO] upload_engine: [StudioNavigator] Setting visibility...
+INFO:     127.0.0.1:56663 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56665 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:37 [INFO] upload_engine: [StudioNavigator] Publishing video...
+INFO:     127.0.0.1:56670 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56674 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56675 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56684 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56694 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:47 [WARNING] upload_engine: [StudioNavigator] Publish button click failed: Locator.click: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator("#done-button")
+    - locator resolved to <ytcp-button disabled hidden="" type="filled" tabindex="-1" track-click="" id="done-button" aria-disabled="true" button-style="default" icon-alignment="start" aria-describedby="goog_1226666695" class="style-scope ytcp-uploads-dialog">�</ytcp-button>
+  - attempting click action
+    2 � waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+    - waiting 20ms
+    2 � waiting for element to be visible, enabled and stable
+      - element is not visible
+    - retrying click action
+      - waiting 100ms
+    - waiting for element to be visible, enabled and stable
+    - element is not visible
+  - retrying click action
+    - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+
+INFO:     127.0.0.1:56709 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+2026-06-24 21:31:48 [INFO] upload_engine: [UPLOAD_ENGINE] Task 3cd6cf07-d3c9-4f05-93af-17f579f635cd YouTube upload COMPLETED
+INFO:     127.0.0.1:56738 - "GET /api/v1/queue/3cd6cf07-d3c9-4f05-93af-17f579f635cd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56739 - "GET /api/v1/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56740 - "GET /api/v1/dashboard HTTP/1.1" 200 OK
