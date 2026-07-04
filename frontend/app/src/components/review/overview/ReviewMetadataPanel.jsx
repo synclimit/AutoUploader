@@ -676,12 +676,25 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   </div>
                 )}
               </div>
+              </div>
+            </div>
+
+            {/* Scheduled Time */}
+            <div className="flex flex-col gap-1.5 mt-4 group neon-interactive">
+               <label className="text-[11px] font-bold text-white/80 group-hover:text-white transition-colors">Scheduled Time (Waktu Upload)</label>
+               <input 
+                  type="datetime-local"
+                  value={edits.scheduled_at !== undefined ? (edits.scheduled_at ? edits.scheduled_at.substring(0, 16) : '') : (video.scheduled_at ? video.scheduled_at.substring(0, 16) : '')} 
+                  onChange={(e) => handleChange('scheduled_at', e.target.value ? new Date(e.target.value).toISOString() : null)}
+                  className="w-full bg-[#0a0f1a]/80 border border-white/[0.05] rounded-[8px] px-3 h-[40px] text-[13px] text-white/90 outline-none hover:border-[var(--accent-500)]/30 focus:border-[var(--accent-500)]/50 transition-all cursor-pointer"
+               />
+               <span className="text-[10px] text-white/40 italic">Kosongkan (hapus nilai) jika ingin video langsung dipublikasikan.</span>
             </div>
 
             {Object.keys(edits).length > 0 && (
               <button 
                 onClick={handleSave}
-                className="mt-4 flex items-center justify-center gap-2 px-6 py-2 rounded-[8px] bg-[var(--accent-500)]/20 text-[var(--accent-400)] hover:bg-[var(--accent-500)]/30 transition-colors text-[13px] font-bold border border-[var(--accent-500)]/30"
+                className="mt-5 flex items-center justify-center gap-2 px-6 py-2 rounded-[8px] bg-[var(--accent-500)]/20 text-[var(--accent-400)] hover:bg-[var(--accent-500)]/30 transition-colors text-[13px] font-bold border border-[var(--accent-500)]/30"
               >
                 <Save size={16} /> Save Changes
               </button>
