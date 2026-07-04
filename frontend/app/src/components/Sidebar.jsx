@@ -4,6 +4,8 @@ import { LayoutDashboard, UploadCloud, CheckSquare, CheckCircle2, History, Radio
 import { useTranslation } from '../i18n/useTranslation'
 import { useSettingsStore } from '../store/settings/settingsStore'
 
+import { useQueueStore } from '../store/upload/uploadStore'
+
 const mainItems = [
   { label: 'Dashboard', transKey: 'nav.dashboard', icon: LayoutDashboard },
   { label: 'Upload', transKey: 'nav.upload', icon: UploadCloud },
@@ -19,6 +21,8 @@ export default function Sidebar() {
   const setActiveModule = useAppStore((s) => s.setActiveModule)
   const { t } = useTranslation()
   const config = useSettingsStore(s => s.config)
+  const isUploading = useQueueStore(s => s.isUploading)
+  const uploadProgress = useQueueStore(s => s.uploadProgress)
 
   const isCompactMode = config?.app_compact || activeModule === 'Review' || activeModule === 'Completed' || activeModule === 'Channels'
   const [isHovered, setIsHovered] = useState(false)
@@ -85,6 +89,21 @@ export default function Sidebar() {
           )
         })}
       </div>
+
+      {/* Upload Progress Indicator */}
+      {isUploading && (
+        <div className={`px-4 mb-3 shrink-0 transition-all duration-300 ${isCompactMode ? 'opacity-0 h-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:h-auto group-hover/sidebar:mb-3' : 'opacity-100 h-auto'}`}>
+          <div className="bg-[#05080e]/80 border border-[var(--accent-500)]/20 p-3 rounded-[12px] flex flex-col gap-2.5 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center justify-between text-[11px] font-bold">
+              <span className="text-[var(--accent-400)] flex items-center gap-1.5"><UploadCloud size={12} className="animate-bounce" /> Importing...</span>
+              <span className="text-white/80">{uploadProgress}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[var(--accent-500)] to-[var(--accent-400)] transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Section: Premium Profile Card */}
       <div className="p-3 shrink-0 relative z-10 mb-2 overflow-visible whitespace-nowrap">
