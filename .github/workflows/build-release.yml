@@ -61,7 +61,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Latest AutoUploader Build
+          name: Latest Ryanz Pitstop Build
           body: "Automatically compiled latest build from master."
           files: release/AutoUploader_Setup.exe
           make_latest: true

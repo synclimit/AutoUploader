@@ -14,8 +14,8 @@ export default function SplashScreen() {
         <AnimatedLogo />
         
         <div className="flex flex-col items-center gap-1 mt-2">
-          <h1 className="text-[28px] font-semibold text-white tracking-[0.03em]">
-            AutoUploader
+          <h1 className="text-[28px] font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 tracking-tight leading-none mb-1">
+            Ryanz Pitstop
           </h1>
           <p className="text-[11px] text-[#8C9BB4] font-medium tracking-widest uppercase">
             Professional Edition

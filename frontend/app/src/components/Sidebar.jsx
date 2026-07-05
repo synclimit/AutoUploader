@@ -52,14 +52,12 @@ export default function Sidebar() {
         {/* Soft Ambient Glow Behind Logo */}
         <div className="absolute top-1/2 left-6 w-[40px] h-[40px] -translate-y-1/2 bg-[var(--accent-400)]/15 blur-[20px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
         
-        <div className="w-[40px] h-[40px] rounded-[12px] shrink-0 bg-gradient-to-br from-[#0c1322] to-[#090e18] border border-[var(--accent-500)]/20 flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.4)] group-hover:border-[var(--accent-400)]/40 group-hover:shadow-[0_4px_15px_rgba(34,211,238,0.2)] transition-all duration-200 z-10 relative">
-          <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent-400)] drop-shadow-[0_0_4px_rgba(34,211,238,0.5)] group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-all duration-200">
-            <path d="M5 3l14 9-14 9V3z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-          </svg>
+        <div className="w-[40px] h-[40px] rounded-[12px] shrink-0 bg-[#0c1322] border border-[var(--accent-500)]/20 flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.4)] group-hover:border-[var(--accent-400)]/40 group-hover:shadow-[0_4px_15px_rgba(34,211,238,0.2)] transition-all duration-200 z-10 relative overflow-hidden">
+          <img src="/favicon.png" alt="Ryanz Pitstop Logo" className="w-[32px] h-[32px] object-contain drop-shadow-[0_0_4px_rgba(34,211,238,0.5)] group-hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-all duration-200" />
         </div>
         
         <span className={`text-white/95 font-bold text-[17px] tracking-wide relative z-10 transition-all duration-200 ${isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100' : 'opacity-100'}`}>
-          AutoUploader
+          Ryanz Pitstop
         </span>
       </div>
 

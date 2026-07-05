@@ -359,7 +359,7 @@ if __name__ == "__main__":
 
     api = Api()
     webview.create_window(
-        "AutoUploader", 
+        "Ryanz Pitstop", 
         "http://127.0.0.1:8000", 
         width=1200, 
         height=800,

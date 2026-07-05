@@ -18,9 +18,9 @@ Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription
 Source: "..\backend\dist\AutoUploader\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\AutoUploader"; Filename: "{app}\AutoUploader.exe"
-Name: "{group}\Uninstall AutoUploader"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\AutoUploader"; Filename: "{app}\AutoUploader.exe"; Tasks: desktopicon
+Name: "{group}\Ryanz Pitstop"; Filename: "{app}\AutoUploader.exe"
+Name: "{group}\Uninstall Ryanz Pitstop"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\Ryanz Pitstop"; Filename: "{app}\AutoUploader.exe"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\AutoUploader.exe"; Description: "Launch AutoUploader"; Flags: nowait postinstall skipifsilent

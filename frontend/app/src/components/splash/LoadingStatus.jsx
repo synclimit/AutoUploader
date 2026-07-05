@@ -29,7 +29,7 @@ export default function LoadingStatus() {
 
       {/* Footer Info */}
       <div className="absolute bottom-[-16px] left-8 text-[10px] text-white/20 font-medium tracking-widest uppercase">
-        © AutoUploader
+        © Ryanz Pitstop
       </div>
       <div className="absolute bottom-[-16px] right-8 text-[10px] text-white/20 font-medium tracking-widest uppercase">
         Version 1.0.0
