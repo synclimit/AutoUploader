@@ -684,8 +684,11 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                <input 
                   type="datetime-local"
                   value={(() => {
-                    const iso = edits.scheduled_at !== undefined ? edits.scheduled_at : video.scheduled_at;
+                    let iso = edits.scheduled_at !== undefined ? edits.scheduled_at : video.scheduled_at;
                     if (!iso) return '';
+                    if (typeof iso === 'string' && !iso.endsWith('Z') && !iso.includes('+') && !iso.includes('-')) {
+                      iso = iso.replace(' ', 'T') + 'Z';
+                    }
                     const d = new Date(iso);
                     if (isNaN(d)) return '';
                     const pad = (n) => String(n).padStart(2, '0');

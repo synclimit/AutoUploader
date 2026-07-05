@@ -23,6 +23,15 @@ const sourceStyles = {
 }
 
 
+const parseUTC = (iso) => {
+  if (!iso) return null;
+  let str = iso;
+  if (typeof str === 'string' && !str.endsWith('Z') && !str.includes('+') && !str.includes('-')) {
+    str = str.replace(' ', 'T') + 'Z';
+  }
+  return new Date(str);
+};
+
 export default function QueueCard({ item, isActive, onClick }) {
   const source = item.source_type === 'M1_VIDEO_SPLITTER' ? 'M1' : item.source_type === 'M3_PLAYLIST_BUILDER' ? 'M3' : 'MANUAL'
   const sourceStyle = source === 'M1' ? sourceStyles['SCAN FOLDER'] : source === 'M3' ? sourceStyles['WATCH FOLDER'] : sourceStyles.MANUAL
@@ -78,7 +87,7 @@ export default function QueueCard({ item, isActive, onClick }) {
               </div>
 
               <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-white/45">
-                {item.scheduled_at && <span>{new Date(item.scheduled_at).toLocaleString()}</span>}
+                {item.scheduled_at && <span>{parseUTC(item.scheduled_at).toLocaleString()}</span>}
                 {item.scheduled_at && <span>•</span>}
 
                 <TooltipHelper
@@ -120,7 +129,7 @@ export default function QueueCard({ item, isActive, onClick }) {
           {/* HUMANIZED SCHEDULER PREP — show schedule time for future use */}
           {item.scheduled_at && (
             <div className="mt-1 flex items-center gap-1 text-[9px] text-white/20">
-              Target: {new Date(item.scheduled_at).toLocaleString()}
+              Target: {parseUTC(item.scheduled_at).toLocaleString()}
               <TooltipHelper
                 label=""
                 tooltip="Scheduled upload time."
