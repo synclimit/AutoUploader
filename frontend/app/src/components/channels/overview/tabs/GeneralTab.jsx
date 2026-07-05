@@ -1,7 +1,7 @@
 import { Folder, Settings2, Activity, Plus, Trash2, HelpCircle, HeartPulse, CheckCircle2, ShieldAlert, Info } from 'lucide-react'
 import apiClient from '../../../../api/client'
 
-export default function GeneralTab({ draft, original, onChange, states }) {
+export default function GeneralTab({ draft, original, onChange, states, channelStatus }) {
   
   const updatePipeline = (key, field, value) => {
     const updated = { ...draft }
@@ -533,12 +533,18 @@ export default function GeneralTab({ draft, original, onChange, states }) {
       
       {/* CHANNEL HEALTH SUMMARY CARD */}
       <div className="flex items-center gap-6 p-6 rounded-[16px] bg-[#0a0f18]/90 backdrop-blur-xl border border-white/[0.04]">
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
-          <HeartPulse size={24} className="text-green-400" />
+        <div className={`flex items-center justify-center w-14 h-14 rounded-full shrink-0 border shadow-lg ${
+          channelStatus === 'Connected' ? 'bg-green-500/10 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.15)] text-green-400' : 'bg-red-500/10 border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)] text-red-400 animate-pulse'
+        }`}>
+          <HeartPulse size={24} />
         </div>
         <div className="flex-1 flex flex-col gap-1">
           <h2 className="text-[16px] font-bold text-white">Channel Health</h2>
-          <span className="text-[12px] font-bold text-green-400 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Overall System Healthy</span>
+          {channelStatus === 'Connected' ? (
+            <span className="text-[12px] font-bold text-green-400 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Overall System Healthy</span>
+          ) : (
+            <span className="text-[12px] font-bold text-red-400 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> Needs Reconnection</span>
+          )}
         </div>
         
         <div className="flex-1 grid grid-cols-2 gap-x-8 gap-y-3 pl-8 border-l border-white/[0.08]">
@@ -552,11 +558,15 @@ export default function GeneralTab({ draft, original, onChange, states }) {
           </div>
           <div className="flex justify-between items-center">
             <span className="text-[12px] text-white/50 font-bold">OAuth Connection</span>
-            <span className="text-[12px] font-bold text-green-400">✓ Connected</span>
+            <span className={`text-[12px] font-bold ${channelStatus === 'Connected' ? 'text-green-400' : 'text-red-400'}`}>
+              {channelStatus === 'Connected' ? '✓ Connected' : '⚠ Disconnected'}
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-[12px] text-white/50 font-bold">Upload Defaults</span>
-            <span className="text-[12px] font-bold text-green-400">✓ Active</span>
+            <span className={`text-[12px] font-bold ${channelStatus === 'Connected' ? 'text-green-400' : 'text-amber-400'}`}>
+              {channelStatus === 'Connected' ? '✓ Active' : '⚠ Paused'}
+            </span>
           </div>
         </div>
       </div>

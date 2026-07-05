@@ -171,9 +171,15 @@ export default function ChannelDetailWorkspace({ channel }) {
             <div className="flex flex-col">
               <div className="flex items-center gap-3">
                 <h1 className="text-[28px] font-bold text-white leading-none tracking-tight drop-shadow-lg">{channel.name}</h1>
-                <span className="text-[11px] font-bold text-green-400 flex items-center gap-1.5 bg-green-500/10 px-2.5 py-0.5 rounded-[6px] border border-green-500/20 uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Active
-                </span>
+                {channel.status === 'Connected' ? (
+                  <span className="text-[11px] font-bold text-green-400 flex items-center gap-1.5 bg-green-500/10 px-2.5 py-0.5 rounded-[6px] border border-green-500/20 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Active
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-bold text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2.5 py-0.5 rounded-[6px] border border-red-500/20 uppercase tracking-wider animate-pulse">
+                    <AlertCircle size={12} /> Needs Reconnect
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-3 mt-2">
                 <span className="text-[13px] font-semibold text-[var(--accent-400)]/80 drop-shadow-md">
@@ -195,8 +201,12 @@ export default function ChannelDetailWorkspace({ channel }) {
                   if (res && res.auth_url) window.location.href = res.auth_url
                 } catch (err) { console.error(err) }
               }}
-              className="h-[38px] px-4.5 rounded-[10px] bg-[#0d121c]/60 backdrop-blur-md border border-white/[0.08] text-white/90 hover:text-white hover:bg-[#111824] hover:border-white/[0.15] font-bold text-[12px] transition-all flex items-center gap-2">
-              <RefreshCw size={14} className="text-[var(--accent-400)]/70" /> Reconnect
+              className={`h-[38px] px-4.5 rounded-[10px] backdrop-blur-md font-bold text-[12px] transition-all flex items-center gap-2 ${
+                channel.status !== 'Connected'
+                  ? 'bg-red-500 text-white border border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse hover:bg-red-600'
+                  : 'bg-[#0d121c]/60 border border-white/[0.08] text-white/90 hover:text-white hover:bg-[#111824] hover:border-white/[0.15]'
+              }`}>
+              <RefreshCw size={14} className={channel.status !== 'Connected' ? 'text-white' : 'text-[var(--accent-400)]/70'} /> Reconnect
             </button>
             <button 
               onClick={() => {
@@ -207,6 +217,31 @@ export default function ChannelDetailWorkspace({ channel }) {
             </button>
           </div>
         </div>
+
+        {/* RECONNECT REQUIRED BANNER */}
+        {channel.status !== 'Connected' && (
+          <div className="flex items-center justify-between p-4 rounded-[14px] bg-red-500/10 border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.15)] animate-in fade-in relative z-10">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-[10px] bg-red-500/20 flex items-center justify-center text-red-400 shrink-0">
+                <AlertCircle size={20} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[14px] font-bold text-red-400 tracking-wide">YouTube Account Disconnected</span>
+                <span className="text-[12px] text-white/70">The OAuth connection is expired or inactive. Click Reconnect to resume automatic uploads.</span>
+              </div>
+            </div>
+            <button 
+              onClick={async () => {
+                try {
+                  const res = await apiClient.get(`/accounts/${channel.id}/auth-url`)
+                  if (res && res.auth_url) window.location.href = res.auth_url
+                } catch (err) { console.error(err) }
+              }}
+              className="h-[38px] px-5 rounded-[10px] bg-red-500 text-white font-bold text-[12px] hover:bg-red-600 transition-all shadow-lg flex items-center gap-2 shrink-0 animate-pulse">
+              <RefreshCw size={14} /> Reconnect Now
+            </button>
+          </div>
+        )}
 
         {/* STICKY SAVE BAR */}
         <div className="sticky top-0 z-50 flex items-center justify-between p-4 rounded-[14px] bg-[#0a0f18]/90 backdrop-blur-2xl border border-white/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.5)] animate-in slide-in-from-top-4 duration-300 mt-2">
