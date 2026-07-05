@@ -104,7 +104,8 @@ app.include_router(ai_engine_router)
 app.include_router(license_router)
 app.include_router(analytics_router)
 
-# Base.metadata.create_all(bind=engine) - Disabled per Sprint 9.0 (Use Alembic instead)
+# Enable SQLAlchemy create_all to ensure tables are created on fresh installs or wiped databases
+Base.metadata.create_all(bind=engine)
 
 
 @app.on_event("startup")

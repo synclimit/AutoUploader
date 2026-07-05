@@ -24,7 +24,9 @@ export default function Sidebar() {
   const isUploading = useQueueStore(s => s.isUploading)
   const uploadProgress = useQueueStore(s => s.uploadProgress)
 
-  const isCompactMode = config?.app_compact || activeModule === 'Review' || activeModule === 'Completed' || activeModule === 'Channels'
+  // Always use compact mode (auto-hide) as requested by user
+  const isCompactMode = true;
+  
   const [isHovered, setIsHovered] = useState(false)
   const userName = useAppStore((s) => s.userName || 'Admin')
   const setUserName = useAppStore((s) => s.setUserName)
@@ -36,7 +38,7 @@ export default function Sidebar() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`h-full bg-gradient-to-br from-[var(--bg-sidebar-from)] via-[var(--bg-sidebar-via)] to-[var(--bg-sidebar-to)] border-r border-white/[0.04] flex flex-col shrink-0 relative z-50 overflow-hidden shadow-[12px_0_40px_rgba(0,0,0,0.5)] transition-[width] duration-200 group/sidebar ${
-        isCompactMode ? 'w-[72px] hover:w-[260px]' : 'w-[260px]'
+        isCompactMode ? 'w-[72px] hover:w-[280px]' : 'w-[280px]'
       }`}
     >
       
@@ -50,12 +52,12 @@ export default function Sidebar() {
       {/* Premium Logo Area */}
       <div className="pt-10 pb-6 px-4 flex flex-col items-center justify-center shrink-0 relative group cursor-pointer overflow-hidden whitespace-nowrap">
         {/* Soft Ambient Glow Behind Logo */}
-        <div className="absolute top-1/2 left-1/2 w-[120px] h-[120px] -translate-x-1/2 -translate-y-1/2 bg-[var(--accent-400)]/20 blur-[30px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 w-[160px] h-[160px] -translate-x-1/2 -translate-y-1/2 bg-[var(--accent-400)]/20 blur-[30px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
         
         <img 
           src="/favicon.png" 
           alt="Ryanz Pitstop Logo" 
-          className={`object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] group-hover:drop-shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[54px] h-[54px] group-hover/sidebar:w-[160px] group-hover/sidebar:h-[160px]' : 'w-[160px] h-[160px] group-hover:scale-105'}`} 
+          className={`object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] group-hover:drop-shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[54px] h-[54px] group-hover/sidebar:w-[220px] group-hover/sidebar:h-[220px]' : 'w-[220px] h-[220px] group-hover:scale-105'}`} 
         />
       </div>
 
