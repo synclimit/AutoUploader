@@ -98,14 +98,17 @@ class PathService:
         migration_occurred = False
         
         local_db = os.path.join(base_dir, "app_v2.db")
+        backend_db = os.path.join(base_dir, "backend", "app_v2.db")
         appdata_db = PathService.get_database_path()
 
         # If it doesn't exist, or it's an empty shell created by SQLAlchemy (< 10KB)
         is_empty = os.path.exists(appdata_db) and os.path.getsize(appdata_db) < 10000
-        if (not os.path.exists(appdata_db) or is_empty) and os.path.exists(local_db):
+        source_db = local_db if os.path.exists(local_db) else (backend_db if os.path.exists(backend_db) else None)
+        
+        if (not os.path.exists(appdata_db) or is_empty) and source_db:
             print(f"[MIGRATION] Copying local database to AppData: {appdata_db}")
             try:
-                shutil.copy2(local_db, appdata_db)
+                shutil.copy2(source_db, appdata_db)
                 migration_occurred = True
             except Exception as e:
                 print(f"[MIGRATION ERROR] Failed to copy database: {e}")
@@ -123,6 +126,15 @@ class PathService:
                     shutil.copy2(local_license, appdata_license)
                 except Exception as e:
                     print(f"[MIGRATION ERROR] Failed to copy license: {e}")
+
+            # Migrate Tokens folder
+            appdata_tokens = os.path.join(appdata_dir, "tokens")
+            local_tokens = os.path.join(base_dir, "tokens") if os.path.exists(os.path.join(base_dir, "tokens")) else os.path.join(base_dir, "backend", "tokens")
+            if os.path.exists(local_tokens) and not os.path.exists(appdata_tokens):
+                try:
+                    shutil.copytree(local_tokens, appdata_tokens, dirs_exist_ok=True)
+                except Exception as e:
+                    print(f"[MIGRATION ERROR] Failed to copy tokens: {e}")
                     
             # Workspace migration can be large, we might just copy if it's small or just let it start fresh
             if os.path.exists(local_workspace) and not os.listdir(appdata_workspace):
