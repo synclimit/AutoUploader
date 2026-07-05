@@ -49,6 +49,8 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
     candidates = []
 
     for entry in entries:
+        if entry.name.startswith(".") or entry.name.startswith("_") or entry.name.lower().endswith(".ignored") or entry.name.lower().endswith(".deleted"):
+            continue
         if entry.is_dir(follow_symlinks=False):
             candidate_path = entry.path
         elif entry.is_file(follow_symlinks=False) and entry.name.lower().endswith(".mp4"):

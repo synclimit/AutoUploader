@@ -87,7 +87,7 @@ class WatchFolderEngine(EngineBase):
         summary = ScanSummary()
         db = SessionLocal()
         try:
-            query = db.query(Account).filter(or_(Account.pipelines != "{}", Account.watch_folder_enabled == True))
+            query = db.query(Account)
             if account_id:
                 query = query.filter(Account.id == account_id)
             enabled_accounts = query.all()
@@ -123,7 +123,7 @@ class WatchFolderEngine(EngineBase):
     def _run_cycle(self):
         db = SessionLocal()
         try:
-            enabled_accounts = db.query(Account).filter(or_(Account.pipelines != "{}", Account.watch_folder_enabled == True)).all()
+            enabled_accounts = db.query(Account).all()
         except Exception as e:
             db.close()
             return

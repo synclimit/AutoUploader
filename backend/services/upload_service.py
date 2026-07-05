@@ -153,6 +153,19 @@ class UploadService:
         task = db.query(UploadTask).filter(UploadTask.id == task_id).first()
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
+        
+        # Prevent watch folder scanner from immediately re-importing the deleted video
+        try:
+            import os
+            path_to_ignore = task.package_folder or task.video_path
+            if path_to_ignore and os.path.exists(path_to_ignore):
+                new_path = path_to_ignore.rstrip("/\\") + ".ignored"
+                if not os.path.exists(new_path):
+                    os.rename(path_to_ignore, new_path)
+        except Exception as e:
+            import logging
+            logging.getLogger("upload_service").warning(f"Could not rename deleted package path to .ignored: {e}")
+            
         db.delete(task)
         db.commit()
 
