@@ -169,7 +169,8 @@ def startup_event():
                 ("created_at", "DATETIME"),
                 ("scheduled_at", "DATETIME"),
                 ("started_at", "DATETIME"),
-                ("completed_at", "DATETIME")
+                ("completed_at", "DATETIME"),
+                ("upload_progress", "INTEGER DEFAULT 0")
             ]
         }
         
