@@ -27,6 +27,21 @@ class APIUploader(BaseUploader):
             with open(token_pickle, "rb") as token:
                 credentials = pickle.load(token)
                 
+            if credentials and credentials.expired and credentials.refresh_token:
+                from google.auth.transport.requests import Request
+                try:
+                    context.logger.info(f"[APIUploader] Refreshing expired OAuth token for account {task.account_id}...")
+                    credentials.refresh(Request())
+                    with open(token_pickle, "wb") as token:
+                        pickle.dump(credentials, token)
+                except Exception as ref_err:
+                    context.logger.error(f"[APIUploader] Token refresh failed: {ref_err}")
+                    return UploadResult(
+                        success=False,
+                        error_code="AUTH_EXPIRED",
+                        error_message=f"OAuth token refresh failed: {ref_err}. Please reconnect channel in Channels menu."
+                    )
+                
             youtube = build("youtube", "v3", credentials=credentials)
             
             # 2. Prepare Video Metadata
@@ -94,6 +109,13 @@ class APIUploader(BaseUploader):
 
             # 3. Upload Video
             context.logger.info(f"[APIUploader] Starting video upload for task {task.id}")
+            if not os.path.exists(task.video_path):
+                return UploadResult(
+                    success=False,
+                    error_code="FILE_NOT_FOUND",
+                    error_message=f"Video file not found on computer disk: {task.video_path}"
+                )
+
             # Use 10MB chunks (1024 * 1024 * 10) instead of -1 (full file) to allow progress updates and avoid timeouts
             media_file = MediaFileUpload(task.video_path, chunksize=10485760, resumable=True)
             
@@ -109,15 +131,32 @@ class APIUploader(BaseUploader):
             
             response = None
             start_time = time.time()
+            retries = 0
             while response is None:
-                upload_status, response = request.next_chunk()
-                if upload_status:
-                    progress = int(upload_status.progress() * 100)
-                    context.logger.info(f"[APIUploader] Upload Progress: {progress}%")
-                    # Update DB with progress for frontend UI
-                    if context.db_session and hasattr(context.task, 'upload_progress'):
-                        context.task.upload_progress = progress
-                        context.db_session.commit()
+                try:
+                    upload_status, response = request.next_chunk()
+                    if upload_status:
+                        progress = int(upload_status.progress() * 100)
+                        context.logger.info(f"[APIUploader] Upload Progress: {progress}%")
+                        # Update DB with progress for frontend UI
+                        if context.db_session and hasattr(context.task, 'upload_progress'):
+                            context.task.upload_progress = progress
+                            context.db_session.commit()
+                    retries = 0 # reset on successful chunk
+                except Exception as chunk_err:
+                    import socket, httplib2
+                    from googleapiclient.errors import HttpError
+                    is_transient = isinstance(chunk_err, (socket.error, socket.timeout, TimeoutError, ConnectionError, httplib2.HttpLib2Error))
+                    if isinstance(chunk_err, HttpError) and chunk_err.resp.status in [500, 502, 503, 504, 408]:
+                        is_transient = True
+                    
+                    if is_transient and retries < 10:
+                        retries += 1
+                        wait_time = 2 ** retries
+                        context.logger.warning(f"[APIUploader] Chunk network error ({chunk_err}). Retrying chunk in {wait_time}s (Attempt {retries}/10)...")
+                        time.sleep(wait_time)
+                    else:
+                        raise chunk_err
             
             video_id = response["id"]
             youtube_url = f"https://youtube.com/watch?v={video_id}"
