@@ -94,7 +94,8 @@ class APIUploader(BaseUploader):
 
             # 3. Upload Video
             context.logger.info(f"[APIUploader] Starting video upload for task {task.id}")
-            media_file = MediaFileUpload(task.video_path, chunksize=-1, resumable=True)
+            # Use 10MB chunks (1024 * 1024 * 10) instead of -1 (full file) to allow progress updates and avoid timeouts
+            media_file = MediaFileUpload(task.video_path, chunksize=10485760, resumable=True)
             
             is_private = status.get("privacyStatus") == "private"
             notify = False if is_private else getattr(task, "notify_subscribers", True)
@@ -113,6 +114,10 @@ class APIUploader(BaseUploader):
                 if upload_status:
                     progress = int(upload_status.progress() * 100)
                     context.logger.info(f"[APIUploader] Upload Progress: {progress}%")
+                    # Update DB with progress for frontend UI
+                    if context.db_session and hasattr(context.task, 'upload_progress'):
+                        context.task.upload_progress = progress
+                        context.db_session.commit()
             
             video_id = response["id"]
             youtube_url = f"https://youtube.com/watch?v={video_id}"

@@ -417,8 +417,8 @@ export default function ReviewWorkspace() {
                buttonClass = "bg-yellow-400 text-black cursor-not-allowed";
                disabled = true;
              } else if (status === 'UPLOADING') {
-               buttonText = "Uploading...";
-               icon = <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>;
+               buttonText = activeTask.upload_progress > 0 ? `Uploading... ${activeTask.upload_progress}%` : "Uploading...";
+               icon = <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin relative z-10"></div>;
                buttonClass = "bg-[var(--accent-400)] text-black cursor-not-allowed";
                disabled = true;
              } else if (status === 'SCHEDULED') {
@@ -451,8 +451,11 @@ export default function ReviewWorkspace() {
                    }
                  }}
                  className={`h-[40px] px-8 rounded-[8px] font-bold text-[13px] hover:brightness-110 transition-all flex items-center gap-2 relative overflow-hidden group neon-scale ${buttonClass}`}>
-                 {!disabled && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:animate-[shimmer_1.5s_infinite]"></div>}
-                 {icon} {buttonText}
+                 {status === 'UPLOADING' && (
+                   <div className="absolute inset-y-0 left-0 bg-white/40 transition-all duration-500 ease-out z-0" style={{ width: `${activeTask.upload_progress || 0}%` }}></div>
+                 )}
+                 {!disabled && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:animate-[shimmer_1.5s_infinite] z-0"></div>}
+                 {icon} <span className="relative z-10">{buttonText}</span>
                </button>
              );
            })()}

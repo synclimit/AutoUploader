@@ -303,6 +303,7 @@ class UploadTaskBase(BaseModel):
     
     upload_mode: str = "Waiting For Approval"
     ai_metadata_generated: bool = False
+    upload_progress: Optional[int] = 0
 
 class UploadTaskCreate(UploadTaskBase):
     pass

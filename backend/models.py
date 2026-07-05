@@ -138,6 +138,7 @@ class UploadTask(Base):
     # Validation History
     last_seo_validation_at = Column(DateTime, nullable=True)
     last_seo_provider = Column(String, nullable=True)
+    upload_progress = Column(Integer, nullable=True, default=0)
 
     logs = relationship("UploadLog", back_populates="task", cascade="all, delete-orphan")
     ai_histories = relationship("AIGenerationHistory", back_populates="task", cascade="all, delete-orphan", order_by="desc(AIGenerationHistory.version)")
