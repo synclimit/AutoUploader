@@ -98,7 +98,13 @@ def run_installer_async(exe_path: str):
 def check_update():
     try:
         # Get local version
-        version_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "version.json")
+        import sys
+        if getattr(sys, 'frozen', False):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            
+        version_file = os.path.join(base_dir, "version.json")
         local_version = "v1.0.0"
         local_build = 0
         if os.path.exists(version_file):
