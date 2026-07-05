@@ -48,18 +48,18 @@ export default function Sidebar() {
       <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent shadow-[0_0_15px_var(--color-primary-cyan)]"></div>
 
       {/* Premium Logo Area */}
-      <div className="pt-12 pb-8 px-4 flex items-center gap-3.5 shrink-0 relative group cursor-pointer overflow-hidden whitespace-nowrap">
+      <div className="pt-10 pb-6 px-4 flex flex-col items-center justify-center gap-3 shrink-0 relative group cursor-pointer overflow-hidden whitespace-nowrap">
         {/* Soft Ambient Glow Behind Logo */}
-        <div className="absolute top-1/2 left-6 w-[40px] h-[40px] -translate-y-1/2 bg-[var(--accent-400)]/15 blur-[20px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-1/2 w-[80px] h-[80px] -translate-x-1/2 -translate-y-1/2 bg-[var(--accent-400)]/15 blur-[25px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
         
         <img 
           src="/favicon.png" 
           alt="Ryanz Pitstop Logo" 
-          className="w-[48px] h-[48px] object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(34,211,238,0.8)] group-hover:scale-105 transition-all duration-300 z-10 relative shrink-0" 
+          className={`object-contain drop-shadow-[0_0_12px_rgba(34,211,238,0.5)] group-hover:drop-shadow-[0_0_16px_rgba(34,211,238,0.9)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[48px] h-[48px] group-hover/sidebar:w-[110px] group-hover/sidebar:h-[110px]' : 'w-[110px] h-[110px] group-hover:scale-105'}`} 
         />
         
-        <span className={`text-white/95 font-bold text-[18px] tracking-wide relative z-10 transition-all duration-200 ${isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100' : 'opacity-100'}`}>
-          Ryanz Pitstop
+        <span className={`text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 font-black text-[22px] tracking-widest relative z-10 transition-all duration-300 ${isCompactMode ? 'opacity-0 h-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:h-auto' : 'opacity-100'}`}>
+          RYANZ PITSTOP
         </span>
       </div>
 
