@@ -348,9 +348,9 @@ export default function PreferencesWorkspace() {
           )}
 
           {(activeCategory === 'about' || searchQuery) && (
-            <PreferenceSection id="about" title="About AutoUploader" icon={Info} description="Application version and licensing information.">
+            <PreferenceSection id="about" title="About Ryanz Pitstop" icon={Info} description="Application version and licensing information.">
               <div className="pl-4 py-2 border-l-2 border-[var(--accent-500)]/30">
-                <p className="text-white text-[14px] font-medium">AutoUploader Pro</p>
+                <p className="text-white text-[14px] font-medium">Ryanz Pitstop Pro</p>
                 <p className="text-white/50 text-[12px] mt-1">Current Version: {updateInfo ? updateInfo.local_version : '1.0.0'}</p>
                 <p className="text-white/30 text-[11px] mt-4 mb-4">Licensed to the current user.</p>
                 
