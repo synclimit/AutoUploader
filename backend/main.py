@@ -290,7 +290,13 @@ if __name__ == "__main__":
     import webview
     import time
     import ctypes
-    
+    # Fix Windows Taskbar Icon
+    try:
+        myappid = 'synclimit.ryanzpitstop.app.1.0'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass
+        
     # Prevent multiple instances
     mutex_name = "Global\\AutoUploader_SingleInstance_Mutex"
     mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
