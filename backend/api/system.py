@@ -87,7 +87,7 @@ def run_installer_async(exe_path: str):
     time.sleep(2)
     # Launch a detached CMD script that kills AutoUploader and runs the installer
     # taskkill /f /im AutoUploader.exe ensures the python backend (if compiled to exe) is killed.
-    script = f'ping 127.0.0.1 -n 3 > nul & taskkill /f /im AutoUploader.exe & start "" "{exe_path}" /SILENT /VERYSILENT /SUPPRESSMSGBOXES /SP-'
+    script = f'ping 127.0.0.1 -n 3 > nul & taskkill /f /im AutoUploader.exe & start /wait "" "{exe_path}" /SILENT /VERYSILENT /SUPPRESSMSGBOXES /SP- & start "" "AutoUploader.exe"'
     subprocess.Popen(f'cmd.exe /c "{script}"', shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
@@ -97,10 +97,12 @@ def check_update():
         # Get local version
         version_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "version.json")
         local_version = "v1.0.0"
+        local_build = 0
         if os.path.exists(version_file):
             with open(version_file, "r") as f:
                 ver_data = json.load(f)
                 local_version = "v" + ver_data.get("version", "1.0.0")
+                local_build = ver_data.get("build", 0)
 
         req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases/latest")
         req.add_header("User-Agent", "AutoUploader-App")
@@ -116,16 +118,31 @@ def check_update():
                         download_url = asset.get("browser_download_url", "")
                         break
                 
-                # Simple version comparison
+                # Fetch remote version.json to compare build numbers
+                remote_build = 0
+                try:
+                    v_req = urllib.request.Request("https://raw.githubusercontent.com/synclimit/AutoUploader/master/version.json")
+                    v_req.add_header("User-Agent", "AutoUploader-App")
+                    with urllib.request.urlopen(v_req, timeout=5) as v_res:
+                        remote_ver_data = json.loads(v_res.read().decode())
+                        remote_build = remote_ver_data.get("build", 0)
+                        if remote_ver_data.get("version"):
+                            latest_version = "v" + remote_ver_data.get("version")
+                except Exception:
+                    pass
+                
+                # Compare builds if available
                 update_available = False
-                if latest_version and latest_version != local_version:
+                if remote_build > local_build:
+                    update_available = True
+                elif not remote_build and latest_version and latest_version != "latest" and latest_version != local_version:
                     update_available = True
                     
                 return {
                     "success": True,
                     "update_available": update_available,
-                    "local_version": local_version,
-                    "latest_version": latest_version,
+                    "local_version": f"{local_version} (Build {local_build})",
+                    "latest_version": f"{latest_version} (Build {remote_build})" if remote_build else latest_version,
                     "release_notes": data.get("body", ""),
                     "download_url": download_url
                 }

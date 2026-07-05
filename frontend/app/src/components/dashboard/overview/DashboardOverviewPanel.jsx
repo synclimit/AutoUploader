@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAppStore } from '../../../store/app/appStore'
 import { useDashboardStore } from '../../../store/dashboard/dashboardStore'
 import { useAccountsStore } from '../../../store/accounts/accountsStore'
-import { Users, FileVideo, CheckCircle2, DollarSign, Activity, Calendar } from 'lucide-react'
+import { Users, FileVideo, CheckCircle2, DollarSign, Activity, Calendar, Download, ChevronRight } from 'lucide-react'
 
 import HomeHero from './HomeHero'
 import StatCard from './StatCard'
@@ -19,11 +19,23 @@ export default function DashboardOverviewPanel() {
   
   const accounts = useAccountsStore((s) => s.accounts || [])
   const fetchAccounts = useAccountsStore((s) => s.fetchAccounts)
+  
+  const [updateInfo, setUpdateInfo] = useState(null)
 
   useEffect(() => {
     // Initial fetch
     fetchDashboardData()
     fetchAccounts()
+    
+    // Check for updates once on mount
+    fetch('http://127.0.0.1:8000/api/v1/system/update/check')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.update_available) {
+          setUpdateInfo(data)
+        }
+      })
+      .catch(err => console.error("Error checking updates:", err))
 
     // 30s Polling
     const interval = setInterval(() => {
@@ -47,6 +59,26 @@ export default function DashboardOverviewPanel() {
     <div className="flex-1 p-5 relative overflow-hidden bg-[#05080e] flex flex-col min-h-0 h-full">
       <div className="relative z-10 flex flex-col gap-4 h-full min-h-0 max-w-[1600px] w-full mx-auto">
         
+        {updateInfo && updateInfo.update_available && (
+          <div className="bg-gradient-to-r from-[var(--accent-500)]/20 to-blue-500/20 border border-[var(--accent-500)]/40 rounded-xl p-4 flex items-center justify-between shadow-[0_0_15px_rgba(34,211,238,0.15)] mb-2 mt-2">
+            <div className="flex items-center gap-3">
+              <div className="bg-[var(--accent-500)]/20 p-2 rounded-lg">
+                <Download size={20} className="text-[var(--accent-400)]" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-sm tracking-wide">Update Available: {updateInfo.latest_version}</h3>
+                <p className="text-white/60 text-xs mt-0.5">A new version of AutoUploader is ready to install.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setActiveModule('Settings')}
+              className="flex items-center gap-2 bg-[var(--accent-500)] hover:bg-[var(--accent-600)] text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors"
+            >
+              View Update <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
+
         {/* Compressed Hero Banner */}
         <HomeHero />
 

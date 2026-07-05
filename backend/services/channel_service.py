@@ -113,6 +113,22 @@ class ChannelService:
             account.status = "healthy"
             account.attention = "✓ Normal"
             
+            if account.authentication_status == "Connected":
+                token_valid = False
+                token_path = os.path.join(ACCOUNTS_TOKEN_DIR, f"{account.id}.pickle")
+                if os.path.exists(token_path):
+                    try:
+                        with open(token_path, "rb") as token_file:
+                            creds = pickle.load(token_file)
+                        if creds and (creds.valid or creds.refresh_token):
+                            token_valid = True
+                    except Exception:
+                        pass
+                
+                if not token_valid:
+                    account.authentication_status = "Disconnected"
+                    db.commit()
+            
             if account.authentication_status != "Connected":
                 account.status = "error"
                 account.attention = "⚠ OAuth Expired"
