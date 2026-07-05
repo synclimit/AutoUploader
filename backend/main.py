@@ -304,10 +304,29 @@ if __name__ == "__main__":
     if sys.stderr is None:
         sys.stderr = open(log_path, "w")
     
+    def free_port_8000():
+        try:
+            import subprocess
+            output = subprocess.check_output('netstat -ano | findstr :8000', shell=True).decode()
+            for line in output.strip().splitlines():
+                if 'LISTENING' in line:
+                    parts = line.strip().split()
+                    pid = parts[-1] if parts else None
+                    if pid and pid != str(os.getpid()) and pid != "0":
+                        subprocess.run(f'taskkill /f /pid {pid}', shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        except Exception:
+            pass
+
     def run_server():
-        # Add a tiny delay to ensure stdout/stderr are fully set up if needed
         time.sleep(0.5)
-        uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error")
+        free_port_8000()
+        for attempt in range(5):
+            try:
+                uvicorn.run(app, host="127.0.0.1", port=8000, log_level="error")
+                break
+            except Exception as e:
+                time.sleep(1)
+                free_port_8000()
         
     t = threading.Thread(target=run_server, daemon=True)
     t.start()
