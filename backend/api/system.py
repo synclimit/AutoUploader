@@ -73,6 +73,16 @@ def get_system_logs(limit: int = 200, db: Session = Depends(get_db)):
         
     return {"success": True, "data": result}
 
+@router.post("/logs/open-folder")
+def open_logs_folder():
+    from services.system.path_service import PathService
+    import os
+    try:
+        os.startfile(PathService.get_logs_dir())
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 import urllib.request
 import json
 import os

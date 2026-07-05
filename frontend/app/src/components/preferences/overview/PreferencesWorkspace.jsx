@@ -139,6 +139,15 @@ export default function PreferencesWorkspace() {
     }
   }
 
+  const handleOpenLogs = async () => {
+    try {
+      await fetch('http://127.0.0.1:8000/api/v1/system/logs/open-folder', { method: 'POST' })
+      showToast('Opened logs folder', 'success')
+    } catch (e) {
+      showToast('Failed to open logs folder', 'error')
+    }
+  }
+
   const handleSave = async () => {
     if (config) {
       setIsSaving(true)
@@ -358,13 +367,21 @@ export default function PreferencesWorkspace() {
                     </button>
                   </div>
                 ) : (
-                  <button 
-                    onClick={handleCheckUpdate}
-                    disabled={isCheckingUpdate}
-                    className="px-4 py-2 border border-white/10 text-white/70 text-xs font-medium rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
-                  >
-                    {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={handleCheckUpdate}
+                      disabled={isCheckingUpdate}
+                      className="px-4 py-2 border border-white/10 text-white/70 text-xs font-medium rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
+                    >
+                      {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
+                    </button>
+                    <button 
+                      onClick={handleOpenLogs}
+                      className="px-4 py-2 border border-[var(--accent-500)]/30 bg-[var(--accent-500)]/10 text-[var(--accent-400)] text-xs font-bold rounded-lg hover:bg-[var(--accent-500)]/20 transition-colors flex items-center gap-2"
+                    >
+                      📁 Open Debug Logs Folder
+                    </button>
+                  </div>
                 )}
               </div>
             </PreferenceSection>
