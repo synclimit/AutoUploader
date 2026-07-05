@@ -15,6 +15,33 @@ class AudienceStep(BaseStep):
                 {"type": "role", "role": "radio", "name": "No, it's not made for kids"}
             ])
             radio_btn.click()
+            
+            # Click "Show more" to reveal advanced settings like AI Use
+            try:
+                show_more = LocatorResolver.resolve(page, [
+                    {"type": "css", "selector": 'ytcp-button#toggle-button'}
+                ], timeout=2000)
+                if "more" in show_more.inner_text().lower():
+                    show_more.click()
+                    page.wait_for_timeout(1000) # Give it time to expand
+            except Exception:
+                pass
+                
+            # Handle AI Content Declaration
+            ai_use = getattr(context.task, "ai_use", "No")
+            if ai_use and str(ai_use).strip().lower() == "yes":
+                try:
+                    ai_radio = LocatorResolver.resolve(page, [
+                        {"type": "css", "selector": 'tp-yt-paper-radio-button[name="ALTERED_CONTENT_YES"]'},
+                        {"type": "css", "selector": 'tp-yt-paper-radio-button[name="SYNTHETIC_MEDIA_YES"]'},
+                        {"type": "css", "selector": 'tp-yt-paper-radio-button[name="VIDEO_ALTERED_CONTENT_YES"]'},
+                        {"type": "text", "text": "Yes", "exact": True}
+                    ], timeout=3000)
+                    ai_radio.click()
+                    context.logger.info("[AudienceStep] AI Content Declaration set to 'Yes'")
+                except Exception as e:
+                    context.logger.warning(f"[AudienceStep] Failed to set AI Content to 'Yes': {e}")
+            
             return StepResult(success=True)
         except Exception as e:
             return StepResult(success=False, message=str(e))
