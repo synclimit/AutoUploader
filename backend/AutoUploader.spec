@@ -11,6 +11,8 @@ a = Analysis(
         ('services/license/keys', 'services/license/keys'),
         ('prompts', 'prompts'),
         ('../version.json', '.'),
+        ('tokens/client_secret.json', 'tokens'),
+        ('../client_secret.json', '.'),
     ],
     hiddenimports=[
         'uvicorn.logging',

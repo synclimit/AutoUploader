@@ -123,13 +123,25 @@ class PathService:
                     shutil.copy2(local_license, appdata_license)
                 except Exception as e:
                     print(f"[MIGRATION ERROR] Failed to copy license: {e}")
-            
+                    
             # Workspace migration can be large, we might just copy if it's small or just let it start fresh
             if os.path.exists(local_workspace) and not os.listdir(appdata_workspace):
                 try:
                     shutil.copytree(local_workspace, appdata_workspace, dirs_exist_ok=True)
                 except Exception as e:
                     print(f"[MIGRATION ERROR] Failed to copy workspace: {e}")
+
+        # Always ensure client_secret.json is in AppData
+        appdata_secret = os.path.join(appdata_dir, "client_secret.json")
+        local_secret = os.path.join(base_dir, "client_secret.json")
+        if getattr(sys, 'frozen', False):
+            local_secret = os.path.join(sys._MEIPASS, "client_secret.json")
+        if os.path.exists(local_secret) and not os.path.exists(appdata_secret):
+            try:
+                shutil.copy2(local_secret, appdata_secret)
+                print(f"[MIGRATION] Copied client_secret.json to AppData: {appdata_secret}")
+            except Exception as e:
+                print(f"[MIGRATION ERROR] Failed to copy client_secret: {e}")
 
         if migration_occurred:
             print("[MIGRATION] First-run data migration completed successfully.")

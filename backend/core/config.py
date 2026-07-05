@@ -21,19 +21,30 @@ import sys
 def get_client_secret_path() -> Path:
     from services.system.path_service import PathService
     
-    # 1. Check in AppData
-    appdata_secret = Path(os.path.join(PathService.get_appdata_dir(), "client_secret.json"))
-    if appdata_secret.exists():
-        return appdata_secret
+    candidates = [
+        Path(os.path.join(PathService.get_appdata_dir(), "client_secret.json")),
+        Path(os.path.join(PathService.get_appdata_dir(), "tokens", "client_secret.json")),
+    ]
+    
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.extend([
+            Path(os.path.join(exe_dir, "client_secret.json")),
+            Path(os.path.join(exe_dir, "tokens", "client_secret.json")),
+            Path(os.path.join(sys._MEIPASS, "client_secret.json")),
+            Path(os.path.join(sys._MEIPASS, "tokens", "client_secret.json")),
+        ])
+    else:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        candidates.extend([
+            Path(os.path.join(base_dir, "client_secret.json")),
+            Path(os.path.join(base_dir, "backend", "tokens", "client_secret.json")),
+        ])
         
-    # 2. Check in EXE directory (if frozen)
-    if getattr(sys, 'frozen', False):
-        exe_secret = Path(os.path.join(os.path.dirname(sys.executable), "client_secret.json"))
-        if exe_secret.exists():
-            return exe_secret
+    for path in candidates:
+        if path.exists():
+            return path
             
-    # 3. Fallback to default developer dir
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    if getattr(sys, 'frozen', False):
-        base_dir = sys._MEIPASS
+    # Fallback default
+    base_dir = sys._MEIPASS if getattr(sys, 'frozen', False) else os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return Path(os.path.join(base_dir, "client_secret.json"))
