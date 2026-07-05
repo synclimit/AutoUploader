@@ -10,6 +10,7 @@ a = Analysis(
         ('frontend_dist', 'frontend_dist'),
         ('services/license/keys', 'services/license/keys'),
         ('prompts', 'prompts'),
+        ('../version.json', '.'),
     ],
     hiddenimports=[
         'uvicorn.logging',
