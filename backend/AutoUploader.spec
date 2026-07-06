@@ -1,11 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
+
+datas_pyd, binaries_pyd, hiddenimports_pyd = collect_all('pydantic')
+datas_core, binaries_core, hiddenimports_core = collect_all('pydantic_core')
 
 block_cipher = None
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
+    binaries=[] + binaries_pyd + binaries_core,
     datas=[
         ('frontend_dist', 'frontend_dist'),
         ('services/license/keys', 'services/license/keys'),
@@ -13,7 +17,7 @@ a = Analysis(
         ('../version.json', '.'),
         ('tokens/client_secret.json', 'tokens'),
         ('../client_secret.json', '.'),
-    ],
+    ] + datas_pyd + datas_core,
     hiddenimports=[
         'uvicorn.logging',
         'uvicorn.loops',
@@ -28,14 +32,18 @@ a = Analysis(
         'passlib.handlers.bcrypt',
         'sqlite3',
         'sqlalchemy.ext.baked',
+        'pydantic',
         'pydantic.validators',
+        'pydantic.deprecated.default_value',
+        'pydantic_core',
+        'pydantic_core._pydantic_core',
         'win32timezone',
         'webview',
         'webview.platforms.winforms',
         'webview.platforms.edgechromium',
         'clr_loader',
         'google.auth._regional_access_boundary_utils',
-    ],
+    ] + hiddenimports_pyd + hiddenimports_core,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
