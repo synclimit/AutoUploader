@@ -34,6 +34,7 @@ a = Analysis(
         'webview.platforms.winforms',
         'webview.platforms.edgechromium',
         'clr_loader',
+        'google.auth._regional_access_boundary_utils',
     ],
     hookspath=[],
     hooksconfig={},
