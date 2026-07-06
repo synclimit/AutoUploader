@@ -50,14 +50,14 @@ export default function Sidebar() {
       <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent shadow-[0_0_15px_var(--color-primary-cyan)]"></div>
 
       {/* Premium Logo Area */}
-      <div className="pt-10 pb-6 px-4 flex flex-col items-center justify-center shrink-0 relative group cursor-pointer overflow-hidden whitespace-nowrap">
+      <div className="pt-8 pb-4 px-1 flex flex-col items-center justify-center shrink-0 relative group cursor-pointer overflow-hidden whitespace-nowrap w-full">
         {/* Soft Ambient Glow Behind Logo */}
         <div className="absolute top-1/2 left-1/2 w-[160px] h-[160px] -translate-x-1/2 -translate-y-1/2 bg-[var(--accent-400)]/20 blur-[30px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
         
         <img 
           src="/favicon.png" 
           alt="Ryanz Pitstop Logo" 
-          className={`object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] group-hover:drop-shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[54px] h-[54px] group-hover/sidebar:w-[220px] group-hover/sidebar:h-[220px]' : 'w-[220px] h-[220px] group-hover:scale-105'}`} 
+          className={`object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] group-hover:drop-shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[56px] h-auto group-hover/sidebar:w-[256px]' : 'w-[256px] h-auto group-hover:scale-105'}`} 
         />
       </div>
 

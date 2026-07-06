@@ -63,7 +63,8 @@ if not credentials:
     )
 
     credentials = flow.run_local_server(
-        port=8080
+        port=8080,
+        prompt='select_account'
     )
 
     with open(

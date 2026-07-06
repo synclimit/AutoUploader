@@ -382,7 +382,7 @@ class ChannelService:
             access_type='offline',
             include_granted_scopes='true',
             state=account_id,
-            prompt='consent'
+            prompt='consent select_account'
         )
         if hasattr(flow, 'code_verifier'):
             temp_credentials[f"{account_id}_verifier"] = flow.code_verifier
