@@ -77,7 +77,7 @@ class SchedulerEngine(EngineBase):
                 .filter(UploadTask.scheduled_at == None)
                 .filter(
                     or_(
-                        and_(UploadTask.status == QueueStatusEnum.watched, UploadTask.upload_mode == "Auto Upload", UploadTask.ai_metadata_generated == True),
+                        and_(UploadTask.status == QueueStatusEnum.watched, UploadTask.ai_metadata_generated == True),
                         and_(UploadTask.status == QueueStatusEnum.scheduled)
                     )
                 )
@@ -142,7 +142,20 @@ class SchedulerEngine(EngineBase):
                     target_date_str = target_date.strftime("%Y-%m-%d")
                     
                     for t in schedule_times:
-                        t_dt_local = datetime.strptime(f"{target_date_str} {t}", "%Y-%m-%d %H:%M")
+                        try:
+                            if "-" in str(t):
+                                t_clean = str(t).replace("T", " ")
+                                try:
+                                    t_dt_local = datetime.strptime(t_clean[:16], "%Y-%m-%d %H:%M")
+                                except ValueError:
+                                    t_dt_local = datetime.strptime(t_clean, "%Y-%m-%d %H:%M:%S")
+                                if t_dt_local.strftime("%Y-%m-%d") != target_date_str:
+                                    continue
+                            else:
+                                t_dt_local = datetime.strptime(f"{target_date_str} {t}", "%Y-%m-%d %H:%M")
+                        except Exception as parse_err:
+                            logger.warning(f"[SCHEDULER_ENGINE] Could not parse schedule time '{t}': {parse_err}")
+                            continue
                         
                         # Allow 30 minutes grace period if the schedule was missed while AI or video processing was running
                         if t_dt_local > now_local - timedelta(minutes=30):
@@ -176,7 +189,10 @@ class SchedulerEngine(EngineBase):
                         
                 task.scheduled_at = chosen_dt
                 
-                if getattr(task, "schedule_mode", "application") == "youtube":
+                if task.status == QueueStatusEnum.watched and getattr(task, "upload_mode", "") != "Auto Upload":
+                    msg = f"Assigned draft publish time {chosen_dt} for Review."
+                    db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.watched.value, message=msg))
+                elif getattr(task, "schedule_mode", "application") == "youtube":
                     task.status = QueueStatusEnum.queued
                     if getattr(task, "privacy_status", "private") != "private":
                         task.privacy_status = "private"

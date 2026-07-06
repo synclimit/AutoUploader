@@ -76,21 +76,21 @@ class APIUploader(BaseUploader):
                 recording_details["recordingDate"] = dt.isoformat()
             
             # Scheduling Support
-            if task.privacy_status == "private" and getattr(task, "scheduled_at", None):
+            if (task.privacy_status == "private" or getattr(task, "schedule_mode", "") == "youtube") and getattr(task, "scheduled_at", None):
                 # YouTube API requires publishAt to be in ISO 8601 format with timezone, and privacyStatus must be 'private'
                 # Also, it must be at least 15 minutes in the future!
+                status["privacyStatus"] = "private"
                 dt = task.scheduled_at
                 import datetime as dt_module
                 now_utc = dt_module.datetime.utcnow()
-                if dt > now_utc:
-                    if dt.tzinfo is None:
-                        dt = dt.replace(tzinfo=dt_module.timezone.utc)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=dt_module.timezone.utc)
+                
+                min_future = now_utc.replace(tzinfo=dt_module.timezone.utc) + dt_module.timedelta(minutes=16)
+                if dt < min_future:
+                    dt = min_future
                     
-                    min_future = now_utc.replace(tzinfo=dt_module.timezone.utc) + dt_module.timedelta(minutes=16)
-                    if dt < min_future:
-                        dt = min_future
-                        
-                    status["publishAt"] = dt.isoformat()
+                status["publishAt"] = dt.isoformat()
 
             if getattr(task, "license", None):
                 status["license"] = task.license

@@ -117,19 +117,22 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   }
 
   const formatSchedulePreview = (time, p) => {
+    const strTime = String(time);
+    const isDate = strTime.includes('-');
+    const timeOnly = isDate ? (strTime.includes('T') ? strTime.split('T')[1] : strTime.split(' ')[1]) || '00:00' : strTime;
     const humanize = p.humanize || { enabled: true, min_delay_minutes: 0, max_delay_minutes: 10 }
-    if (!humanize.enabled || (humanize.min_delay_minutes === 0 && humanize.max_delay_minutes === 0)) return time
+    if (!humanize.enabled || (humanize.min_delay_minutes === 0 && humanize.max_delay_minutes === 0)) return strTime;
     
     // Parse time to calculate max end time
-    const [h, m] = time.split(':').map(Number)
-    const date = new Date()
-    date.setHours(h, m, 0, 0)
-    date.setMinutes(date.getMinutes() + humanize.max_delay_minutes)
+    const [h, m] = timeOnly.split(':').map(Number);
+    const date = new Date();
+    date.setHours(h || 0, m || 0, 0, 0);
+    date.setMinutes(date.getMinutes() + humanize.max_delay_minutes);
     
-    const endH = String(date.getHours()).padStart(2, '0')
-    const endM = String(date.getMinutes()).padStart(2, '0')
+    const endH = String(date.getHours()).padStart(2, '0');
+    const endM = String(date.getMinutes()).padStart(2, '0');
     
-    return `${time} → ${endH}:${endM}`
+    return isDate ? `${strTime} → ${endH}:${endM}` : `${timeOnly} → ${endH}:${endM}`;
   }
 
   const renderPipeline = (key, title) => {
@@ -338,26 +341,71 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   {renderTooltip('Jadwal pasti kapan video-video Anda akan dirilis di YouTube setiap harinya.')}
                   {renderDirtyIndicator(key, 'schedule')}
                 </div>
-                <button onClick={() => addSchedule(key)} className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--accent-400)] hover:text-[var(--accent-400)] bg-[var(--accent-500)]/10 px-2 py-1 rounded-[6px]">
-                  <Plus size={12} /> Add Time
-                </button>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => addSchedule(key)} className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--accent-400)] hover:text-[var(--accent-400)] bg-[var(--accent-500)]/10 px-2 py-1 rounded-[6px]" title="Add Daily Recurring Time">
+                    <Plus size={12} /> Add Daily Time
+                  </button>
+                  <button onClick={() => {
+                    const updated = { ...draft };
+                    updated[key] = { ...(updated[key] || {}) };
+                    if (!updated[key].schedule) updated[key].schedule = [];
+                    const todayStr = new Date().toISOString().slice(0, 10);
+                    updated[key].schedule = [...updated[key].schedule, `${todayStr} 12:00`];
+                    onChange(updated);
+                  }} className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 px-2 py-1 rounded-[6px]" title="Add Specific Date & Time">
+                    <Plus size={12} /> Add Date & Time
+                  </button>
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-3">
-                {(p.schedule || []).map((time, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded-[8px] bg-[#05080e] border border-white/[0.08] group hover:border-[var(--accent-500)]/30 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <input 
-                        type="time" 
-                        value={time}
-                        onChange={(e) => updateScheduleTime(key, idx, e.target.value)}
-                        className="bg-transparent border-none text-[13px] font-mono text-[var(--accent-400)] outline-none w-[65px] text-center"
-                      />
-                      <span className="text-white/20 text-[10px]">→</span>
-                      <span className="text-[12px] font-mono text-white/50">{formatSchedulePreview(time, p)}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {(p.schedule || []).map((time, idx) => {
+                  const strTime = String(time);
+                  const isDate = strTime.includes('-');
+                  const timeOnly = isDate ? (strTime.includes('T') ? strTime.split('T')[1] : strTime.split(' ')[1]) || '12:00' : strTime;
+                  return (
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-[8px] bg-[#05080e] border border-white/[0.08] group hover:border-[var(--accent-500)]/30 transition-colors">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {isDate ? (
+                          <input 
+                            type="datetime-local" 
+                            value={strTime.replace(' ', 'T').slice(0, 16)}
+                            onChange={(e) => updateScheduleTime(key, idx, e.target.value.replace('T', ' '))}
+                            className="bg-transparent border-none text-[12px] font-mono text-amber-400 outline-none flex-1 truncate"
+                          />
+                        ) : (
+                          <input 
+                            type="time" 
+                            value={strTime}
+                            onChange={(e) => updateScheduleTime(key, idx, e.target.value)}
+                            className="bg-transparent border-none text-[13px] font-mono text-[var(--accent-400)] outline-none w-[65px] text-center"
+                          />
+                        )}
+                        <span className="text-white/20 text-[10px]">→</span>
+                        <span className="text-[11px] font-mono text-white/50 truncate">{formatSchedulePreview(strTime, p)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                        <button 
+                          onClick={() => {
+                            if (isDate) {
+                              updateScheduleTime(key, idx, timeOnly);
+                            } else {
+                              const todayStr = new Date().toISOString().slice(0, 10);
+                              updateScheduleTime(key, idx, `${todayStr} ${strTime}`);
+                            }
+                          }}
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-colors ${isDate ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30' : 'bg-white/10 text-white/60 hover:text-white hover:bg-white/20'}`}
+                          title={isDate ? "Switch to Daily Recurring Time" : "Switch to Specific Date & Time"}
+                        >
+                          {isDate ? "Date" : "Daily"}
+                        </button>
+                        <button onClick={() => removeSchedule(key, idx)} className="text-white/30 hover:text-red-400 p-1 transition-colors" title="Remove">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* HUMANIZE CONFIG */}
