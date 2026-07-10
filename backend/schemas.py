@@ -88,6 +88,7 @@ class SourceTypeEnum(str, Enum):
     m1 = "M1_VIDEO_SPLITTER"
     m3 = "M3_PLAYLIST_BUILDER"
     manual = "MANUAL_UPLOAD"
+    campaign = "CAMPAIGN_EXECUTION"
 
 class UploadProviderEnum(str, Enum):
     api = "api"
@@ -182,6 +183,9 @@ class AccountListResponse(BaseModel):
     videos: Optional[str] = "0"
     monetized: Optional[bool] = False
     handle: Optional[str] = ""
+    coverage: Optional[str] = "0 Days"
+    notification: Optional[str] = ""
+    mode: Optional[str] = "Campaign"
 
     class Config:
         from_attributes = True
@@ -259,6 +263,7 @@ class MetadataSourceEnum(str, Enum):
     gemini = "GEMINI"
     renderer = "RENDERER"
     manual = "MANUAL"
+    campaign = "CAMPAIGN"
 
 class UploadTaskBase(BaseModel):
     account_id: str
@@ -267,6 +272,11 @@ class UploadTaskBase(BaseModel):
     upload_stage: UploadStageEnum = UploadStageEnum.none
     metadata_source: MetadataSourceEnum = MetadataSourceEnum.manual
     source_type: SourceTypeEnum = SourceTypeEnum.manual
+    
+    source_id: Optional[str] = None
+    execution_source: Optional[str] = None
+    correlation_id: Optional[str] = None
+    execution_no: Optional[int] = None
     
     package_folder: str
     video_path: str
@@ -345,6 +355,7 @@ class UploadTaskResponse(UploadTaskBase):
     scheduled_at: Optional[datetime] = None
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+
 
     status_label: Optional[str] = None
     status_color: Optional[str] = None
@@ -480,3 +491,204 @@ class GlobalSettingsResponse(GlobalSettingsBase):
 
     class Config:
         from_attributes = True
+
+class CampaignAssetState(str, Enum):
+    NEW = "NEW"
+    SELECTED = "SELECTED"
+    REVIEWED = "REVIEWED"
+    APPROVED = "APPROVED"
+    UPLOADING = "UPLOADING"
+    SCHEDULED = "SCHEDULED"
+    CONSUMED = "CONSUMED"
+    ARCHIVED = "ARCHIVED"
+
+class CampaignAssetCheckRequest(BaseModel):
+    sha256: str
+    filesize: int
+    duration_seconds: float
+    
+class CampaignAssetBase(BaseModel):
+    channel_id: Optional[str] = None
+    campaign_id: Optional[str] = None
+    filename: str
+    filesize: int
+    duration_seconds: float
+    source_type: str = "LOCAL"
+    asset_origin: str = "LOCAL_FOLDER"
+    youtube_video_id: Optional[str] = None
+    scheduled_publish_at: Optional[datetime] = None
+    allow_reupload: bool = False
+    created_by: Optional[str] = None
+
+class CampaignAssetCreate(CampaignAssetBase):
+    sha256: str
+    
+class CampaignAssetResponse(CampaignAssetBase):
+    id: str
+    fingerprint: str
+    fingerprint_version: int
+    sha256: str
+    status: CampaignAssetState
+    uploaded_at: Optional[datetime] = None
+    archived_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CampaignAssetLookupResponse(BaseModel):
+    duplicate: bool
+    fingerprint: str
+    status: Optional[CampaignAssetState] = None
+    asset: Optional[CampaignAssetResponse] = None
+
+class CampaignScanRequest(BaseModel):
+    channel_id: Optional[str] = None
+    campaign_folder: str
+
+class CampaignScanSummary(BaseModel):
+    detected: int = 0
+    available: int = 0
+    duplicate: int = 0
+    invalid: int = 0
+    videos_to_upload: int = 0
+    estimated_coverage: str = "0 days"
+
+class CampaignScanAsset(BaseModel):
+    filename: str
+    filepath: str
+    filesize: int
+    duration_seconds: float
+    fingerprint: str
+    duplicate: bool
+    status: str
+    selectable: bool
+    # Future compatibility
+    campaign_id: Optional[str] = None
+    asset_id: Optional[str] = None
+    youtube_video_id: Optional[str] = None
+    scheduled_publish_at: Optional[datetime] = None
+    allow_reupload: Optional[bool] = None
+
+class CampaignScanResponse(BaseModel):
+    success: bool = True
+    summary: CampaignScanSummary
+    assets: List[CampaignScanAsset]
+
+class CampaignReviewAssetUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[str] = None
+    visibility: Optional[str] = None
+    thumbnail: Optional[str] = None
+    playlist: Optional[str] = None
+    category: Optional[str] = None
+    language: Optional[str] = None
+    audience: Optional[str] = None
+    recording_date: Optional[datetime] = None
+
+class CampaignReviewAssetResponse(BaseModel):
+    id: str
+    session_id: str
+    fingerprint: str
+    filepath: str
+    filename: str
+    filesize: int
+    duration_seconds: float
+    status: str
+    selected: bool
+    editable: bool
+    
+    title: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[str] = None
+    visibility: str
+    thumbnail: Optional[str] = None
+    playlist: Optional[str] = None
+    category: Optional[str] = None
+    language: Optional[str] = None
+    audience: Optional[str] = None
+    recording_date: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class CampaignReviewSessionResponse(BaseModel):
+    id: str
+    channel_id: str
+    pipeline_type: str
+    strategy: str
+    status: str
+    
+    detected: int
+    available: int
+    selected: int
+    duplicate: int
+    invalid: int
+    selected_file_size: float
+    selected_duration: float
+    
+    assets: List[CampaignReviewAssetResponse] = []
+
+    class Config:
+        from_attributes = True
+
+class CampaignReviewSelectRequest(BaseModel):
+    channel_id: str
+    pipeline_type: str
+    asset_id: str
+    selected: bool
+
+class CampaignReviewApproveRequest(BaseModel):
+    channel_id: str
+    pipeline_type: str
+
+class CampaignQueueBuildRequest(BaseModel):
+    session_id: str
+    channel_id: str
+    pipeline_type: str
+
+class CampaignUploadPlanResponse(BaseModel):
+    id: str
+    review_session_id: str
+    campaign_asset_id: str
+    channel_id: str
+    pipeline_type: str
+    publish_order: int
+    publish_date: str
+    publish_time: str
+    publish_datetime: datetime
+    humanized_datetime: datetime
+    title: Optional[str]
+    description: Optional[str]
+    tags: Optional[str]
+    thumbnail: Optional[str]
+    playlist: Optional[str]
+    category: Optional[str]
+    visibility: str
+    language: Optional[str]
+    audience: Optional[str]
+    recording_date: Optional[datetime]
+    status: str
+    
+    execution_status: str
+    execution_started_at: Optional[datetime] = None
+    execution_finished_at: Optional[datetime] = None
+    retry_count: int = 0
+    last_error: Optional[str] = None
+    youtube_video_id: Optional[str] = None
+    youtube_publish_at: Optional[datetime] = None
+    upload_task_id: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class CampaignExecutionStartRequest(BaseModel):
+    session_id: str
+    channel_id: str
+    pipeline_type: str
+
+class CampaignExecutionRetryRequest(BaseModel):
+    plan_id: str
+    updated_at: datetime

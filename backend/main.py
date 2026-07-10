@@ -59,9 +59,15 @@ from api.media import router as media_router
 from api.ai_engine import router as ai_engine_router
 from api.license import router as license_router
 from api.analytics import router as analytics_router
+from api.campaign_assets import router as campaign_assets_router
+from api.campaign_scan import router as campaign_scan_router
+from api.campaign_review import router as campaign_review_router
+from api.campaign_queue import router as campaign_queue_router
+from api.campaign_execution import router as campaign_execution_router
 
 from services.watch_folder.engine import get_engine as get_wf_engine
 from services.upload_engine.engine import get_engine as get_upload_engine
+from services.campaign_execution_service import get_campaign_execution_engine
 from scheduler.upload_scheduler import get_scheduler_engine
 from services.ai.automation import get_ai_automation_engine
 
@@ -103,6 +109,11 @@ app.include_router(media_router)
 app.include_router(ai_engine_router)
 app.include_router(license_router)
 app.include_router(analytics_router)
+app.include_router(campaign_assets_router)
+app.include_router(campaign_scan_router)
+app.include_router(campaign_review_router)
+app.include_router(campaign_queue_router)
+app.include_router(campaign_execution_router)
 
 # Enable SQLAlchemy create_all to ensure tables are created on fresh installs or wiped databases
 Base.metadata.create_all(bind=engine)

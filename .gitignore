@@ -52,4 +52,7 @@ browser_profiles/
 chrome-profile/
 test_assets/
 AutoUploade_UI_Design_System/
-DNA APLIKASI SAMPAI DEPLOY/
+DNA APLIKASI SAMPAI DEPLOY/
+# Releases
+release/
+*.exe

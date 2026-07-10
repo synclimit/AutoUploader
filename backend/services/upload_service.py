@@ -96,8 +96,9 @@ class UploadService:
         import json
         
         # Inheritance Engine
+        # Campaign execution explicitly uses CampaignUploadPlan as the sole metadata source snapshot
         account = db.query(Account).filter(Account.id == data.account_id).first()
-        if account:
+        if account and data.source_type != 'CAMPAIGN_EXECUTION':
             try:
                 defaults_json = json.loads(account.upload_defaults) if account.upload_defaults else {}
                 advanced_json = json.loads(account.advanced_settings) if account.advanced_settings else {}

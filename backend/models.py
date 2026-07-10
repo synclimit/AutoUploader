@@ -11,6 +11,19 @@ from datetime import datetime
 from database.db import Base
 from sqlalchemy import Boolean
 
+import enum
+from sqlalchemy import Float, Enum as SQLEnum
+
+class CampaignAssetState(enum.Enum):
+    NEW = "NEW"
+    SELECTED = "SELECTED"
+    REVIEWED = "REVIEWED"
+    APPROVED = "APPROVED"
+    UPLOADING = "UPLOADING"
+    SCHEDULED = "SCHEDULED"
+    CONSUMED = "CONSUMED"
+    ARCHIVED = "ARCHIVED"
+
 class Account(Base):
     __tablename__ = "accounts"
 
@@ -78,7 +91,13 @@ class UploadTask(Base):
     status = Column(String, nullable=False, default="WATCHED")
     upload_stage = Column(String, nullable=False, default="NONE")
     metadata_source = Column(String, nullable=False) # 'PROFILE', 'GEMINI', 'RENDERER', 'MANUAL'
-    source_type = Column(String, nullable=False) # 'M1_VIDEO_SPLITTER', 'M3_PLAYLIST_BUILDER', 'MANUAL_UPLOAD'
+    source_type = Column(String, nullable=False) # 'M1_VIDEO_SPLITTER', 'M3_PLAYLIST_BUILDER', 'MANUAL_UPLOAD', 'CAMPAIGN_EXECUTION'
+    
+    # Source Tracking
+    source_id = Column(String, nullable=True) # ID of CampaignUploadPlan or other source
+    execution_source = Column(String, nullable=True) # 'CAMPAIGN', 'CONTINUOUS', 'MANUAL', 'API', 'TEST'
+    correlation_id = Column(String, nullable=True) # 'CAMPAIGN-20260710-UUID'
+    execution_no = Column(Integer, nullable=True) # Sequential execution number
 
     # Folder-Based Package Pointers
     package_folder = Column(String, nullable=False) # Base folder path
@@ -257,3 +276,193 @@ class GlobalSettings(Base):
     adv_logs = Column(Boolean, default=True)
     
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class CampaignAsset(Base):
+    __tablename__ = "campaign_assets"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id = Column(String, nullable=True, index=True)
+    campaign_id = Column(String, nullable=True, index=True)
+    
+    fingerprint = Column(String, unique=True, index=True, nullable=False)
+    fingerprint_version = Column(Integer, default=1, nullable=False)
+    sha256 = Column(String, nullable=False)
+    filename = Column(String, nullable=False)
+    filesize = Column(Integer, nullable=False)
+    duration_seconds = Column(Float, nullable=False)
+    source_type = Column(String, default="LOCAL")
+    asset_origin = Column(String, default="LOCAL_FOLDER")
+    
+    youtube_video_id = Column(String, nullable=True, index=True)
+    scheduled_publish_at = Column(DateTime, nullable=True)
+    uploaded_at = Column(DateTime, nullable=True)
+    
+    status = Column(SQLEnum(CampaignAssetState), default=CampaignAssetState.NEW, nullable=False)
+    allow_reupload = Column(Boolean, default=False)
+    created_by = Column(String, nullable=True)
+    
+    archived_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class CampaignReviewSession(Base):
+    __tablename__ = "campaign_review_sessions"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id = Column(String, nullable=False, index=True)
+    pipeline_type = Column(String, nullable=False, default="long")
+    strategy = Column(String, nullable=False, default="campaign")
+    status = Column(String, nullable=False, default="DRAFT") # DRAFT, REVIEWING, APPROVED, LOCKED
+    
+    # Summary Fields
+    detected = Column(Integer, default=0)
+    available = Column(Integer, default=0)
+    selected = Column(Integer, default=0)
+    duplicate = Column(Integer, default=0)
+    invalid = Column(Integer, default=0)
+    selected_file_size = Column(Float, default=0.0) # in bytes
+    selected_duration = Column(Float, default=0.0) # in seconds
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    assets = relationship("CampaignReviewAsset", back_populates="session", cascade="all, delete-orphan")
+
+class CampaignReviewAsset(Base):
+    __tablename__ = "campaign_review_assets"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, ForeignKey("campaign_review_sessions.id", ondelete="CASCADE"), nullable=False)
+    
+    # Core reference to the raw file
+    fingerprint = Column(String, nullable=False, index=True)
+    filepath = Column(String, nullable=False)
+    filename = Column(String, nullable=False)
+    filesize = Column(Integer, nullable=False)
+    duration_seconds = Column(Float, nullable=False)
+    
+    status = Column(String, nullable=False, default="NEW") # NEW, CONSUMED, INVALID
+    selected = Column(Boolean, default=False)
+    editable = Column(Boolean, default=True)
+    
+    # Review Metadata
+    title = Column(String, nullable=True)
+    description = Column(String, nullable=True)
+    tags = Column(String, nullable=True)
+    visibility = Column(String, default="private")
+    thumbnail = Column(String, nullable=True)
+    playlist = Column(String, nullable=True)
+    category = Column(String, nullable=True)
+    language = Column(String, nullable=True)
+    audience = Column(String, nullable=True)
+    recording_date = Column(DateTime, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    session = relationship("CampaignReviewSession", back_populates="assets")
+
+class CampaignExecutionState(enum.Enum):
+    PLANNED = "PLANNED"
+    READY = "READY"
+    UPLOADING = "UPLOADING"
+    UPLOADED = "UPLOADED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+class FailureCategory(enum.Enum):
+    NETWORK = "NETWORK"
+    PLAYWRIGHT = "PLAYWRIGHT"
+    LOGIN = "LOGIN"
+    YOUTUBE = "YOUTUBE"
+    VALIDATION = "VALIDATION"
+    UNKNOWN = "UNKNOWN"
+
+class RetryPolicy(enum.Enum):
+    MANUAL = "MANUAL"
+    AUTO = "AUTO"
+
+class CampaignUploadPlan(Base):
+    __tablename__ = "campaign_upload_plans"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    review_session_id = Column(String, ForeignKey("campaign_review_sessions.id", ondelete="CASCADE"), nullable=False)
+    campaign_asset_id = Column(String, ForeignKey("campaign_assets.id", ondelete="CASCADE"), nullable=False)
+    channel_id = Column(String, nullable=False, index=True)
+    pipeline_type = Column(String, nullable=False)
+    
+    # Scheduling Rules
+    publish_order = Column(Integer, nullable=False)
+    publish_date = Column(String, nullable=False)
+    publish_time = Column(String, nullable=False)
+    publish_datetime = Column(DateTime, nullable=False)
+    humanized_datetime = Column(DateTime, nullable=False)
+    
+    # Metadata Snapshot
+    title = Column(String, nullable=True)
+    description = Column(String, nullable=True)
+    tags = Column(String, nullable=True)
+    thumbnail = Column(String, nullable=True)
+    playlist = Column(String, nullable=True)
+    category = Column(String, nullable=True)
+    visibility = Column(String, default="private")
+    language = Column(String, nullable=True)
+    audience = Column(String, nullable=True)
+    recording_date = Column(DateTime, nullable=True)
+    
+    # Status Machine
+    status = Column(String, nullable=False, default="PLANNED") # Deprecated in favor of execution_status for UI, keeping for compat if needed, but execution_status is the new Single Source of Truth
+    execution_status = Column(SQLEnum(CampaignExecutionState), default=CampaignExecutionState.PLANNED, nullable=False)
+    
+    # Execution Tracking
+    execution_started_at = Column(DateTime, nullable=True)
+    execution_finished_at = Column(DateTime, nullable=True)
+    retry_count = Column(Integer, default=0, nullable=False)
+    last_error = Column(String, nullable=True)
+    
+    correlation_id = Column(String, nullable=True)
+    execution_no = Column(Integer, default=0, nullable=False)
+    attempt = Column(Integer, default=1, nullable=False)
+    failure_category = Column(SQLEnum(FailureCategory), nullable=True)
+    retry_policy = Column(SQLEnum(RetryPolicy), default=RetryPolicy.MANUAL, nullable=False)
+    
+    # YouTube Details
+    youtube_video_id = Column(String, nullable=True)
+    youtube_publish_at = Column(DateTime, nullable=True)
+    
+    # Upload Task Link
+    upload_task_id = Column(String, ForeignKey("upload_tasks.id", ondelete="SET NULL"), nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class CampaignUploadJournal(Base):
+    __tablename__ = "campaign_upload_journal"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    campaign_upload_plan_id = Column(String, ForeignKey("campaign_upload_plans.id", ondelete="CASCADE"), nullable=False, index=True)
+    upload_task_id = Column(String, nullable=True)
+    
+    source_id = Column(String, nullable=True) # maps to plan ID for generic correlation
+    correlation_id = Column(String, nullable=True)
+    execution_no = Column(Integer, nullable=True)
+    attempt = Column(Integer, nullable=True)
+    browser_profile = Column(String, nullable=True)
+    
+    result = Column(String, nullable=False) # e.g. UPLOADED, FAILED
+    status = Column(String, nullable=False) # Keep for compat temporarily
+    
+    duration_seconds = Column(Integer, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    
+    youtube_video_id = Column(String, nullable=True)
+    publish_time = Column(DateTime, nullable=True)
+    
+    failure_category = Column(String, nullable=True)
+    error_message = Column(String, nullable=True)
+    failure_reason = Column(String, nullable=True)
+    
+    started_at = Column(DateTime, nullable=True)
+    finished_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

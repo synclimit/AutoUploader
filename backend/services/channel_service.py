@@ -148,6 +148,28 @@ class ChannelService:
             account.videos = "0"
             account.monetized = True if account.publish_enabled else False
             account.handle = "@" + account.channel_name.replace(" ", "").lower()
+            
+            # --- Coverage Automation (Sprint 4.1) ---
+            from models import CampaignReviewSession, CampaignUploadPlan
+            active_campaigns = db.query(CampaignReviewSession).filter(
+                CampaignReviewSession.channel_id == account.id,
+                CampaignReviewSession.status != "FINISHED"
+            ).all()
+            
+            active_plans_exist = db.query(CampaignUploadPlan).filter(
+                CampaignUploadPlan.channel_id == account.id,
+                CampaignUploadPlan.execution_status.notin_(["UPLOADED", "FAILED", "CANCELLED", "COMPLETED"])
+            ).first() is not None
+
+            account.mode = "Campaign"
+            if not active_campaigns and not active_plans_exist:
+                account.coverage = "0 Days"
+                account.attention = "Campaign Empty"
+                account.notification = "Create Next Campaign"
+            else:
+                account.coverage = "Active"
+                account.notification = "Campaign Running"
+            
             ChannelService._debug_log("SUCCESS _populate_dashboard_fields")
         except Exception as e:
             ChannelService._debug_log(f"FAILED _populate_dashboard_fields\nException: {str(e)}\nAccount ID: {account.id}")

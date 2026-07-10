@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { Filter, ChevronDown, Sparkles, Clock, Trash2, Save, CloudUpload, RotateCcw } from 'lucide-react'
+import { Filter, ChevronDown, Sparkles, Clock, Trash2, Save, CloudUpload, RotateCcw, Activity } from 'lucide-react'
 import ReviewVideoRow from './ReviewVideoRow'
 import ReviewCenterPanel from './ReviewCenterPanel'
 import ReviewMetadataPanel from './ReviewMetadataPanel'
@@ -314,7 +314,23 @@ export default function ReviewWorkspace() {
           >
             <Sparkles size={14} className={aiAssistantEnabled ? 'text-[var(--accent-400)] animate-pulse' : 'text-white/40'} /> AI Assistant
           </button>
-          <button onClick={() => setIsLogOpen(true)} className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-white/[0.08] bg-[#05080e]/60 text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors text-[12px] font-bold neon-interactive">
+          
+          <button 
+            onClick={() => {
+              import('../../../store/app/appStore').then(module => {
+                const store = module.useAppStore.getState();
+                if (activeTask?.review_session_id) {
+                  store.setJournalContext({ sessionId: activeTask.review_session_id });
+                }
+                store.setActiveModule('Journal');
+              });
+            }} 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-white/[0.08] bg-[#05080e]/60 text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors text-[12px] font-bold neon-interactive"
+          >
+            <Activity size={14} className="text-white/40" /> Upload Journal
+          </button>
+          
+          <button onClick={() => setIsLogOpen(!isLogOpen)} className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-white/[0.08] bg-[#05080e]/60 text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors text-[12px] font-bold neon-interactive">
             <Clock size={14} className="text-white/40" /> Activity Log
           </button>
         </div>

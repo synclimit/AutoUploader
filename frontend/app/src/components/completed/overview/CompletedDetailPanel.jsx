@@ -42,9 +42,25 @@ export default function CompletedDetailPanel({ video, onClose }) {
     <div className="absolute right-0 top-0 bottom-0 w-[450px] bg-[#05080e] border-l border-white/[0.05] shadow-[-10px_0_30px_rgba(0,0,0,0.5)] z-40 flex flex-col">
       <div className="h-[64px] shrink-0 border-b border-white/[0.05] flex items-center justify-between px-5">
         <h2 className="text-[16px] font-bold text-white">Detail Panel</h2>
-        <button onClick={onClose} className="w-8 h-8 rounded-[8px] flex items-center justify-center hover:bg-white/[0.05] text-white/50 hover:text-white transition-colors">
-          <X size={18} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => {
+              import('../../../store/app/appStore').then(module => {
+                const store = module.useAppStore.getState();
+                if (video?.account_id) {
+                  store.setJournalContext({ channelId: video.account_id });
+                }
+                store.setActiveModule('Journal');
+              });
+            }}
+            className="h-8 px-3 rounded-[8px] bg-white/[0.05] hover:bg-white/[0.1] text-white/70 hover:text-white transition-colors text-[12px] font-medium flex items-center gap-2"
+          >
+            Upload Journal
+          </button>
+          <button onClick={onClose} className="w-8 h-8 rounded-[8px] flex items-center justify-center hover:bg-white/[0.05] text-white/50 hover:text-white transition-colors">
+            <X size={18} />
+          </button>
+        </div>
       </div>
       
       <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4">

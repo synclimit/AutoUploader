@@ -28,9 +28,19 @@ import PreferencesWorkspace from './components/preferences/overview/PreferencesW
 import AnalyticsShell from './components/analytics/layout/AnalyticsShell'
 import AnalyticsWorkspace from './components/analytics/overview/AnalyticsWorkspace'
 
+import JournalShell from './components/journal/layout/JournalShell'
+import JournalWorkspace from './components/journal/overview/JournalWorkspace'
+
 
 function renderModule(activeModule) {
   switch (activeModule) {
+    case 'Journal':
+      return (
+        <JournalShell>
+          <JournalWorkspace />
+        </JournalShell>
+      )
+
     case 'Upload':
       return (
         <UploadsShell>

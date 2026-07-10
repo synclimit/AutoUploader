@@ -3,9 +3,9 @@ import toast from 'react-hot-toast'
 import { useDashboardStore } from '../../../store/dashboard/dashboardStore'
 import { useAccountsStore } from '../../../store/accounts/accountsStore'
 import { useAnalyticsStore } from '../../../store/analytics/analyticsStore'
-import { Search, Filter, Settings2, RefreshCw, Download, Activity, ExternalLink, Copy, Video, ChevronRight } from 'lucide-react'
+import { Search, Filter, Settings2, RefreshCw, Download, Activity, ExternalLink, Copy, Video, ChevronRight, ArrowUpDown } from 'lucide-react'
 
-export default function ChannelOverviewTable({ channels = [], setActiveModule }) {
+export default function ChannelOverviewTable({ channels = [], setActiveModule, externalFilter, onFilterChange }) {
   const fetchDashboardData = useDashboardStore(s => s.fetchDashboardData)
   const fetchAccounts = useAccountsStore(s => s.fetchAccounts)
   const fetchDashboard = useAnalyticsStore(s => s.fetchDashboard)
@@ -13,6 +13,8 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
   
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('All')
+  const [sortBy, setSortBy] = useState('Default')
+  const [showSortMenu, setShowSortMenu] = useState(false)
   const storeTimeFilter = useDashboardStore(s => s.timeFilter || '28d')
   const setStoreTimeFilter = useDashboardStore(s => s.setTimeFilter || (() => {}))
   const [localTimeMode, setLocalTimeMode] = useState(storeTimeFilter)
@@ -29,6 +31,12 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
   const [contextMenu, setContextMenu] = useState(null)
   const [summaryPopover, setSummaryPopover] = useState(null)
 
+  useEffect(() => {
+    if (externalFilter) {
+      setFilter(externalFilter)
+    }
+  }, [externalFilter])
+
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const saved = localStorage.getItem('au_visible_columns')
     if (saved) {
@@ -42,14 +50,14 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
     return {
       status: true,
       attention: true,
-      queue: true,
+      mode: true,
+      coverage: true,
       completed: true,
       subscribers: true,
       views: true,
       ctr: true,
       videos: true,
-      monetized: true,
-      analytics: true
+      monetized: true
     }
   })
 
@@ -63,12 +71,10 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    await Promise.all([fetchDashboardData(), fetchAccounts()])
-    for (const c of rawChannels) {
-      if (c.id) fetchDashboard(c.id, true);
-    }
-    setLastUpdated(new Date().toLocaleTimeString())
+    await fetchAccounts()
+    await fetchDashboardData()
     setIsRefreshing(false)
+    setLastUpdated(new Date().toLocaleTimeString())
     toast.success('Dashboard refreshed')
   }
 
@@ -77,12 +83,14 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
     
     const headers = []
     if (visibleColumns.status) headers.push('Status')
-    headers.push('Channel', 'Attention', 'Queue', 'Completed', 'Subs', 'Views', 'CTR', 'Videos', 'Monetized')
+    headers.push('Channel', 'Attention', 'Mode', 'Coverage', 'Completed', 'Subs', 'Views', 'CTR', 'Videos', 'Monetized')
     
     const rows = sortedChannels.map(c => {
       const r = []
       if (visibleColumns.status) r.push(c.status)
-      r.push(c.channel_name || c.name || '', c.attention, c.queue, c.completed, c.subs || '0', c.views || '0', c.ctr || '0.00%', c.videos || '0', c.monetized ? 'Yes' : 'No')
+      const modeVal = c.mode || c.automation_strategy || 'Continuous'
+      const covVal = c.coverage_text || (c.coverage_days !== undefined ? `${c.coverage_days} Days Left` : (c.coverage || 'Empty'))
+      r.push(c.channel_name || c.name || '', c.attention || '', modeVal, covVal, c.completed, c.subs || '0', c.views || '0', c.ctr || '0.00%', c.videos || '0', c.monetized ? 'Yes' : 'No')
       return r.map(val => `"${val}"`).join(',')
     })
     
@@ -126,7 +134,6 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
   }, [channels, dashboardData, timeMode])
 
   useEffect(() => {
-    // Initial fetch of lightweight dashboard metrics for all channels
     (channels || []).forEach(c => {
       if (c.id && !dashboardData[c.id]) {
         fetchDashboard(c.id);
@@ -134,7 +141,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
     });
   }, [channels, fetchDashboard]);
 
-  // Smart Sorting (Error > Warning > Queue > Healthy)
+  // Smart Sorting & Filtering
   const sortedChannels = useMemo(() => {
     let filtered = [...rawChannels]
     
@@ -144,37 +151,53 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
       filtered = filtered.filter(c => 
         (c?.channel_name || c?.name || '')?.toLowerCase().includes(q) || 
         (c?.handle || '')?.toLowerCase().includes(q) ||
-        (c?.channel_id || '')?.toLowerCase().includes(q)
+        (c?.channel_id || '')?.toLowerCase().includes(q) ||
+        (c?.id || '')?.toLowerCase().includes(q)
       )
     }
     
     // Apply Filter
     if (filter !== 'All') {
       if (filter === 'Healthy') filtered = filtered.filter(c => c?.status === 'healthy')
-      if (filter === 'Warning') filtered = filtered.filter(c => c?.status === 'warning')
-      if (filter === 'Error') filtered = filtered.filter(c => c?.status === 'error')
+      if (filter === 'Warning' || filter === 'Low') filtered = filtered.filter(c => c?.status === 'warning')
+      if (filter === 'Error' || filter === 'Critical' || filter === 'Failed') filtered = filtered.filter(c => c?.status === 'error')
       if (filter === 'Monetized') filtered = filtered.filter(c => c?.monetized)
       if (filter === 'Non Monetized') filtered = filtered.filter(c => c && !c.monetized)
-      if (filter === 'Has Queue') filtered = filtered.filter(c => c?.queue > 0)
-      if (filter === 'No Queue') filtered = filtered.filter(c => c?.queue === 0)
+      if (filter === 'Continuous') filtered = filtered.filter(c => (c.mode || c.automation_strategy || 'Continuous').toLowerCase().includes('continuous'))
+      if (filter === 'Campaign') filtered = filtered.filter(c => (c.mode || c.automation_strategy || '').toLowerCase().includes('campaign'))
     }
     
     return filtered.sort((a, b) => {
+      if (sortBy === 'Coverage') {
+        const order = { error: 1, warning: 2, healthy: 3 }
+        return (order[a?.status] || 4) - (order[b?.status] || 4)
+      }
+      if (sortBy === 'Attention') {
+        return (b?.attention || '').localeCompare(a?.attention || '')
+      }
+      if (sortBy === 'Subscribers') {
+        return Number(b?.subs || 0) - Number(a?.subs || 0)
+      }
+      if (sortBy === 'Views') {
+        return Number(b?.views || 0) - Number(a?.views || 0)
+      }
+      if (sortBy === 'Videos') {
+        return Number(b?.videos || 0) - Number(a?.videos || 0)
+      }
       const getPriority = (c) => {
         if (c?.status === 'error') return 1
         if (c?.status === 'warning') return 2
-        if (c?.queue > 0) return 3
-        return 4
+        return 3
       }
       return getPriority(a) - getPriority(b)
     })
-  }, [rawChannels, search, filter])
+  }, [rawChannels, search, filter, sortBy])
 
   const counts = useMemo(() => {
     return {
       healthy: rawChannels.filter(c => c?.status === 'healthy').length,
       warning: rawChannels.filter(c => c?.status === 'warning').length,
-      error: rawChannels.filter(c => c?.status === 'error').length,
+      error: rawChannels.filter(c => c?.status === 'error').length
     }
   }, [rawChannels])
 
@@ -201,11 +224,47 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
     return <span className="text-[12px] font-bold text-red-400 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400"></span>Error</span>
   }
 
+  // Mode Badge (Backend API value only)
+  const ModeBadge = ({ channel }) => {
+    const backendMode = channel.mode || channel.automation_strategy || 'Continuous'
+    const isCampaign = backendMode.toLowerCase().includes('campaign')
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[11px] font-bold ${isCampaign ? 'bg-blue-500/15 text-blue-300 border border-blue-500/30' : 'bg-green-500/15 text-green-300 border border-green-500/30'}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${isCampaign ? 'bg-blue-400' : 'bg-green-400'}`}></span>
+        {isCampaign ? 'Campaign' : 'Continuous'}
+      </span>
+    )
+  }
+
+  // Coverage Badge (Backend API value only)
+  const CoverageBadge = ({ channel }) => {
+    const text = channel.coverage_text || (channel.coverage_days !== undefined ? `${channel.coverage_days} Days Left` : (channel.coverage || 'Optimal'))
+    const colorCode = (channel.coverage_color || '').toLowerCase()
+    let bgStyle = 'bg-red-500/15 text-red-300 border border-red-500/30'
+    let dotStyle = 'bg-red-400'
+    if (colorCode === 'green' || text.toLowerCase().includes('optimal') || text.toLowerCase().includes('healthy') || (channel.coverage_days && channel.coverage_days > 14)) {
+      bgStyle = 'bg-green-500/15 text-green-300 border border-green-500/30'
+      dotStyle = 'bg-green-400'
+    } else if (colorCode === 'yellow' || (channel.coverage_days && channel.coverage_days > 5)) {
+      bgStyle = 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+      dotStyle = 'bg-amber-400'
+    } else if (colorCode === 'orange' || (channel.coverage_days && channel.coverage_days > 0)) {
+      bgStyle = 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
+      dotStyle = 'bg-orange-400'
+    }
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-[4px] text-[11px] font-bold ${bgStyle}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${dotStyle}`}></span>
+        {text}
+      </span>
+    )
+  }
+
   // Completed Cell Logic
   const CompletedCell = ({ completed, lastUploadText }) => {
     if (completed > 0) return <span className="text-[12px] font-bold text-[var(--accent-400)]">{completed}</span>
     
-    // Relative time formatting if 0 completed today
     let color = 'text-white/40'
     const lowerText = (lastUploadText || 'Never').toLowerCase()
     if (lowerText.includes('day') && !lowerText.includes('yesterday')) color = 'text-amber-400/80'
@@ -305,6 +364,29 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
 
         <div className="relative">
           <button 
+            onClick={(e) => { e.stopPropagation(); setShowSortMenu(!showSortMenu); setShowFilterMenu(false); setShowTimeMenu(false); setShowColMenu(false); }}
+            className={`h-[32px] px-3 bg-cyan-950/30 hover:bg-cyan-900/40 border ${sortBy !== 'Default' ? 'border-[var(--accent-400)] text-cyan-200' : 'border-[var(--accent-500)]/20 text-[var(--accent-400)]'} rounded-[6px] text-[12px] font-bold flex items-center gap-2 transition-colors`}
+          >
+            <ArrowUpDown size={14} /> Sort: {sortBy}
+          </button>
+          
+          {showSortMenu && (
+            <div className="absolute top-[100%] left-0 mt-1 w-[160px] bg-[#0b1d25] border border-[var(--accent-500)]/20 shadow-2xl rounded-[8px] overflow-hidden z-50">
+              {['Default', 'Coverage', 'Attention', 'Subscribers', 'Views', 'Videos'].map(s => (
+                <div 
+                  key={s}
+                  onClick={() => { setSortBy(s); setShowSortMenu(false); }}
+                  className={`px-3 py-2 text-[12px] cursor-pointer hover:bg-[var(--accent-500)]/10 ${sortBy === s ? 'text-[var(--accent-400)] font-bold bg-[var(--accent-500)]/5' : 'text-white/70'}`}
+                >
+                  {s}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="relative">
+          <button 
             onClick={(e) => { e.stopPropagation(); setShowTimeMenu(!showTimeMenu); setShowFilterMenu(false); setShowColMenu(false); }}
             className="h-[32px] px-3 bg-cyan-950/30 hover:bg-cyan-900/40 border border-[var(--accent-500)]/20 text-[var(--accent-400)] rounded-[6px] text-[12px] font-bold flex items-center gap-2 transition-colors"
           >
@@ -386,20 +468,20 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
               <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider sticky left-0 bg-[#0b1d25] z-30 shadow-[1px_0_0_rgba(34,211,238,0.2)]">Channel</th>
               {visibleColumns.status && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Status</th>}
               {visibleColumns.attention && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Attention</th>}
-              {visibleColumns.queue && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Queue</th>}
+              {visibleColumns.mode && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Mode</th>}
+              {visibleColumns.coverage && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Coverage</th>}
               {visibleColumns.completed && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Completed</th>}
               {visibleColumns.subscribers && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Subs</th>}
               {visibleColumns.views && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Views ({timeMode === 'yesterday' ? '1d' : timeMode === '7d' ? '7d' : timeMode === '28d' ? '28d' : timeMode === '1y' ? '1y' : 'All'})</th>}
               {visibleColumns.ctr && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">CTR</th>}
               {visibleColumns.videos && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Videos</th>}
               {visibleColumns.monetized && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Monetized</th>}
-              {visibleColumns.analytics && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider text-right">Action</th>}
             </tr>
           </thead>
           <tbody>
             {sortedChannels.length === 0 ? (
               <tr>
-                <td colSpan="10" className="p-8 text-center">
+                <td colSpan="11" className="p-8 text-center">
                   <div className="flex flex-col items-center justify-center">
                     <Video size={32} className="text-white/20 mb-3" />
                     <span className="text-[13px] font-bold text-white/70">No channels connected yet.</span>
@@ -431,9 +513,14 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
                       <span className={`text-[12px] font-bold ${(c.attention || '').includes('⚠') ? 'text-amber-400' : 'text-white/50'}`}>{c.attention || ''}</span>
                     </td>
                   )}
-                  {visibleColumns.queue && (
+                  {visibleColumns.mode && (
                     <td className="px-3 py-2 h-[40px]">
-                      <span className={`text-[12px] font-bold ${c.queue > 0 ? 'text-white/90' : 'text-white/30'}`}>{c.queue > 0 ? `Waiting (${c.queue})` : 'Queue Empty'}</span>
+                      <ModeBadge channel={c} />
+                    </td>
+                  )}
+                  {visibleColumns.coverage && (
+                    <td className="px-3 py-2 h-[40px]">
+                      <CoverageBadge channel={c} />
                     </td>
                   )}
                   {visibleColumns.completed && (
@@ -466,20 +553,6 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
                       <span className={`text-[12px] font-bold ${c.monetized ? 'text-green-400' : 'text-white/30'}`}>{c.monetized ? 'Yes' : 'No'}</span>
                     </td>
                   )}
-                  {visibleColumns.analytics && (
-                    <td className="px-3 py-2 h-[40px] text-right">
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          useAccountsStore.getState().setSelectedAccount(c);
-                          if (setActiveModule) setActiveModule('Analytics'); 
-                        }}
-                        className="px-3 py-1 bg-cyan-950/30 hover:bg-cyan-900/50 border border-[var(--accent-500)]/30 rounded-[6px] text-[11px] font-bold text-[var(--accent-400)] transition-colors inline-flex items-center gap-1.5"
-                      >
-                        Open <span className="text-[var(--accent-400)]/50">→</span>
-                      </button>
-                    </td>
-                  )}
                 </tr>
               ))
             )}
@@ -490,26 +563,55 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule })
       {/* Context Menu */}
       {contextMenu && (
         <div 
-          className="fixed bg-[#0b1d25] border border-[var(--accent-500)]/20 rounded-[8px] shadow-2xl py-1 z-50 min-w-[160px]"
+          className="fixed bg-[#0b1d25] border border-[var(--accent-500)]/20 rounded-[8px] shadow-2xl py-1.5 z-50 min-w-[180px]"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-3 py-1 border-b border-[var(--accent-500)]/10 mb-1">
-            <span className="text-[11px] font-bold text-cyan-200/50">{contextMenu.channel.name}</span>
+            <span className="text-[11px] font-bold text-cyan-200/50">{contextMenu.channel.channel_name || contextMenu.channel.name}</span>
           </div>
           <button 
             onClick={() => {
               useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
-              if (setActiveModule) setActiveModule('Analytics');
+              if (setActiveModule) setActiveModule('Channels');
+              closePopups();
             }}
-            className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2"
+            className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"
           >
-            <Activity size={14} className="text-[var(--accent-400)]" /> Open Analytics
+            <ExternalLink size={14} className="text-[var(--accent-400)]" /> Open Channel
           </button>
-          <button className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2"><ExternalLink size={14} className="text-[var(--accent-400)]" /> Open Channel</button>
-          <button className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2"><Copy size={14} className="text-[var(--accent-400)]" /> Copy Channel ID</button>
+          <button 
+            onClick={() => {
+              useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
+              if (setActiveModule) setActiveModule('Queue');
+              closePopups();
+            }}
+            className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"
+          >
+            <Activity size={14} className="text-[var(--accent-400)]" /> Open Campaign
+          </button>
+          <button 
+            onClick={() => {
+              useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
+              if (setActiveModule) setActiveModule('Review');
+              closePopups();
+            }}
+            className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"
+          >
+            <Video size={14} className="text-[var(--accent-400)]" /> Open Review
+          </button>
+          <button 
+            onClick={() => {
+              useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
+              if (setActiveModule) setActiveModule('Upload');
+              closePopups();
+            }}
+            className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"
+          >
+            <Copy size={14} className="text-[var(--accent-400)]" /> Open Upload Journal
+          </button>
           <div className="h-px bg-[var(--accent-500)]/10 my-1"></div>
-          <button className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2"><RefreshCw size={14} className="text-[var(--accent-400)]" /> Refresh Data</button>
+          <button onClick={() => { handleRefresh(); closePopups(); }} className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"><RefreshCw size={14} className="text-[var(--accent-400)]" /> Refresh Data</button>
         </div>
       )}
     </div>
