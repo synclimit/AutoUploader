@@ -44,11 +44,39 @@ class APIUploader(BaseUploader):
                 
             youtube = build("youtube", "v3", credentials=credentials)
             
+            # Helper to resolve Category ID
+            def _resolve_category_id(val) -> str:
+                if not val:
+                    return "22"
+                s_val = str(val).strip().lower()
+                if s_val.isdigit():
+                    return s_val
+                cat_map = {
+                    "film & animation": "1",
+                    "autos & vehicles": "2",
+                    "music": "10",
+                    "pets & animals": "15",
+                    "sports": "17",
+                    "short movies": "18",
+                    "travel & events": "19",
+                    "gaming": "20",
+                    "videoblogging": "21",
+                    "people & blogs": "22",
+                    "comedy": "23",
+                    "entertainment": "24",
+                    "news & politics": "25",
+                    "howto & style": "26",
+                    "education": "27",
+                    "science & technology": "28",
+                    "nonprofits & activism": "29"
+                }
+                return cat_map.get(s_val, "22")
+            
             # 2. Prepare Video Metadata
             snippet = {
                 "title": task.title or "Untitled Upload",
                 "description": task.description or "Uploaded via AutoUploader",
-                "categoryId": str(task.category_id) if getattr(task, "category_id", None) else "22"
+                "categoryId": _resolve_category_id(getattr(task, "category_id", None))
             }
             if task.tags:
                 snippet["tags"] = [tag.strip() for tag in task.tags.split(",") if tag.strip()]
@@ -65,8 +93,8 @@ class APIUploader(BaseUploader):
                 "publicStatsViewable": getattr(task, "public_stats_viewable", True)
             }
             
-            if getattr(task, "ai_use", "UNKNOWN") != "UNKNOWN":
-                context.logger.info(f"[APIUploader] Skipping unsupported YouTube Data API field: ai_use={task.ai_use}")
+            if getattr(task, "ai_use", "UNKNOWN") not in (None, "", "UNKNOWN"):
+                context.logger.warning(f"[APIUploader] WARNING: YouTube Data API v3 does not currently support setting the 'Altered or synthetic content' (AI Use) disclosure flag via REST API (task.ai_use={task.ai_use}). Video uploaded with default API disclosure. Use YouTube Studio manual toggle if required.")
             
             recording_details = {}
             if getattr(task, "recording_date", None):
@@ -75,10 +103,8 @@ class APIUploader(BaseUploader):
                     dt = dt.replace(tzinfo=datetime.timezone.utc)
                 recording_details["recordingDate"] = dt.isoformat()
             
-            # Scheduling Support
-            if (task.privacy_status == "private" or getattr(task, "schedule_mode", "") == "youtube") and getattr(task, "scheduled_at", None):
-                # YouTube API requires publishAt to be in ISO 8601 format with timezone, and privacyStatus must be 'private'
-                # Also, it must be at least 15 minutes in the future!
+            # PRIORITY 1: Scheduling Support
+            if getattr(task, "scheduled_at", None):
                 status["privacyStatus"] = "private"
                 dt = task.scheduled_at
                 import datetime as dt_module
@@ -90,7 +116,7 @@ class APIUploader(BaseUploader):
                 if dt < min_future:
                     dt = min_future
                     
-                status["publishAt"] = dt.isoformat()
+                status["publishAt"] = dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
             if getattr(task, "license", None):
                 status["license"] = task.license
@@ -113,15 +139,13 @@ class APIUploader(BaseUploader):
                 return UploadResult(
                     success=False,
                     error_code="FILE_NOT_FOUND",
-                    error_message=f"Video file not found on computer disk: {task.video_path}"
+                    error_message=f"Video file not found: {task.video_path}"
                 )
 
-            # Use 10MB chunks (1024 * 1024 * 10) instead of -1 (full file) to allow progress updates and avoid timeouts
             media_file = MediaFileUpload(task.video_path, chunksize=10485760, resumable=True)
-            
             is_private = status.get("privacyStatus") == "private"
             notify = False if is_private else getattr(task, "notify_subscribers", True)
-                
+
             request = youtube.videos().insert(
                 part=",".join(insert_parts),
                 body=request_body,

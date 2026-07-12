@@ -83,6 +83,15 @@ class CampaignExecutionEngine:
                 import os
                 package_folder = os.path.dirname(asset.filename) if "/" in asset.filename or "\\" in asset.filename else ""
                 
+                cat_map = {
+                    "film & animation": 1, "autos & vehicles": 2, "music": 10, "pets & animals": 15,
+                    "sports": 17, "short movies": 18, "travel & events": 19, "gaming": 20,
+                    "videoblogging": 21, "people & blogs": 22, "comedy": 23, "entertainment": 24,
+                    "news & politics": 25, "howto & style": 26, "education": 27, "science & technology": 28,
+                    "nonprofits & activism": 29
+                }
+                resolved_cat = int(plan.category) if plan.category and str(plan.category).isdigit() else cat_map.get(str(plan.category or "").strip().lower(), None)
+
                 task_data = UploadTaskCreate(
                     account_id=plan.channel_id,
                     metadata_source="CAMPAIGN",
@@ -100,10 +109,12 @@ class CampaignExecutionEngine:
                     made_for_kids=False,
                     video_id=asset.fingerprint, # duplicate detection key
                     playlist_id=plan.playlist,
-                    category_id=int(plan.category) if plan.category and plan.category.isdigit() else None,
+                    category_id=resolved_cat,
                     default_language=plan.language,
                     audience=plan.audience,
                     pipeline_type=plan.pipeline_type,
+                    scheduled_at=plan.publish_datetime,
+                    schedule_mode="youtube" if plan.publish_datetime else "application",
                     status=QueueStatusEnum.queued # Dispatched immediately to UploadEngine
                 )
                 
