@@ -34,16 +34,6 @@ def retry_plan(plan_id: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{session_id}", response_model=List[CampaignUploadPlanResponse])
-def get_execution_progress(session_id: str, db: Session = Depends(get_db)):
-    try:
-        plans = db.query(CampaignUploadPlan).filter(
-            CampaignUploadPlan.review_session_id == session_id
-        ).order_by(CampaignUploadPlan.publish_order).all()
-        return plans
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 from services.journal.journal_service import get_paginated_journal
 from services.journal.csv_exporter import export_journal_csv
 from fastapi import Request
@@ -63,3 +53,14 @@ def export_journal(request: Request, db: Session = Depends(get_db)):
         return export_journal_csv(db=db, params=params)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{session_id}", response_model=List[CampaignUploadPlanResponse])
+def get_execution_progress(session_id: str, db: Session = Depends(get_db)):
+    try:
+        plans = db.query(CampaignUploadPlan).filter(
+            CampaignUploadPlan.review_session_id == session_id
+        ).order_by(CampaignUploadPlan.publish_order).all()
+        return plans
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

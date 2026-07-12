@@ -65,7 +65,7 @@ export default function UploadJournal({ initialSessionId, initialChannelId }) {
          // e.g. params.append('date_from', calculateDate(dateFilter))
       }
 
-      const res = await apiClient.get(`/api/v1/campaign-execution/journal?${params.toString()}`, {
+      const res = await apiClient.get(`/campaign-execution/journal?${params.toString()}`, {
         signal: abortControllerRef.current.signal
       });
 
