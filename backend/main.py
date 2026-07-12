@@ -151,7 +151,12 @@ def startup_event():
                 ("metadata_profile", "VARCHAR"),
                 ("upload_preset", "VARCHAR"),
                 ("playlist", "VARCHAR"),
-                ("schema_version", "INTEGER DEFAULT 1")
+                ("schema_version", "INTEGER DEFAULT 1"),
+                ("project_id", "VARCHAR"),
+                ("client_id", "VARCHAR"),
+                ("credential_folder", "VARCHAR"),
+                ("health_status", "VARCHAR DEFAULT 'UNKNOWN'"),
+                ("quota_exhausted_until", "DATETIME")
             ],
             "upload_tasks": [
                 ("ai_use", "BOOLEAN DEFAULT 0"),
