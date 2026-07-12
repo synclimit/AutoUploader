@@ -3,13 +3,16 @@ from PyInstaller.utils.hooks import collect_all
 
 datas_pyd, binaries_pyd, hiddenimports_pyd = collect_all('pydantic')
 datas_core, binaries_core, hiddenimports_core = collect_all('pydantic_core')
+datas_fa, binaries_fa, hiddenimports_fa = collect_all('fastapi')
+datas_star, binaries_star, hiddenimports_star = collect_all('starlette')
+datas_uv, binaries_uv, hiddenimports_uv = collect_all('uvicorn')
 
 block_cipher = None
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[] + binaries_pyd + binaries_core,
+    binaries=[] + binaries_pyd + binaries_core + binaries_fa + binaries_star + binaries_uv,
     datas=[
         ('frontend_dist', 'frontend_dist'),
         ('services/license/keys', 'services/license/keys'),
@@ -17,8 +20,20 @@ a = Analysis(
         ('../version.json', '.'),
         ('tokens/client_secret.json', 'tokens'),
         ('../client_secret.json', '.'),
-    ] + datas_pyd + datas_core,
+    ] + datas_pyd + datas_core + datas_fa + datas_star + datas_uv,
     hiddenimports=[
+        'fastapi',
+        'fastapi.applications',
+        'fastapi.routing',
+        'fastapi.responses',
+        'fastapi.exceptions',
+        'fastapi.middleware',
+        'fastapi.middleware.cors',
+        'starlette',
+        'starlette.applications',
+        'starlette.routing',
+        'starlette.responses',
+        'uvicorn',
         'uvicorn.logging',
         'uvicorn.loops',
         'uvicorn.loops.auto',
@@ -43,7 +58,7 @@ a = Analysis(
         'webview.platforms.edgechromium',
         'clr_loader',
         'google.auth._regional_access_boundary_utils',
-    ] + hiddenimports_pyd + hiddenimports_core,
+    ] + hiddenimports_pyd + hiddenimports_core + hiddenimports_fa + hiddenimports_star + hiddenimports_uv,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
