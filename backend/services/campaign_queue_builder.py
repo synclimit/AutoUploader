@@ -7,14 +7,14 @@ from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 import pytz
 
-from models import CampaignReviewSession, CampaignReviewAsset, CampaignAsset, CampaignUploadPlan, Account
+from models import CampaignReviewSession, CampaignReviewAsset, CampaignAsset, CampaignUploadPlan, Channel
 
 class CampaignQueueBuilder:
 
     @staticmethod
-    def _parse_pipeline_config(account: Account, pipeline_type: str) -> Dict[str, Any]:
+    def _parse_pipeline_config(channel: Channel, pipeline_type: str) -> Dict[str, Any]:
         try:
-            pipelines = json.loads(account.pipelines)
+            pipelines = json.loads(channel.pipelines)
         except Exception:
             pipelines = {}
             
@@ -24,7 +24,7 @@ class CampaignQueueBuilder:
         daily_limit = pipeline_config.get("daily_limit", 1)
         schedule = pipeline_config.get("schedule", ["09:00"])
         humanize = pipeline_config.get("humanize", {"enabled": False, "min_delay_minutes": 0, "max_delay_minutes": 0})
-        timezone_str = account.publish_timezone or "UTC"
+        timezone_str = channel.publish_timezone or "UTC"
         
         return {
             "daily_limit": daily_limit,
@@ -67,11 +67,11 @@ class CampaignQueueBuilder:
             raise ValueError("No assets selected in the review session.")
 
         # 4. Read Configuration
-        account = db.query(Account).filter(Account.id == channel_id).first()
-        if not account:
-            raise ValueError("Channel account not found.")
+        channel = db.query(Channel).filter(Channel.id == channel_id).first()
+        if not channel:
+            raise ValueError("Channel channel not found.")
 
-        config = CampaignQueueBuilder._parse_pipeline_config(account, pipeline_type)
+        config = CampaignQueueBuilder._parse_pipeline_config(channel, pipeline_type)
         
         daily_limit = config["daily_limit"]
         schedule = config["schedule"]

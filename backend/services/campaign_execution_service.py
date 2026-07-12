@@ -93,7 +93,7 @@ class CampaignExecutionEngine:
                 resolved_cat = int(plan.category) if plan.category and str(plan.category).isdigit() else cat_map.get(str(plan.category or "").strip().lower(), None)
 
                 task_data = UploadTaskCreate(
-                    account_id=plan.channel_id,
+                    channel_id=plan.channel_id,
                     metadata_source="CAMPAIGN",
                     source_type="CAMPAIGN_EXECUTION",
                     source_id=plan.id,

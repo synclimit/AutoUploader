@@ -25,7 +25,7 @@ def perform_real_upload(video_count):
 def test_layer_2_real_upload(video_count):
     """
     Layer 2: Real Upload Validation
-    Requires a real YouTube testing account.
+    Requires a real YouTube testing channel.
     Executes genuine uploads using test assets.
     Validates Thumbnail, Metadata, Playlist, Schedule, Retry, Completion.
     """

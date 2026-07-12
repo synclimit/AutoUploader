@@ -6,7 +6,7 @@ from typing import List
 from fastapi import APIRouter, File, UploadFile, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.db import get_db
-from models import Account
+from models import Channel
 from services.watch_folder.engine import get_engine
 
 logger = logging.getLogger("import_api")
@@ -17,13 +17,13 @@ UPLOAD_DIR = os.path.join(PathService.get_temp_dir(), "uploads")
 
 @router.post("/upload")
 async def upload_files(
-    account_id: str = Form(...),
+    channel_id: str = Form(...),
     files: List[UploadFile] = File(...),
     db: Session = Depends(get_db)
 ):
-    account = db.query(Account).filter(Account.id == account_id).first()
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+    channel = db.query(Channel).filter(Channel.id == channel_id).first()
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
 
     import_batch_id = f"import_{uuid.uuid4().hex[:8]}"
     batch_dir = os.path.join(UPLOAD_DIR, import_batch_id)
@@ -104,7 +104,7 @@ async def upload_files(
                 "retry_failed": True,
                 "duplicate_policy": "skip"
             }
-            task = importer.create_task(result, account, db, "manual_import", p_config)
+            task = importer.create_task(result, channel, db, "manual_import", p_config)
             imported_count += 1
         except Exception as e:
             logger.error(f"[IMPORT_API] Import failed | folder={folder_path!r} | error={e}")

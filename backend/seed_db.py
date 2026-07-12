@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import uuid
 from datetime import datetime, timedelta
 from database.db import SessionLocal, Base, engine
-from models import Account, UploadTask
+from models import Channel, UploadTask
 from schemas import QueueStatusEnum
 
 # Ensure tables exist
@@ -15,13 +15,13 @@ db = SessionLocal()
 
 # Clear existing test data
 db.query(UploadTask).delete()
-db.query(Account).delete()
+db.query(Channel).delete()
 db.commit()
 
 # Create 3 Accounts
-a1 = Account(id=str(uuid.uuid4()), channel_name="Test Connected 1", authentication_status="Connected")
-a2 = Account(id=str(uuid.uuid4()), channel_name="Test Connected 2", authentication_status="Connected")
-a3 = Account(id=str(uuid.uuid4()), channel_name="Test Disconnected", authentication_status="Disconnected")
+a1 = Channel(id=str(uuid.uuid4()), channel_name="Test Connected 1", authentication_status="Connected")
+a2 = Channel(id=str(uuid.uuid4()), channel_name="Test Connected 2", authentication_status="Connected")
+a3 = Channel(id=str(uuid.uuid4()), channel_name="Test Disconnected", authentication_status="Disconnected")
 db.add_all([a1, a2, a3])
 db.commit()
 
@@ -31,7 +31,7 @@ def make_task(status, days_ago, acc_id):
     completed = created + timedelta(minutes=5) if status == QueueStatusEnum.completed else None
     return UploadTask(
         id=str(uuid.uuid4()),
-        account_id=acc_id,
+        channel_id=acc_id,
         status=status.value if hasattr(status, 'value') else status,
         upload_stage="NONE",
         metadata_source="MANUAL",
@@ -59,4 +59,4 @@ tasks = [
 
 db.add_all(tasks)
 db.commit()
-print("Database seeded with specific accounts and tasks for validation.")
+print("Database seeded with specific channels and tasks for validation.")

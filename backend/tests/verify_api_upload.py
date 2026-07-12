@@ -8,7 +8,7 @@ from googleapiclient.discovery import build
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database.db import SessionLocal
-from models import UploadTask, Account
+from models import UploadTask, Channel
 from services.upload_engine.providers.api_provider import APIUploader
 from services.upload_engine.providers.upload_context import UploadContext
 
@@ -36,9 +36,9 @@ def main():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     
-    # Try to find a connected account
+    # Try to find a connected channel
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    tokens_dir = os.path.join(base_dir, "tokens", "accounts")
+    tokens_dir = os.path.join(base_dir, "tokens", "channels")
     
     available_tokens = []
     if os.path.exists(tokens_dir):
@@ -49,20 +49,20 @@ def main():
         print("BLOCKED")
         return
 
-    account_id = available_tokens[0]
-    account = db.query(Account).filter(Account.id == account_id).first()
+    channel_id = available_tokens[0]
+    channel = db.query(Channel).filter(Channel.id == channel_id).first()
     
-    if not account:
-        logger.warning(f"Account {account_id} not found in DB. Creating dummy for test.")
-        account = Account(
-            id=account_id, 
-            channel_name="Test Account", 
+    if not channel:
+        logger.warning(f"Channel {channel_id} not found in DB. Creating dummy for test.")
+        channel = Channel(
+            id=channel_id, 
+            channel_name="Test Channel", 
             source_type="M1_VIDEO_SPLITTER",
             region="Indonesia",
             authentication_status="Connected",
             upload_provider="api"
         )
-        db.add(account)
+        db.add(channel)
         db.commit()
 
     # Create dummy video file
@@ -81,7 +81,7 @@ def main():
     import datetime
     task = UploadTask(
         id="test-api-upload-task",
-        account_id=account.id,
+        channel_id=channel.id,
         video_path=dummy_video,
         thumbnail_path=dummy_thumb,
         title="Automated Test Video",
@@ -98,7 +98,7 @@ def main():
     
     context = UploadContext(
         task=task,
-        account=account,
+        channel=channel,
         profile=None,
         browser_profile_path="",
         db_session=db,
@@ -136,7 +136,7 @@ def main():
     # Now verify with real YouTube API using googleapiclient
     try:
         from googleapiclient.errors import HttpError
-        token_pickle = os.path.join(tokens_dir, f"{account_id}.pickle")
+        token_pickle = os.path.join(tokens_dir, f"{channel_id}.pickle")
         with open(token_pickle, "rb") as token:
             credentials = pickle.load(token)
             

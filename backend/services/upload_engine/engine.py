@@ -8,7 +8,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 from database.db import SessionLocal
-from models import UploadTask, UploadLog, Account
+from models import UploadTask, UploadLog, Channel
 from schemas import QueueStatusEnum
 
 from core.engine_base import EngineBase
@@ -96,10 +96,10 @@ class UploadEngine(EngineBase):
             if not task:
                 return
 
-            account = db.query(Account).filter(Account.id == task.account_id).first()
-            if not account:
+            channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
+            if not channel:
                 task.status = QueueStatusEnum.failed
-                task.failure_reason = "Account not found"
+                task.failure_reason = "Channel not found"
                 task.completed_at = datetime.utcnow()
                 db.commit()
                 return
@@ -117,16 +117,16 @@ class UploadEngine(EngineBase):
             # Build context
             context = UploadContext(
                 task=task,
-                account=account,
+                channel=channel,
                 profile=None,
-                browser_profile_path=account.browser_profile or "youtube_automation",
+                browser_profile_path=channel.browser_profile or "youtube_automation",
                 db_session=db,
                 logger=logger,
                 settings={}
             )
 
             # Resolve provider
-            provider_name = account.upload_provider or "api"
+            provider_name = channel.upload_provider or "api"
             try:
                 provider = ProviderRegistry.get_provider(provider_name)
             except ValueError as e:
@@ -181,8 +181,12 @@ class UploadEngine(EngineBase):
                             return True
                         return False
 
-                    # For AutoUploader desktop client, we aggressively retry all errors up to the user's setting
+                    # For AutoUploader desktop client, we aggressively retry all errors up to the user's setting, except auth errors
+                    err_str = str(e)
                     is_retryable = True
+                    if "AUTH_REQUIRED" in err_str or "unauthorized" in err_str.lower() or "oauth token not found" in err_str.lower():
+                        is_retryable = False
+                        
                     current_retry = getattr(task, 'retry_count', 0)
                     
                     settings = db.query(GlobalSettings).first()

@@ -81,7 +81,7 @@ print("\n## Alembic Migration vs Canonical SQLite")
 # Alembic lacks initial migration. We will just hardcode the missing tables/columns logically based on our findings.
 # Since Alembic has NO create_table, the entire schema is technically a diff.
 print("- **CRITICAL DIFFERENCE:** The Alembic migration history (in `alembic/versions`) contains NO `op.create_table` directives for ANY table. It only contains `op.add_column` for `v5_architecture_lock` and the `youtube_api` metadata.")
-print("- **Missing Tables in Alembic:** `accounts`, `profiles`, `profile_templates`, `upload_tasks`, `upload_logs`, `global_settings`.")
+print("- **Missing Tables in Alembic:** `channels`, `profiles`, `profile_templates`, `upload_tasks`, `upload_logs`, `global_settings`.")
 print("- **Missing Columns in Alembic:** Because tables are never created, ALL base columns are missing from Alembic's perspective.")
 print("- **Missing Indexes/FKs in Alembic:** ALL indexes and foreign keys are missing from Alembic's perspective.")
 

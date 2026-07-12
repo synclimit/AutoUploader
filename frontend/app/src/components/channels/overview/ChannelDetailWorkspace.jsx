@@ -197,7 +197,7 @@ export default function ChannelDetailWorkspace({ channel }) {
             <button 
               onClick={async () => {
                 try {
-                  const res = await apiClient.get(`/accounts/${channel.id}/auth-url`)
+                  const res = await apiClient.get(`/channels/${channel.id}/auth-url`)
                   if (res && res.auth_url) window.location.href = res.auth_url
                 } catch (err) { console.error(err) }
               }}
@@ -233,7 +233,7 @@ export default function ChannelDetailWorkspace({ channel }) {
             <button 
               onClick={async () => {
                 try {
-                  const res = await apiClient.get(`/accounts/${channel.id}/auth-url`)
+                  const res = await apiClient.get(`/channels/${channel.id}/auth-url`)
                   if (res && res.auth_url) window.location.href = res.auth_url
                 } catch (err) { console.error(err) }
               }}

@@ -104,7 +104,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   fetchAccounts: async () => {
     set({ isLoading: true, error: null })
     try {
-      const response = await apiClient.get('/accounts', { validateStatus: () => true });
+      const response = await apiClient.get('/channels', { validateStatus: () => true });
       console.log("HTTP Status:", 200); // Or extract from a full axios wrapper if we had it
       console.log("Raw JSON:", response);
       
@@ -128,7 +128,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   fetchAccount: async (id: string) => {
     set({ isLoading: true, error: null })
     try {
-      const data = await apiClient.get(`/accounts/${id}`)
+      const data = await apiClient.get(`/channels/${id}`)
       set({ selectedAccount: data, isLoading: false })
     } catch (err: any) {
       set({ error: err.message, isLoading: false })
@@ -138,7 +138,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   createAccount: async (data: any) => {
     set({ isLoading: true, error: null })
     try {
-      const newAcc = await apiClient.post('/accounts', data)
+      const newAcc = await apiClient.post('/channels', data)
       showToast('Account Created', 'success')
       await get().fetchAccounts()
       await get().fetchAccount(newAcc.id)
@@ -152,7 +152,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   updateAccount: async (id: string, updates: any) => {
     set({ isLoading: true, error: null })
     try {
-      const updated = await apiClient.put(`/accounts/${id}`, updates)
+      const updated = await apiClient.put(`/channels/${id}`, updates)
       showToast('Account Updated', 'success')
       await get().fetchAccounts()
       set({ selectedAccount: updated, isLoading: false })
@@ -165,7 +165,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   deleteAccount: async (id: string) => {
     set({ isLoading: true, error: null })
     try {
-      await apiClient.delete(`/accounts/${id}`)
+      await apiClient.delete(`/channels/${id}`)
       showToast('Account Deleted', 'info')
       await get().fetchAccounts()
       const { selectedAccount } = get()
@@ -200,7 +200,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   disconnectAccount: async (id: string) => {
     set({ isLoading: true, error: null })
     try {
-      const updated = await apiClient.post(`/accounts/${id}/disconnect`)
+      const updated = await apiClient.post(`/channels/${id}/disconnect`)
       showToast('YouTube Channel Disconnected', 'info')
       await get().fetchAccounts()
       set({ selectedAccount: updated, isLoading: false })
@@ -212,7 +212,7 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
 
   refreshOAuthToken: async (id: string) => {
     try {
-      await apiClient.post(`/accounts/${id}/refresh`)
+      await apiClient.post(`/channels/${id}/refresh`)
       showToast('OAuth Token Refreshed', 'success')
     } catch (err: any) {
       showToast(err.message || 'Failed to refresh token', 'error')

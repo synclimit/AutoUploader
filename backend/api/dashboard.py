@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from datetime import datetime
 
 from database.db import get_db
-from models import UploadTask, Account
+from models import UploadTask, Channel
 from schemas import QueueStatusEnum
 from services.upload_engine.engine import get_engine
 from services.watch_folder.engine import get_engine as get_wf_engine

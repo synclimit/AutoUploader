@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, PlaySquare, Folder, CheckCircle2, ChevronRight, ExternalLink, Loader2 } from 'lucide-react'
+import { X, PlaySquare, Folder, CheckCircle2, ChevronRight, ExternalLink, Loader2, UploadCloud, FileJson } from 'lucide-react'
 import apiClient from '../../../api/client'
 import { useAccountsStore } from '../../../store/accounts/accountsStore'
 import { showToast } from '../../common/NotificationToast'
@@ -10,8 +10,12 @@ export default function AddChannelWizard({ onClose }) {
   // Form State
   const [channelName, setChannelName] = useState('')
   const [accountId, setAccountId] = useState(null)
-  const [watchFolder, setWatchFolder] = useState('')
   
+  // Credential State
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
+
   const [isCreating, setIsCreating] = useState(false)
   const fetchAccounts = useAccountsStore(s => s.fetchAccounts)
   
@@ -19,13 +23,14 @@ export default function AddChannelWizard({ onClose }) {
   const pollInterval = useRef(null)
 
   useEffect(() => {
-    if (step === 2 && accountId) {
+    if (step === 3 && accountId) {
       pollInterval.current = setInterval(async () => {
         try {
-          const acc = await apiClient.get(`/accounts/${accountId}`)
-          if (acc.authentication_status === 'Pending Confirmation' || acc.authentication_status === 'Connected' || acc.authentication_status === 'AUTHENTICATED') {
+          const acc = await apiClient.get(`/channels/${accountId}`)
+          // Our channel logic sets health_status to 'READY' if successful
+          if (acc.health_status === 'READY' || acc.authentication_status === 'Connected') {
             clearInterval(pollInterval.current)
-            setStep(3)
+            setStep(4) // Move to finish
           }
         } catch (e) {
           console.error(e)
@@ -42,21 +47,58 @@ export default function AddChannelWizard({ onClose }) {
     if (!channelName.trim()) return
     setIsCreating(true)
     try {
-      const acc = await apiClient.post('/accounts', { channel_name: channelName })
+      const acc = await apiClient.post('/channels', { channel_name: channelName })
       setAccountId(acc.id)
       setStep(2)
     } catch (e) {
-      console.error("Failed to create account:", e)
+      console.error("Failed to create channel:", e)
+      showToast("Failed to create channel alias", "error")
     } finally {
       setIsCreating(false)
     }
   }
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0])
+      setUploadSuccess(false)
+    }
+  }
+
+  const handleUploadCredential = async () => {
+    if (!selectedFile || !accountId) return
+    setIsUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      
+      const res = await apiClient.post(`/oauth/channels/${accountId}/credential/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      
+      // apiClient automatically throws an error if success is false or HTTP status is not 2xx
+      setUploadSuccess(true)
+      showToast("Credential uploaded and validated successfully", "success")
+      setStep(3)
+    } catch (e) {
+      console.error("Upload failed:", e)
+      showToast(e.message || "Failed to upload client_secret.json", "error")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   const handleConnectGoogle = async () => {
     try {
-      const data = await apiClient.get(`/accounts/${accountId}/auth-url`)
-      if (data.auth_url) {
+      const data = await apiClient.get(`/oauth/channels/${accountId}/url`)
+      // apiClient automatically unwraps response.data.data
+      if (data && data.auth_url) {
         await apiClient.post('/system/open-url', { url: data.auth_url })
+      } else if (data && data.data && data.data.auth_url) {
+        // Fallback just in case interceptor didn't strip it
+        await apiClient.post('/system/open-url', { url: data.data.auth_url })
+      } else {
+        throw new Error(data?.message || "Failed to get auth URL")
       }
     } catch (e) {
       console.error("Failed to get auth URL:", e)
@@ -64,28 +106,7 @@ export default function AddChannelWizard({ onClose }) {
     }
   }
 
-  const handleBrowseFolder = async () => {
-    try {
-      const data = await apiClient.get('/system/browse-folder')
-      if (data.path) {
-        setWatchFolder(data.path)
-      }
-    } catch (e) {
-      console.error("Failed to browse folder:", e)
-    }
-  }
-
   const handleFinish = async () => {
-    if (watchFolder && accountId) {
-      try {
-        await apiClient.put(`/accounts/${accountId}`, { 
-          watch_folder: watchFolder, 
-          watch_folder_enabled: true 
-        })
-      } catch (e) {
-        console.error("Failed to update watch folder:", e)
-      }
-    }
     await fetchAccounts()
     onClose()
   }
@@ -115,11 +136,11 @@ export default function AddChannelWizard({ onClose }) {
 
         {/* Progress Bar */}
         <div className="w-full h-1 bg-white/5 flex">
-          <div className={`h-full bg-[var(--accent-400)] transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`}></div>
+          <div className={`h-full bg-[var(--accent-400)] transition-all duration-300 ${step === 1 ? 'w-1/4' : step === 2 ? 'w-2/4' : step === 3 ? 'w-3/4' : 'w-full'}`}></div>
         </div>
 
         {/* Content Area */}
-        <div className="p-8 flex flex-col relative z-10 min-h-[320px]">
+        <div className="p-8 flex flex-col relative z-10 min-h-[320px]" data-cache="v3">
           
           {step === 1 && (
             <div className="flex flex-col h-full animate-fade-in">
@@ -143,7 +164,7 @@ export default function AddChannelWizard({ onClose }) {
                 />
               </div>
 
-              <div className="mt-auto flex justify-end">
+              <div className="mt-auto pt-8 flex justify-end">
                 <button 
                   onClick={handleCreateAccount}
                   disabled={!channelName.trim() || isCreating}
@@ -156,6 +177,59 @@ export default function AddChannelWizard({ onClose }) {
           )}
 
           {step === 2 && (
+            <div className="flex flex-col h-full animate-fade-in">
+              <h2 className="text-[20px] font-bold text-white mb-2">Upload Client Secret</h2>
+              <p className="text-[13px] text-white/50 mb-4 flex items-center gap-2">
+                Provide the client_secret.json file downloaded from Google Cloud Console.
+                <a 
+                  href="https://console.cloud.google.com/apis/credentials" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[var(--accent-500)] hover:text-[var(--accent-400)] inline-flex items-center gap-1 font-medium bg-[var(--accent-500)]/10 px-2 py-0.5 rounded transition-colors"
+                >
+                  Open Console <ExternalLink size={12} />
+                </a>
+              </p>
+              <div className="flex flex-col items-center justify-center p-6 rounded-[16px] border border-white/[0.08] bg-white/[0.02] gap-4">
+                <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2">
+                  <FileJson size={32} className="text-blue-400" />
+                </div>
+                
+                <input 
+                  type="file" 
+                  accept=".json"
+                  id="client-secret-upload"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                
+                <label 
+                  htmlFor="client-secret-upload"
+                  className="h-[44px] px-6 rounded-[10px] border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-[14px] hover:bg-blue-500/20 transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <UploadCloud size={16} /> Browse JSON File
+                </label>
+                
+                {selectedFile && (
+                  <div className="text-[13px] text-green-400 font-medium flex items-center gap-1">
+                    <CheckCircle2 size={14} /> {selectedFile.name}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-auto pt-8 flex justify-end">
+                <button 
+                  onClick={handleUploadCredential}
+                  disabled={!selectedFile || isUploading}
+                  className="h-[44px] px-6 rounded-[12px] bg-[var(--accent-500)] hover:bg-[var(--accent-400)] text-[#05080e] font-bold text-[14px] transition-colors flex items-center gap-2 shadow-[0_0_20px_rgba(34,211,238,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? <Loader2 size={16} className="animate-spin" /> : "Validate JSON"} <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
             <div className="flex flex-col h-full animate-fade-in">
               <h2 className="text-[20px] font-bold text-white mb-2">Connect to YouTube</h2>
               <p className="text-[13px] text-white/50 mb-8">Securely connect your YouTube channel using Google OAuth. AutoUploader will use API v3 for reliable uploads.</p>
@@ -182,31 +256,14 @@ export default function AddChannelWizard({ onClose }) {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="flex flex-col h-full animate-fade-in">
-              <h2 className="text-[20px] font-bold text-white mb-2">Assign Watch Folder</h2>
-              <p className="text-[13px] text-white/50 mb-8">Videos dropped into this folder will automatically be queued for this channel.</p>
+              <h2 className="text-[20px] font-bold text-white mb-2">Setup Complete</h2>
+              <p className="text-[13px] text-white/50 mb-8">Your channel has been successfully connected and is ready for manual uploads.</p>
               
-              <div className="p-4 rounded-[12px] border border-white/[0.08] bg-[#05080e]/60 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Folder size={16} className="text-[var(--accent-400)]" />
-                    <span className="text-[13px] font-bold text-white">Watch Folder</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-[40px] px-3 rounded-[8px] bg-white/[0.03] border border-white/[0.05] flex items-center truncate" title={watchFolder || "Not selected..."}>
-                    <span className={`text-[13px] font-mono truncate ${watchFolder ? 'text-white' : 'text-white/40'}`}>
-                      {watchFolder || "Not selected..."}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={handleBrowseFolder}
-                    className="h-[40px] px-4 rounded-[8px] bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/30 text-[var(--accent-400)] font-bold text-[12px] hover:bg-[var(--accent-500)]/20 transition-colors"
-                  >
-                    Browse
-                  </button>
-                </div>
+              <div className="flex flex-col items-center justify-center p-6 rounded-[16px] border border-green-500/20 bg-green-500/5 gap-4">
+                 <CheckCircle2 size={48} className="text-green-400" />
+                 <span className="text-white font-bold">Channel is Ready</span>
               </div>
 
               <div className="mt-auto pt-6 flex justify-end">
@@ -214,7 +271,7 @@ export default function AddChannelWizard({ onClose }) {
                   onClick={handleFinish}
                   className="h-[44px] px-6 rounded-[12px] bg-green-500 hover:bg-green-400 text-[#05080e] font-bold text-[14px] transition-colors flex items-center gap-2 shadow-[0_0_20px_rgba(74,222,128,0.2)]"
                 >
-                  <CheckCircle2 size={16} /> Finish Setup
+                  Go to Dashboard <ChevronRight size={16} />
                 </button>
               </div>
             </div>

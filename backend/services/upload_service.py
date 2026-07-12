@@ -33,7 +33,7 @@ class UploadService:
         db: Session, 
         status: List[str] = None,
         source_type: str = None,
-        account_id: str = None,
+        channel_id: str = None,
         profile_id: str = None,
         keyword: str = None,
         date_from: datetime = None,
@@ -50,8 +50,8 @@ class UploadService:
             query = query.filter(UploadTask.status.in_(status))
         if source_type:
             query = query.filter(UploadTask.source_type == source_type)
-        if account_id:
-            query = query.filter(UploadTask.account_id == account_id)
+        if channel_id:
+            query = query.filter(UploadTask.channel_id == channel_id)
         if profile_id:
             query = query.filter(UploadTask.profile_id == profile_id)
         if keyword:
@@ -92,16 +92,16 @@ class UploadService:
 
     @staticmethod
     def create(db: Session, data: UploadTaskCreate) -> UploadTask:
-        from models import Account
+        from models import Channel
         import json
         
         # Inheritance Engine
         # Campaign execution explicitly uses CampaignUploadPlan as the sole metadata source snapshot
-        account = db.query(Account).filter(Account.id == data.account_id).first()
-        if account and data.source_type != 'CAMPAIGN_EXECUTION':
+        channel = db.query(Channel).filter(Channel.id == data.channel_id).first()
+        if channel and data.source_type != 'CAMPAIGN_EXECUTION':
             try:
-                defaults_json = json.loads(account.upload_defaults) if account.upload_defaults else {}
-                advanced_json = json.loads(account.advanced_settings) if account.advanced_settings else {}
+                defaults_json = json.loads(channel.upload_defaults) if channel.upload_defaults else {}
+                advanced_json = json.loads(channel.advanced_settings) if channel.advanced_settings else {}
                 
                 pipeline = data.pipeline_type if data.pipeline_type else "long"
                 
@@ -289,7 +289,7 @@ class UploadService:
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
 
-        from models import Account
+        from models import Channel
         from prompts.manager import PromptManager
         
         prompt_meta = PromptManager.get_prompt(request.content_type)
@@ -300,10 +300,10 @@ class UploadService:
                                         .replace("{language}", request.language)\
                                         .replace("{seo_mode}", request.seo_mode)
                                         
-        account = db.query(Account).filter(Account.id == task.account_id).first()
-        if account and account.ai_identity:
+        channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
+        if channel and channel.ai_identity:
             try:
-                ai_identity = json.loads(account.ai_identity)
+                ai_identity = json.loads(channel.ai_identity)
                 if ai_identity and isinstance(ai_identity, dict) and len(ai_identity.keys()) > 0:
                     prompt = f"CHANNEL AI IDENTITY CONTEXT:\nThe following is the identity, personality, and demographic of the channel this content is generated for. You MUST adhere to these constraints to ensure channel consistency.\n{json.dumps(ai_identity, indent=2)}\n\n---\n\n" + prompt
             except:

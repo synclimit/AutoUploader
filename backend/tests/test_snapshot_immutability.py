@@ -6,7 +6,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database.db import SessionLocal
-from models import UploadTask, GlobalSettings, Account, Profile
+from models import UploadTask, GlobalSettings, Channel, Profile
 
 def test_upload_task_immutability():
     db = SessionLocal()
@@ -14,15 +14,15 @@ def test_upload_task_immutability():
     # 1. Create initial settings
     pref = GlobalSettings(general_theme="dark", general_language="en", upload_concurrent=3)
     profile = Profile(id="test_profile", name="Default Profile", content_type="Longform (16:9)")
-    account = Account(id="test_account", channel_name="Test Channel", publish_visibility="private", language="en")
+    channel = Channel(id="test_account", channel_name="Test Channel", publish_visibility="private", language="en")
     
-    db.add_all([pref, profile, account])
+    db.add_all([pref, profile, channel])
     db.commit()
     
     # 2. Create UploadTask based on these settings
     task = UploadTask(
         id="test_immutable_task",
-        account_id="test_account",
+        channel_id="test_account",
         title="Original Title",
         description="Original Description",
         privacy_status="private",
@@ -39,8 +39,8 @@ def test_upload_task_immutability():
     # 3. Modify settings
     pref.general_theme = "light"
     pref.upload_concurrent = 10
-    account.publish_visibility = "public"
-    account.language = "id"
+    channel.publish_visibility = "public"
+    channel.language = "id"
     profile.name = "Updated Profile"
     db.commit()
     
@@ -56,7 +56,7 @@ def test_upload_task_immutability():
     # Cleanup
     db.delete(refetched_task)
     db.delete(pref)
-    db.delete(account)
+    db.delete(channel)
     db.delete(profile)
     db.commit()
     db.close()

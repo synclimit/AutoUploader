@@ -20,12 +20,12 @@ class YouTubePlugin(IAnalyticsProvider):
             raise ValueError("Credentials are required for YouTube API")
         return build("youtubeAnalytics", "v2", credentials=credentials)
     
-    def get_channel_metrics(self, account_id: str, credentials: Any = None) -> Dict[str, Any]:
+    def get_channel_metrics(self, channel_id: str, credentials: Any = None) -> Dict[str, Any]:
         youtube = self._get_youtube_service(credentials)
         response = youtube.channels().list(mine=True, part="id,statistics,snippet").execute()
         
         if not response.get("items"):
-            raise ValueError("No YouTube channel found for this account.")
+            raise ValueError("No YouTube channel found for this channel.")
             
         channel = response["items"][0]
         stats = channel.get("statistics", {})
@@ -38,7 +38,7 @@ class YouTubePlugin(IAnalyticsProvider):
             "title": channel.get("snippet", {}).get("title", "")
         }
         
-    def get_analytics_metrics(self, account_id: str, credentials: Any = None) -> Dict[str, Any]:
+    def get_analytics_metrics(self, channel_id: str, credentials: Any = None) -> Dict[str, Any]:
         # Fetch high-level analytics (Last 28 days for CTR, watch time, etc)
         # Using YouTube Analytics API
         analytics = self._get_youtube_analytics_service(credentials)
@@ -74,7 +74,7 @@ class YouTubePlugin(IAnalyticsProvider):
             print(f"Analytics API Error: {e}")
             return {"views": 0, "watchTime": 0, "avgViewDuration": 0, "ctr": 0}
         
-    def get_chart_data(self, account_id: str, days: int, credentials: Any = None) -> Dict[str, Any]:
+    def get_chart_data(self, channel_id: str, days: int, credentials: Any = None) -> Dict[str, Any]:
         analytics = self._get_youtube_analytics_service(credentials)
         
         end_date = datetime.utcnow().strftime("%Y-%m-%d")
@@ -105,5 +105,5 @@ class YouTubePlugin(IAnalyticsProvider):
             print(f"Analytics Chart API Error: {e}")
             return {"history": []}
         
-    def get_videos(self, account_id: str, page_token: Optional[str], limit: int, credentials: Any = None) -> Dict[str, Any]:
+    def get_videos(self, channel_id: str, page_token: Optional[str], limit: int, credentials: Any = None) -> Dict[str, Any]:
         return {}

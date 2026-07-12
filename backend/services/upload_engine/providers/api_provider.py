@@ -14,33 +14,63 @@ class APIUploader(BaseUploader):
         
         try:
             # 1. Authenticate
-            from services.system.path_service import PathService
-            token_pickle = os.path.join(PathService.get_appdata_dir(), "tokens", "accounts", f"{task.account_id}.pickle")
+            from services.oauth_core.oauth_repository import OAuthRepository
+            from services.oauth_core.oauth_client import OAuthClient
+            from services.oauth_core.oauth_types import OAuthHealthStatus
             
-            if not os.path.exists(token_pickle):
-                return UploadResult(
-                    success=False,
-                    error_code="AUTH_REQUIRED",
-                    error_message=f"OAuth token not found for account {task.account_id}. Please connect YouTube."
-                )
+            if not context.db_session:
+                from database.db import SessionLocal
+                db = SessionLocal()
+            else:
+                db = context.db_session
                 
-            with open(token_pickle, "rb") as token:
-                credentials = pickle.load(token)
-                
-            if credentials and credentials.expired and credentials.refresh_token:
-                from google.auth.transport.requests import Request
-                try:
-                    context.logger.info(f"[APIUploader] Refreshing expired OAuth token for account {task.account_id}...")
-                    credentials.refresh(Request())
-                    with open(token_pickle, "wb") as token:
-                        pickle.dump(credentials, token)
-                except Exception as ref_err:
-                    context.logger.error(f"[APIUploader] Token refresh failed: {ref_err}")
+            try:
+                token = OAuthRepository.load_token(db, task.channel_id)
+                if not token or not token.access_token:
                     return UploadResult(
                         success=False,
-                        error_code="AUTH_EXPIRED",
-                        error_message=f"OAuth token refresh failed: {ref_err}. Please reconnect channel in Channels menu."
+                        error_code="AUTH_REQUIRED",
+                        error_message=f"OAuth token not found for channel {task.channel_id}. Please connect YouTube."
                     )
+                
+                config = OAuthClient.load_configuration(task.channel_id)
+                from google.oauth2.credentials import Credentials
+                import datetime
+                dt = datetime.datetime.fromisoformat(token.expires_at) if token.expires_at else None
+                credentials = Credentials(
+                    token=token.access_token,
+                    refresh_token=token.refresh_token,
+                    token_uri=config.token_uri,
+                    client_id=config.client_id,
+                    client_secret=config.client_secret,
+                    scopes=config.scopes,
+                    expiry=dt
+                )
+                
+                if credentials and credentials.expired and credentials.refresh_token:
+                    from google.auth.transport.requests import Request
+                    try:
+                        context.logger.info(f"[APIUploader] Refreshing expired OAuth token for channel {task.channel_id}...")
+                        credentials.refresh(Request())
+                        # Save refreshed token back to DB
+                        from services.oauth_core.oauth_types import OAuthToken
+                        dt_str = credentials.expiry.isoformat() if credentials.expiry else None
+                        new_token = OAuthToken(
+                            access_token=credentials.token,
+                            refresh_token=credentials.refresh_token,
+                            expires_at=dt_str
+                        )
+                        OAuthRepository.save_or_update_token(db, task.channel_id, new_token)
+                    except Exception as ref_err:
+                        context.logger.error(f"[APIUploader] Token refresh failed: {ref_err}")
+                        return UploadResult(
+                            success=False,
+                            error_code="AUTH_EXPIRED",
+                            error_message=f"OAuth token refresh failed: {ref_err}. Please reconnect channel in Channels menu."
+                        )
+            finally:
+                if not context.db_session:
+                    db.close()
                 
             youtube = build("youtube", "v3", credentials=credentials)
             
@@ -192,8 +222,22 @@ class APIUploader(BaseUploader):
                 try:
                     from google.auth.transport.requests import Request
                     credentials.refresh(Request())
-                    with open(token_pickle, "wb") as token:
-                        pickle.dump(credentials, token)
+                    from services.oauth_core.oauth_types import OAuthToken
+                    dt_str = credentials.expiry.isoformat() if credentials.expiry else None
+                    new_token = OAuthToken(
+                        access_token=credentials.token,
+                        refresh_token=credentials.refresh_token,
+                        expires_at=dt_str
+                    )
+                    if not context.db_session:
+                        from database.db import SessionLocal
+                        db = SessionLocal()
+                        try:
+                            OAuthRepository.save_or_update_token(db, task.channel_id, new_token)
+                        finally:
+                            db.close()
+                    else:
+                        OAuthRepository.save_or_update_token(context.db_session, task.channel_id, new_token)
                     youtube = build("youtube", "v3", credentials=credentials)
                 except Exception as ref_err:
                     context.logger.warning(f"[APIUploader] Token refresh failed: {ref_err}")

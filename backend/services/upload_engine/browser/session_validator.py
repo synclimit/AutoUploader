@@ -10,7 +10,7 @@ class SessionValidator:
             url = page.url
             if "studio.youtube.com/channel" in url or "studio.youtube.com" in url:
                 # Need to verify we aren't asked to sign in
-                if page.locator("text='Sign in'").count() > 0 or "accounts.google.com" in url:
+                if page.locator("text='Sign in'").count() > 0 or "channels.google.com" in url:
                     return False
                 return True
             return False

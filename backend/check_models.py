@@ -1,6 +1,6 @@
 import asyncio
 from database.db import SessionLocal
-from models import Account
+from models import Channel
 import json
 
 async def main():
@@ -9,7 +9,7 @@ async def main():
     db = SessionLocal()
     # Read API Key from settings (but in AutoUploader it's stored where?)
     # Wait, the screenshot shows the API key in the AI Provider settings.
-    # We can just fetch it from Account or Settings.
+    # We can just fetch it from Channel or Settings.
     from models import Settings
     settings_obj = db.query(Settings).filter(Settings.key == "ai_provider").first()
     if not settings_obj:

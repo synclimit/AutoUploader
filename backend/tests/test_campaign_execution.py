@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from database.db import Base
 from models import (
     CampaignReviewSession, CampaignAsset, CampaignUploadPlan, 
-    CampaignExecutionState, Account, UploadTask
+    CampaignExecutionState, Channel, UploadTask
 )
 from services.campaign_execution_service import CampaignExecutionService, CampaignExecutionEngine
 from schemas import QueueStatusEnum
@@ -31,7 +31,7 @@ def test_start_campaign(db_session):
     pipeline_type = "long"
     
     # Create required entities
-    db_session.add(Account(id=channel_id, channel_name="Test Channel"))
+    db_session.add(Channel(id=channel_id, channel_name="Test Channel"))
     
     # Create CampaignAsset
     c_asset = CampaignAsset(
@@ -63,7 +63,7 @@ def test_execution_loop_creates_upload_task(db_session):
     session_id = "test_session"
     pipeline_type = "long"
     
-    db_session.add(Account(id=channel_id, channel_name="Test Channel"))
+    db_session.add(Channel(id=channel_id, channel_name="Test Channel"))
     
     c_asset = CampaignAsset(
         id=str(uuid.uuid4()), channel_id=channel_id, fingerprint="fp1",

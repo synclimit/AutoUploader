@@ -86,7 +86,7 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
         queryParams.append('source_type', f.source_type)
       }
       if (f.account_id) {
-        queryParams.append('account_id', f.account_id)
+        queryParams.append('channel_id', f.account_id)
       }
       if (f.keyword) {
         queryParams.append('keyword', f.keyword)
@@ -103,17 +103,19 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
       
       const data = await apiClient.get(url)
       
+      const mappedData = data.map((t: any) => ({ ...t, account_id: t.channel_id || t.account_id }))
+      
       const activeTask = get().activeTask
       let newActiveTask = activeTask
       
       if (activeTask) {
-        const found = data.find((t: UploadTask) => t.id === activeTask.id)
+        const found = mappedData.find((t: UploadTask) => t.id === activeTask.id)
         if (found) newActiveTask = found
-      } else if (data.length > 0) {
-        newActiveTask = data[0]
+      } else if (mappedData.length > 0) {
+        newActiveTask = mappedData[0]
       }
       
-      set({ tasks: data, loading: false, activeTask: newActiveTask })
+      set({ tasks: mappedData, loading: false, activeTask: newActiveTask })
       
       // Also fetch logs if we have an active task
       if (newActiveTask) {
@@ -127,9 +129,10 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
   fetchTask: async (id) => {
     try {
       const data = await apiClient.get(`/queue/${id}`)
+      const mappedData = { ...data, account_id: data.channel_id || data.account_id }
       set((s) => ({ 
-        activeTask: data,
-        tasks: s.tasks.map(t => t.id === id ? data : t)
+        activeTask: mappedData,
+        tasks: s.tasks.map(t => t.id === id ? mappedData : t)
       }))
     } catch (error: any) {
       set({ error: error.message })

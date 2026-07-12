@@ -3,7 +3,7 @@ import sys
 import json
 from datetime import datetime
 from database.db import SessionLocal
-from models import Account, UploadTask
+from models import Channel, UploadTask
 from services.watch_folder import scanner, validator, duplicate_checker
 
 def debug_channel(channel_name: str):
@@ -12,12 +12,12 @@ def debug_channel(channel_name: str):
     print("==============================\n")
     
     db = SessionLocal()
-    account = db.query(Account).filter(Account.channel_name == channel_name).first()
+    channel = db.query(Channel).filter(Channel.channel_name == channel_name).first()
     
-    if not account:
+    if not channel:
         print(f"[FAIL] Channel Loaded\n")
         print("Reason:")
-        print(f"Account {channel_name} not found.")
+        print(f"Channel {channel_name} not found.")
         print("\n==============================")
         print("TRACE COMPLETE")
         print("==============================")
@@ -27,20 +27,20 @@ def debug_channel(channel_name: str):
     print("[PASS] Channel Loaded")
         
     try:
-        pipelines = json.loads(account.pipelines) if account.pipelines else {}
+        pipelines = json.loads(channel.pipelines) if channel.pipelines else {}
     except:
         pipelines = {}
         
-    if not pipelines and account.watch_folder_enabled and account.watch_folder:
+    if not pipelines and channel.watch_folder_enabled and channel.watch_folder:
         pipelines = {
             "long": {
                 "enabled": True,
-                "watch_folder": account.watch_folder,
+                "watch_folder": channel.watch_folder,
                 "daily_limit": 2,
                 "processing_order": "oldest_first",
                 "schedule_mode": "application",
                 "schedule": ["09:00", "18:00"],
-                "publish_mode": account.publish_visibility or "private",
+                "publish_mode": channel.publish_visibility or "private",
                 "retry_failed": True,
                 "duplicate_policy": "skip"
             }
@@ -103,7 +103,7 @@ def debug_channel(channel_name: str):
                     else:
                         try:
                             from services.watch_folder import importer
-                            task = importer.create_task(res, account, db, p_key, p_config)
+                            task = importer.create_task(res, channel, db, p_key, p_config)
                             print("[PASS] Import\n")
                             print("Reason:")
                             print(f"UploadTask created successfully: {task.id}")

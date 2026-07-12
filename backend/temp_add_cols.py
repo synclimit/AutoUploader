@@ -5,13 +5,13 @@ def add_columns():
     cursor = conn.cursor()
     
     try:
-        cursor.execute("ALTER TABLE accounts ADD COLUMN pipelines TEXT DEFAULT '{}'")
+        cursor.execute("ALTER TABLE channels ADD COLUMN pipelines TEXT DEFAULT '{}'")
         print("Added pipelines")
     except Exception as e:
         print(e)
         
     try:
-        cursor.execute("ALTER TABLE accounts ADD COLUMN pipeline_states TEXT DEFAULT '{}'")
+        cursor.execute("ALTER TABLE channels ADD COLUMN pipeline_states TEXT DEFAULT '{}'")
         print("Added pipeline_states")
     except Exception as e:
         print(e)

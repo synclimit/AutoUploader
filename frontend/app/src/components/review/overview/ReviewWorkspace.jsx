@@ -65,22 +65,27 @@ export default function ReviewWorkspace() {
     return tasks
   }, [tasks])
 
-  // Map to format expected by UI components
-  const mappedVideos = filteredVideos.map(v => ({
-    ...v,
-    channelName: accounts.find(c => c.id === v.account_id)?.channel_name || 'Unknown Channel',
-    channelLogo: accounts.find(c => c.id === v.account_id)?.avatar_url || null,
-    duration: '00:00', // Need metadata parsing
-    resolution: '1080p',
-    size: 'Unknown'
-  }))
+  const mappedVideos = useMemo(() => {
+    return filteredVideos.map(v => {
+      const channel = accounts.find(c => c.id === v.account_id);
+      return {
+        ...v,
+        channelName: channel?.channel_name || channel?.name || 'Unknown Channel',
+        channelLogo: channel?.avatar_url || null,
+        duration: '00:00', // Need metadata parsing
+        resolution: '1080p',
+        size: 'Unknown'
+      };
+    });
+  }, [filteredVideos, accounts]);
 
   const activeVideoProps = useMemo(() => {
     if (!activeTask) return null;
+    const channel = accounts.find(c => c.id === activeTask.account_id);
     return {
       ...activeTask,
-      channelName: accounts.find(c => c.id === activeTask.account_id)?.channel_name || 'Unknown Channel',
-      channelLogo: accounts.find(c => c.id === activeTask.account_id)?.avatar_url || null,
+      channelName: channel?.channel_name || channel?.name || 'Unknown Channel',
+      channelLogo: channel?.avatar_url || null,
       duration: '00:00',
       resolution: '1080p',
       size: 'Unknown'
@@ -438,11 +443,11 @@ export default function ReviewWorkspace() {
                buttonClass = "bg-[var(--accent-400)] text-black cursor-not-allowed";
                disabled = true;
              } else if (status === 'SCHEDULED') {
-               buttonText = "Upload Now (Override)";
-               icon = <CloudUpload size={16} strokeWidth={2.5} />;
-               buttonClass = "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)]";
-               disabled = false;
-             } else if (status === 'COMPLETED') {
+                buttonText = "✓ Scheduled";
+                icon = <Clock size={16} strokeWidth={2.5} />;
+                buttonClass = "bg-purple-500/20 text-purple-400 cursor-not-allowed border border-purple-500/30";
+                disabled = true;
+              } else if (status === 'COMPLETED') {
                buttonText = "✓ Uploaded";
                icon = null;
                buttonClass = "bg-green-500/20 text-green-400 cursor-not-allowed border border-green-500/30";

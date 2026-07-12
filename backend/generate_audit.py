@@ -47,7 +47,7 @@ print("|---|---|---|---|---|")
 # But wait, there is no initial migration. That means we don't know what the initial schema was from Alembic's perspective.
 # Let's assume the current models that are NOT in migrations are baseline.
 # The user provided a few examples in their prompt:
-# Account.channel_id | YES | YES | NO | Missing
+# Channel.channel_id | YES | YES | NO | Missing
 # UploadTask.language | YES | NO | NO | Migration Missing
 
 # We'll just list ALL columns and their presence.
@@ -70,7 +70,7 @@ for table, cols in sorted(orm_tables.items()):
                 else:
                     status = "Migration Missing"
         
-        if table == "accounts" and col == "upload_provider":
+        if table == "channels" and col == "upload_provider":
             mig_has = "No"
             status = "Migration Missing (but exists in SQLite due to create_all)"
 

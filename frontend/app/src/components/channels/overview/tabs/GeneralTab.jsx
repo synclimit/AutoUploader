@@ -410,6 +410,28 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   className="h-[40px] rounded-[10px] bg-[#05080e] border border-white/[0.08] px-3 text-[14px] text-white outline-none focus:border-[var(--accent-500)] transition-colors" 
                 />
               </div>
+
+              <div className="flex-[2] flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Upload Mode</label>
+                  {renderTooltip('Pilih apakah video dari folder langsung diupload otomatis atau masuk ke daftar tunggu (review).')}
+                  {renderDirtyIndicator(key, 'require_approval')}
+                </div>
+                <div className="flex bg-black/40 p-1 rounded-[8px] border border-white/10 h-[40px]">
+                  <button
+                    onClick={() => updatePipeline(key, 'require_approval', false)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-[6px] text-[12px] font-bold transition-all ${p.require_approval === false ? 'bg-[var(--accent-500)]/20 text-[var(--accent-400)]' : 'text-white/40 hover:text-white/80'}`}
+                  >
+                    Auto Upload
+                  </button>
+                  <button
+                    onClick={() => updatePipeline(key, 'require_approval', true)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-[6px] text-[12px] font-bold transition-all ${p.require_approval !== false ? 'bg-amber-500/20 text-amber-400' : 'text-white/40 hover:text-white/80'}`}
+                  >
+                    Need Approval
+                  </button>
+                </div>
+              </div>
             </div>
             </>
             ) : (
@@ -489,8 +511,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between border-b border-white/[0.04] pb-3">
+
+              {/* DETERMINISTIC SCHEDULE */}
+              <div className="flex items-center justify-between border-b border-white/[0.04] pb-3 mt-4">
                 <div className="flex items-center gap-2">
                   <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Deterministic Schedule</label>
                   {renderTooltip('Jadwal pasti kapan video-video Anda akan dirilis di YouTube setiap harinya.')}
@@ -503,7 +526,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                 {(p.schedule || []).map((time, idx) => {
                   const strTime = String(time);
                   const isDate = strTime.includes('-');
@@ -552,6 +575,39 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   );
                 })}
               </div>
+
+              {/* SCHEDULER ENGINE */}
+              <div className="pb-4 border-b border-white/[0.04] mt-4">
+                <div className="flex items-center justify-between p-3 bg-white/[0.02] rounded-[8px] border border-white/[0.04]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-[8px] bg-[var(--accent-500)]/10 flex items-center justify-center">
+                      <Settings2 size={14} className="text-[var(--accent-400)]" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[12px] font-bold text-white tracking-wide">Scheduler Engine</span>
+                      <span className="text-[10px] text-white/50">Pilih eksekutor penjadwalan video (Continuous & Campaign)</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {renderDirtyIndicator(key, 'schedule_mode')}
+                    <div className="flex bg-black/40 p-1 rounded-[8px] border border-white/10">
+                      <button
+                        onClick={() => updatePipeline(key, 'schedule_mode', 'application')}
+                        className={`px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${(!p.schedule_mode || p.schedule_mode === 'application') ? 'bg-[var(--accent-500)]/20 text-[var(--accent-400)]' : 'text-white/40 hover:text-white/80'}`}
+                      >
+                        Pitstop
+                      </button>
+                      <button
+                        onClick={() => updatePipeline(key, 'schedule_mode', 'youtube')}
+                        className={`px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${(p.schedule_mode === 'youtube') ? 'bg-red-500/20 text-red-400' : 'text-white/40 hover:text-white/80'}`}
+                      >
+                        YouTube
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
 
               {/* HUMANIZE CONFIG */}
               <div className="mt-4 pt-5 border-t border-white/[0.04] flex flex-col gap-4">

@@ -12,7 +12,7 @@ def setup_profile():
     print(f"Profile directory: {PROFILE_PATH}")
     print("\nInstructions:")
     print("1. A browser window will open.")
-    print("2. Log into your YouTube testing account.")
+    print("2. Log into your YouTube testing channel.")
     print("3. Ensure you can access YouTube Studio (studio.youtube.com).")
     print("4. Close the browser window when finished.\n")
     

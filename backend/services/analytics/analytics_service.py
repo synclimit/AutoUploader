@@ -20,15 +20,15 @@ class AnalyticsService:
             raise ValueError(f"Provider {account_type} not found or not supported.")
         return provider
         
-    async def get_dashboard_metrics(self, account_id: str, account_type: str, credentials: Any, force_refresh: bool = False) -> Dict[str, Any]:
+    async def get_dashboard_metrics(self, channel_id: str, account_type: str, credentials: Any, force_refresh: bool = False) -> Dict[str, Any]:
         """
         Lightweight metrics for the dashboard + 28d analytics.
         """
         def fetch_combined():
             provider = self._get_provider(account_type)
-            channel = provider.get_channel_metrics(account_id, credentials)
+            channel = provider.get_channel_metrics(channel_id, credentials)
             try:
-                analytics = provider.get_analytics_metrics(account_id, credentials)
+                analytics = provider.get_analytics_metrics(channel_id, credentials)
             except Exception as e:
                 print(f"Analytics 28d fetch failed: {e}")
                 analytics = {"views": channel.get("views", 0), "ctr": 0}
@@ -46,40 +46,40 @@ class AnalyticsService:
             }
 
         return await self._fetch_with_cache(
-            f"dashboard_{account_id}",
+            f"dashboard_{channel_id}",
             cache_service.analytics_cache,
             fetch_combined,
             "youtube",
             force_refresh
         )
 
-    async def get_overview_metrics(self, account_id: str, account_type: str, credentials: Any, force_refresh: bool = False) -> Dict[str, Any]:
+    async def get_overview_metrics(self, channel_id: str, account_type: str, credentials: Any, force_refresh: bool = False) -> Dict[str, Any]:
         """
         Heavy analytics for Workspace Overview.
         Combines channel metrics and heavy analytics.
         """
         async def fetch_both():
             provider = self._get_provider(account_type)
-            channel = provider.get_channel_metrics(account_id, credentials)
-            analytics = provider.get_analytics_metrics(account_id, credentials)
+            channel = provider.get_channel_metrics(channel_id, credentials)
+            analytics = provider.get_analytics_metrics(channel_id, credentials)
             return {"channel": channel, "analytics": analytics}
             
         return await self._fetch_with_cache(
-            f"overview_{account_id}",
+            f"overview_{channel_id}",
             cache_service.analytics_cache,
             fetch_both,
             "youtube",
             force_refresh
         )
 
-    async def get_charts(self, account_id: str, account_type: str, days: int, credentials: Any, force_refresh: bool = False) -> Dict[str, Any]:
+    async def get_charts(self, channel_id: str, account_type: str, days: int, credentials: Any, force_refresh: bool = False) -> Dict[str, Any]:
         """
         Time-series data for Charts.
         """
         return await self._fetch_with_cache(
-            f"charts_{account_id}_{days}",
+            f"charts_{channel_id}_{days}",
             cache_service.chart_cache,
-            lambda: self._get_provider(account_type).get_chart_data(account_id, days, credentials),
+            lambda: self._get_provider(account_type).get_chart_data(channel_id, days, credentials),
             "youtube",
             force_refresh
         )

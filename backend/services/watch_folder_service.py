@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from fastapi import HTTPException
 
-from models import Account
+from models import Channel
 from services.watch_folder import health_service
 from services.watch_folder.engine import get_engine
 
@@ -14,30 +14,30 @@ class WatchFolderService:
     @staticmethod
     def get_all_health(db: Session):
         try:
-            accounts = (
-                db.query(Account)
+            channels = (
+                db.query(Channel)
                 .filter(
                     or_(
-                        Account.pipelines != "{}",
-                        Account.watch_folder_enabled == True
+                        Channel.pipelines != "{}",
+                        Channel.watch_folder_enabled == True
                     )
                 )
                 .all()
             )
         except Exception as e:
-            logger.error(f"[SERVICE] DB error fetching accounts: {e}")
+            logger.error(f"[SERVICE] DB error fetching channels: {e}")
             raise HTTPException(status_code=500, detail="Database error")
 
-        if not accounts:
-            return {"accounts": [], "total": 0}
+        if not channels:
+            return {"channels": [], "total": 0}
 
         health_records = health_service.get_all_health(
-            [a.id for a in accounts], db
+            [a.id for a in channels], db
         )
 
-        account_map = {a.id: a for a in accounts}
+        account_map = {a.id: a for a in channels}
         for record in health_records:
-            acc = account_map.get(record["account_id"])
+            acc = account_map.get(record["channel_id"])
             if acc:
                 record["channel_name"] = acc.channel_name
                 import json
@@ -56,30 +56,30 @@ class WatchFolderService:
                     p_health["remaining_today"] = max(0, int(p_health["daily_limit"]) - p_health["today_intake"]) if str(p_health["daily_limit"]).isdigit() else "—"
                     p_health["packages_found"] = p_health.get("last_scan_count", "—")
 
-        return {"accounts": health_records, "total": len(health_records)}
+        return {"channels": health_records, "total": len(health_records)}
 
     @staticmethod
-    def get_account_health(db: Session, account_id: str):
+    def get_account_health(db: Session, channel_id: str):
         try:
-            account = (
-                db.query(Account)
-                .filter(Account.id == account_id)
+            channel = (
+                db.query(Channel)
+                .filter(Channel.id == channel_id)
                 .first()
             )
         except Exception as e:
             logger.error(f"[SERVICE] DB error: {e}")
             raise HTTPException(status_code=500, detail="Database error")
 
-        if not account:
-            raise HTTPException(status_code=404, detail="Account not found")
+        if not channel:
+            raise HTTPException(status_code=404, detail="Channel not found")
 
-        health = health_service.get_health(account_id, db)
-        health["channel_name"] = account.channel_name
+        health = health_service.get_health(channel_id, db)
+        health["channel_name"] = channel.channel_name
         
         import json
         try:
-            pipelines = json.loads(account.pipelines) if account.pipelines else {}
-            pipeline_states = json.loads(account.pipeline_states) if account.pipeline_states else {}
+            pipelines = json.loads(channel.pipelines) if channel.pipelines else {}
+            pipeline_states = json.loads(channel.pipeline_states) if channel.pipeline_states else {}
         except:
             pipelines = {}
             pipeline_states = {}
@@ -95,9 +95,9 @@ class WatchFolderService:
         return health
 
     @staticmethod
-    def trigger_scan_now(account_id: Optional[str] = None, pipeline_type: Optional[str] = None):
+    def trigger_scan_now(channel_id: Optional[str] = None, pipeline_type: Optional[str] = None):
         engine = get_engine()
-        summary = engine.scan_now(account_id=account_id, pipeline_type=pipeline_type)
+        summary = engine.scan_now(channel_id=channel_id, pipeline_type=pipeline_type)
 
         return {
             "success": summary.success,

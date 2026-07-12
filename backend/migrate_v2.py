@@ -6,11 +6,11 @@ import json
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from database.db import SessionLocal
-from models import Account
+from models import Channel
 
 def run_migration():
     db = SessionLocal()
-    accounts = db.query(Account).all()
+    channels = db.query(Channel).all()
     migrated = 0
     
     default_shorts = {
@@ -31,15 +31,15 @@ def run_migration():
         }
     }
     
-    for account in accounts:
+    for channel in channels:
         try:
-            defaults = json.loads(account.upload_defaults) if account.upload_defaults else {}
+            defaults = json.loads(channel.upload_defaults) if channel.upload_defaults else {}
         except:
             defaults = {}
             
         # Detect legacy schema: If it doesn't have "long" or "shorts" root keys
         if "long" not in defaults and "shorts" not in defaults:
-            print(f"Migrating account {account.channel_name}...")
+            print(f"Migrating channel {channel.channel_name}...")
             
             # Wrap legacy into long
             new_long = {
@@ -65,12 +65,12 @@ def run_migration():
                 "shorts": default_shorts
             }
             
-            account.upload_defaults = json.dumps(new_defaults)
+            channel.upload_defaults = json.dumps(new_defaults)
             migrated += 1
             
     if migrated > 0:
         db.commit()
-        print(f"Migration complete. Migrated {migrated} accounts.")
+        print(f"Migration complete. Migrated {migrated} channels.")
     else:
         print("No legacy configurations found. Migration skipped.")
         

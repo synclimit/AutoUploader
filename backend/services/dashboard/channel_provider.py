@@ -4,9 +4,9 @@ from services.channel_service import ChannelService
 class ChannelProvider:
     @staticmethod
     def get_channels(db: Session) -> dict:
-        accounts = ChannelService.get_dashboard_projection(db)
-        total = len(accounts)
-        connected = sum(1 for a in accounts if a.authentication_status == "Connected")
+        channels = ChannelService.get_dashboard_projection(db)
+        total = len(channels)
+        connected = sum(1 for a in channels if a.authentication_status == "Connected")
         
         print(f"Dashboard Count (Connected): {connected}")
         print(f"Accounts Count (Total): {total}")

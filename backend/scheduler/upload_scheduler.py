@@ -4,7 +4,7 @@ import threading
 from datetime import datetime
 
 from database.db import SessionLocal
-from models import UploadTask, UploadLog, Account
+from models import UploadTask, UploadLog, Channel
 from schemas import QueueStatusEnum
 from sqlalchemy import or_, and_
 
@@ -95,10 +95,10 @@ class SchedulerEngine(EngineBase):
             
             assigned_times = {}
             for ft in future_tasks:
-                if ft.account_id not in assigned_times:
-                    assigned_times[ft.account_id] = set()
+                if ft.channel_id not in assigned_times:
+                    assigned_times[ft.channel_id] = set()
                 # Store the base time (without seconds/microseconds or humanize delay) to prevent collisions
-                assigned_times[ft.account_id].add(ft.scheduled_at.replace(second=0, microsecond=0))
+                assigned_times[ft.channel_id].add(ft.scheduled_at.replace(second=0, microsecond=0))
             
             now_local = datetime.now()
             from datetime import timezone
@@ -110,8 +110,8 @@ class SchedulerEngine(EngineBase):
                     
                 try:
                     import json
-                    account = db.query(Account).filter(Account.id == task.account_id).first()
-                    account_pipelines = json.loads(account.pipelines) if account and account.pipelines else {}
+                    channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
+                    account_pipelines = json.loads(channel.pipelines) if channel and channel.pipelines else {}
                     p_key = task.pipeline_type
                     p_config = account_pipelines.get(p_key, {})
                     schedule_list = p_config.get("schedule")
@@ -163,13 +163,13 @@ class SchedulerEngine(EngineBase):
                             t_dt_utc = t_dt_local.astimezone().astimezone(timezone.utc).replace(tzinfo=None)
                             
                             # Check if this exact slot is already taken for this channel
-                            if task.account_id in assigned_times and t_dt_utc in assigned_times[task.account_id]:
+                            if task.channel_id in assigned_times and t_dt_utc in assigned_times[task.channel_id]:
                                 continue # Slot taken, try next
                                 
                             chosen_dt = t_dt_utc
-                            if task.account_id not in assigned_times:
-                                assigned_times[task.account_id] = set()
-                            assigned_times[task.account_id].add(chosen_dt)
+                            if task.channel_id not in assigned_times:
+                                assigned_times[task.channel_id] = set()
+                            assigned_times[task.channel_id].add(chosen_dt)
                             break
                             
                     day_offset += 1

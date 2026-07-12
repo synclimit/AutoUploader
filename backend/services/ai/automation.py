@@ -6,7 +6,7 @@ import asyncio
 from datetime import datetime
 
 from database.db import SessionLocal
-from models import UploadTask, Account, UploadLog
+from models import UploadTask, Channel, UploadLog
 from schemas import QueueStatusEnum
 from core.engine_base import EngineBase
 
@@ -88,14 +88,14 @@ class AIAutomationEngine(EngineBase):
                 if not self._running:
                     break
                     
-                account = db.query(Account).filter(Account.id == task.account_id).first()
-                if not account:
+                channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
+                if not channel:
                     continue
                     
                 logger.info(f"[AI_AUTOMATION] Processing AI Metadata for Task {task.id}")
                 
                 # Context Builder
-                context = ContextBuilder.build(task, account)
+                context = ContextBuilder.build(task, channel)
                 prompt_text = context.get_prompt()
                 
                 try:

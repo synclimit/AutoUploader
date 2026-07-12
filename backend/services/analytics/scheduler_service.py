@@ -12,8 +12,8 @@ class AnalyticsScheduler:
         self.active_tasks: Dict[str, asyncio.Task] = {}
         self.polling_interval = 300 # 5 minutes by default
         
-    def start_polling(self, account_id: str, account_type: str, credentials: Any, refresh_callback: Callable):
-        if account_id in self.active_tasks:
+    def start_polling(self, channel_id: str, account_type: str, credentials: Any, refresh_callback: Callable):
+        if channel_id in self.active_tasks:
             return # Already polling
             
         async def poll_loop():
@@ -22,14 +22,14 @@ class AnalyticsScheduler:
                 try:
                     await refresh_callback()
                 except Exception as e:
-                    print(f"Scheduler error for {account_id}: {e}")
+                    print(f"Scheduler error for {channel_id}: {e}")
                     # Exponential backoff on errors will be handled by AnalyticsService
                     
-        self.active_tasks[account_id] = asyncio.create_task(poll_loop())
+        self.active_tasks[channel_id] = asyncio.create_task(poll_loop())
         
-    def stop_polling(self, account_id: str):
-        if account_id in self.active_tasks:
-            self.active_tasks[account_id].cancel()
-            del self.active_tasks[account_id]
+    def stop_polling(self, channel_id: str):
+        if channel_id in self.active_tasks:
+            self.active_tasks[channel_id].cancel()
+            del self.active_tasks[channel_id]
 
 scheduler_service = AnalyticsScheduler()

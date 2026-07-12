@@ -266,7 +266,7 @@ class MetadataSourceEnum(str, Enum):
     campaign = "CAMPAIGN"
 
 class UploadTaskBase(BaseModel):
-    account_id: str
+    channel_id: str
     profile_id: Optional[str] = None
     status: QueueStatusEnum = QueueStatusEnum.watched
     upload_stage: UploadStageEnum = UploadStageEnum.none

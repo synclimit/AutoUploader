@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database.db import Base
-from models import CampaignReviewSession, CampaignReviewAsset, CampaignAsset, CampaignUploadPlan, Account, UploadTask, CampaignAssetState
+from models import CampaignReviewSession, CampaignReviewAsset, CampaignAsset, CampaignUploadPlan, Channel, UploadTask, CampaignAssetState
 from services.campaign_queue_builder import CampaignQueueBuilder
 
 # Use an in-memory SQLite database for testing
@@ -26,7 +26,7 @@ def test_build_queue_success(db_session):
     channel_id = str(uuid.uuid4())
     session_id = str(uuid.uuid4())
     
-    # 1. Mock Account configuration
+    # 1. Mock Channel configuration
     pipelines_config = {
         "long": {
             "daily_limit": 2,
@@ -35,13 +35,13 @@ def test_build_queue_success(db_session):
         }
     }
     
-    account = Account(
+    channel = Channel(
         id=channel_id,
         channel_name="Test Channel",
         publish_timezone="UTC",
         pipelines=json.dumps(pipelines_config)
     )
-    db_session.add(account)
+    db_session.add(channel)
     
     # 2. Mock CampaignAssets (Permanent storage)
     c_asset1 = CampaignAsset(
@@ -149,7 +149,7 @@ def test_idempotency(db_session):
             "humanize": {"enabled": False}
         }
     }
-    db_session.add(Account(id=channel_id, channel_name="Test", pipelines=json.dumps(pipelines_config)))
+    db_session.add(Channel(id=channel_id, channel_name="Test", pipelines=json.dumps(pipelines_config)))
     
     c_asset = CampaignAsset(
         id=str(uuid.uuid4()), channel_id=channel_id, fingerprint="fp1",
@@ -178,7 +178,7 @@ def test_no_upload_task_created(db_session):
     session_id = str(uuid.uuid4())
     
     pipelines_config = {"long": {"daily_limit": 1, "schedule": ["09:00"]}}
-    db_session.add(Account(id=channel_id, channel_name="Test", pipelines=json.dumps(pipelines_config)))
+    db_session.add(Channel(id=channel_id, channel_name="Test", pipelines=json.dumps(pipelines_config)))
     c_asset = CampaignAsset(id=str(uuid.uuid4()), channel_id=channel_id, fingerprint="fp1", sha256="123", filename="", filesize=0, duration_seconds=0)
     db_session.add(c_asset)
     db_session.add(CampaignReviewSession(id=session_id, channel_id=channel_id, pipeline_type="long", status="LOCKED"))

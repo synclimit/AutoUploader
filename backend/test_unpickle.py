@@ -1,5 +1,5 @@
 import pickle
-p = r'C:\Users\Server Abal\AppData\Roaming\AutoUploader\tokens\accounts\743ada11-e6d5-4616-862f-0dc39512c9da.pickle'
+p = r'C:\Users\Server Abal\AppData\Roaming\AutoUploader\tokens\channels\743ada11-e6d5-4616-862f-0dc39512c9da.pickle'
 try:
     with open(p, 'rb') as f:
         creds = pickle.load(f)

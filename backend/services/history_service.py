@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-from models import UploadTask, UploadLog, Account
+from models import UploadTask, UploadLog, Channel
 from schemas import QueueStatusEnum
 
 class HistoryService:
@@ -32,8 +32,8 @@ class HistoryService:
 
         items = []
         for task in tasks:
-            account = db.query(Account).filter(Account.id == task.account_id).first()
-            channel_name = account.channel_name if account else "Unknown Channel"
+            channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
+            channel_name = channel.channel_name if channel else "Unknown Channel"
             
             dt = task.completed_at or task.created_at
             

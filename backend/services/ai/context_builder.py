@@ -1,6 +1,6 @@
 import json
 import os
-from models import UploadTask, Account
+from models import UploadTask, Channel
 
 class GenerationContext:
     def __init__(self, prompt: str):
@@ -11,26 +11,26 @@ class GenerationContext:
 
 class ContextBuilder:
     @staticmethod
-    def build(task: UploadTask, account: Account) -> GenerationContext:
+    def build(task: UploadTask, channel: Channel) -> GenerationContext:
         # 1. Filename (Seed Keyword)
         filename = os.path.basename(task.video_path) if task.video_path else "unknown"
         seed_keyword, _ = os.path.splitext(filename)
         
         # 2. Channel AI Identity (Brand Profile)
         try:
-            identity = json.loads(account.ai_identity) if account.ai_identity else {}
+            identity = json.loads(channel.ai_identity) if channel.ai_identity else {}
         except:
             identity = {}
             
         # 3. Upload Defaults
         try:
-            defaults = json.loads(account.upload_defaults) if account.upload_defaults else {}
+            defaults = json.loads(channel.upload_defaults) if channel.upload_defaults else {}
         except:
             defaults = {}
             
         # Combine into prompt
         prompt = f"""CHANNEL PROFILE
-Name: {account.channel_name}
+Name: {channel.channel_name}
 Category: {identity.get('channel_category', 'Not specified')}
 Brand Description: {identity.get('channel_description', 'Not specified')}
 Audience: {identity.get('target_audience', 'Not specified')}

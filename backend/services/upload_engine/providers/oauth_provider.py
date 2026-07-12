@@ -13,13 +13,13 @@ class OAuthUploader(BaseUploader):
         
         try:
             from services.system.path_service import PathService
-            token_pickle = os.path.join(PathService.get_appdata_dir(), "tokens", "accounts", f"{task.account_id}.pickle")
+            token_pickle = os.path.join(PathService.get_appdata_dir(), "tokens", "channels", f"{task.channel_id}.pickle")
             
             if not os.path.exists(token_pickle):
                 return UploadResult(
                     success=False,
                     error_code="AUTH_REQUIRED",
-                    error_message=f"OAuth token not found for account {task.account_id}. Please connect YouTube."
+                    error_message=f"OAuth token not found for channel {task.channel_id}. Please connect YouTube."
                 )
                 
             with open(token_pickle, "rb") as token:

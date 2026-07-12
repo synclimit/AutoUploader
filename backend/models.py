@@ -24,23 +24,28 @@ class CampaignAssetState(enum.Enum):
     CONSUMED = "CONSUMED"
     ARCHIVED = "ARCHIVED"
 
-class Account(Base):
-    __tablename__ = "accounts"
+class Channel(Base):
+    __tablename__ = "channels"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    channel_name = Column(String, unique=True, nullable=False)
+    alias_name = Column(String, unique=True, nullable=False)
     channel_id = Column(String, nullable=True)
     subscribers = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     profile_id = Column(String, ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
+    
+    # Credential Engine Fields
+    project_id = Column(String, unique=True, nullable=True)
+    client_id = Column(String, nullable=True)
+    credential_folder = Column(String, nullable=True)
+    health_status = Column(String, default="UNKNOWN")
+    quota_exhausted_until = Column(DateTime, nullable=True)
     
     source_type = Column(String, default="M1_VIDEO_SPLITTER")
     region = Column(String, default="Indonesia")
     
     watch_folder = Column(String, nullable=True)
     watch_folder_enabled = Column(Boolean, default=False)
-    
-    authentication_status = Column(String, default="Disconnected")
     
     # Publishing Schedule / Rules
     publish_enabled = Column(Boolean, default=False)
@@ -77,14 +82,37 @@ class Account(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    profile = relationship("Profile", back_populates="accounts")
+    profile = relationship("Profile", back_populates="channels")
+    oauth_credential = relationship("OAuthCredential", back_populates="channel", uselist=False, cascade="all, delete-orphan")
+
+    @property
+    def channel_name(self):
+        return self.alias_name
+
+
+class OAuthCredential(Base):
+    __tablename__ = "oauth_credentials"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id = Column(String, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False, unique=True)
+    access_token = Column(String, nullable=True)
+    refresh_token = Column(String, nullable=True)
+    token_expires_at = Column(DateTime, nullable=True)
+    refresh_failed_count = Column(Integer, default=0)
+    last_refresh_at = Column(DateTime, nullable=True)
+    last_refresh_error = Column(String, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    channel = relationship("Channel", back_populates="oauth_credential")
 
 
 class UploadTask(Base):
     __tablename__ = "upload_tasks"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    account_id = Column(String, ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False)
+    channel_id = Column(String, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
     profile_id = Column(String, ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
     
     # State Machine
@@ -206,7 +234,7 @@ class Profile(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     templates = relationship("ProfileTemplate", back_populates="profile", cascade="all, delete-orphan")
-    accounts = relationship("Account", back_populates="profile")
+    channels = relationship("Channel", back_populates="profile")
 
 
 class ProfileTemplate(Base):

@@ -75,7 +75,7 @@ def test_api_provider():
 
     context = UploadContext(
         task=task,
-        account=None,
+        channel=None,
         profile=None,
         logger=MockLogger(),
         browser_profile_path="",

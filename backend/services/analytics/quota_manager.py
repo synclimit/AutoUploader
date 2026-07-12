@@ -13,14 +13,14 @@ class QuotaManager:
         self.usage_today = 0
         self.daily_limit = 10000
         
-    def can_refresh(self, account_id: str) -> bool:
-        if account_id in self.last_refresh:
-            if time.time() - self.last_refresh[account_id] < self.cooldown_period:
+    def can_refresh(self, channel_id: str) -> bool:
+        if channel_id in self.last_refresh:
+            if time.time() - self.last_refresh[channel_id] < self.cooldown_period:
                 return False
         return True
         
-    def record_refresh(self, account_id: str):
-        self.last_refresh[account_id] = time.time()
+    def record_refresh(self, channel_id: str):
+        self.last_refresh[channel_id] = time.time()
         
     def record_api_call(self, cost: int = 1):
         self.usage_today += cost

@@ -9,7 +9,7 @@ def get_count(query):
     return c.fetchone()[0]
 
 state = {
-    "Connected": get_count("SELECT count(*) FROM accounts"), 
+    "Connected": get_count("SELECT count(*) FROM channels"), 
     "Pending": get_count("SELECT count(*) FROM upload_tasks WHERE status='REVIEW'"),
     "Uploading": get_count("SELECT count(*) FROM upload_tasks WHERE status='UPLOADING'"),
     "Completed": get_count("SELECT count(*) FROM upload_tasks WHERE status='COMPLETED'"),

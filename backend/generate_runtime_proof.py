@@ -69,7 +69,7 @@ async def run_proof():
     task = db.query(UploadTask).first()
     if not task:
         print("No task found to test. Creating a dummy task...")
-        task = UploadTask(id="test-task-1", account_id="acc-1", package_folder="test", video_path="test.mp4")
+        task = UploadTask(id="test-task-1", channel_id="acc-1", package_folder="test", video_path="test.mp4")
         db.add(task)
         db.commit()
         db.refresh(task)

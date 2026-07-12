@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/v1/queue", tags=["Queue"])
 def get_queue(
     status: Optional[List[str]] = Query(default=None),
     source_type: Optional[SourceTypeEnum] = None,
-    account_id: Optional[str] = None,
+    channel_id: Optional[str] = None,
     profile_id: Optional[str] = None,
     keyword: Optional[str] = None,
     date_from: Optional[datetime] = None,
@@ -28,7 +28,7 @@ def get_queue(
         db, 
         status=status,
         source_type=source_type,
-        account_id=account_id,
+        channel_id=channel_id,
         profile_id=profile_id,
         keyword=keyword,
         date_from=date_from,

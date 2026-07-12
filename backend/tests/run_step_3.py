@@ -29,30 +29,30 @@ def run_workflow():
         profile_id = res.json()["id"]
         print(f"   Created Profile ID: {profile_id}")
 
-    # 2. Account
-    print("2. Account Setup")
+    # 2. Channel
+    print("2. Channel Setup")
     account_payload = {
         "channel_name": "Workflow Test Channel",
         "source_type": "MANUAL_UPLOAD",
         "region": "Indonesia"
     }
-    res = requests.post(f"{BASE_URL}/accounts", json=account_payload)
+    res = requests.post(f"{BASE_URL}/channels", json=account_payload)
     if res.status_code != 201:
-        print("Failed to create account", res.status_code, res.text)
-        accounts = requests.get(f"{BASE_URL}/accounts").json()
-        if len(accounts) > 0:
-            account_id = accounts[0]["id"]
-            print(f"   Using existing Account ID: {account_id}")
+        print("Failed to create channel", res.status_code, res.text)
+        channels = requests.get(f"{BASE_URL}/channels").json()
+        if len(channels) > 0:
+            channel_id = channels[0]["id"]
+            print(f"   Using existing Channel ID: {channel_id}")
         else:
             return
     else:
-        account_id = res.json()["id"]
-        print(f"   Created Account ID: {account_id}")
+        channel_id = res.json()["id"]
+        print(f"   Created Channel ID: {channel_id}")
 
     # 3. Queue / Import
     print("3. Watch Folder -> Import")
     queue_payload = {
-        "account_id": account_id,
+        "channel_id": channel_id,
         "profile_id": profile_id,
         "package_folder": "./tests/assets",
         "video_path": "./tests/assets/720p.mp4",

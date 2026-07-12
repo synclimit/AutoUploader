@@ -678,42 +678,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
               </div>
             </div>
 
-            {/* Scheduled Time */}
-            <div className="flex flex-col gap-1.5 mt-4 group neon-interactive">
-               <label className="text-[11px] font-bold text-white/80 group-hover:text-white transition-colors">Scheduled Time (Waktu Upload)</label>
-               <input 
-                  type="datetime-local"
-                  value={(() => {
-                    let iso = edits.scheduled_at !== undefined ? edits.scheduled_at : video.scheduled_at;
-                    if (!iso) return '';
-                    if (typeof iso === 'string' && !iso.endsWith('Z') && !iso.includes('+') && !iso.includes('-')) {
-                      iso = iso.replace(' ', 'T') + 'Z';
-                    }
-                    const d = new Date(iso);
-                    if (isNaN(d)) return '';
-                    const pad = (n) => String(n).padStart(2, '0');
-                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-                  })()} 
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (!val) {
-                      handleChange('scheduled_at', null);
-                    } else {
-                      const d = new Date(val);
-                      if (!isNaN(d)) {
-                        handleChange('scheduled_at', d.toISOString());
-                      }
-                    }
-                  }}
-                  onClick={(e) => {
-                    try {
-                      if (e.target.showPicker) e.target.showPicker();
-                    } catch (err) {}
-                  }}
-                  className="w-full bg-[#0a0f1a]/80 border border-white/[0.05] rounded-[8px] px-3 h-[40px] text-[13px] text-white/90 outline-none hover:border-[var(--accent-500)]/30 focus:border-[var(--accent-500)]/50 transition-all cursor-pointer"
-               />
-               <span className="text-[10px] text-white/40 italic">Kosongkan (hapus nilai) jika ingin video langsung dipublikasikan.</span>
-            </div>
+
 
             {Object.keys(edits).length > 0 && (
               <button 

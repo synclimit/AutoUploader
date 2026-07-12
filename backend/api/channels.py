@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from services.channel_service import ChannelService
 import urllib.parse
 
-router = APIRouter(prefix="/api/v1/accounts", tags=["Accounts"])
+router = APIRouter(prefix="/api/v1/channels", tags=["Accounts"])
 
 def get_db():
     db = SessionLocal()
@@ -30,16 +30,16 @@ def debug_log(msg):
 def get_accounts(db: Session = Depends(get_db)):
     import time
     start_time = time.time()
-    debug_log("Request received: GET /api/v1/accounts")
+    debug_log("Request received: GET /api/v1/channels")
     debug_log(f"Database path: {db.get_bind().url.database}")
     
     try:
-        accounts = ChannelService.get_all(db)
+        channels = ChannelService.get_all(db)
         execution_time = (time.time() - start_time) * 1000
         debug_log(f"HTTP status: 200")
-        debug_log(f"Returned rows: {len(accounts)}")
+        debug_log(f"Returned rows: {len(channels)}")
         debug_log(f"Execution time: {execution_time:.2f} ms")
-        return accounts
+        return channels
     except Exception as e:
         execution_time = (time.time() - start_time) * 1000
         debug_log(f"HTTP status: 500")
@@ -54,50 +54,50 @@ def get_accounts(db: Session = Depends(get_db)):
 def oauth_callback(code: str, state: str, db: Session = Depends(get_db)):
     try:
         result = ChannelService.oauth_callback(db, code, state, _temp_credentials)
-        account_id = result["account_id"]
+        channel_id = result["channel_id"]
         channel_id = result["channel_id"]
         channel_name = urllib.parse.quote(result["channel_name"])
         avatar_url = urllib.parse.quote(result.get("avatar_url") or "")
-        redirect_url = f"http://127.0.0.1:8000/accounts/confirm?accountId={account_id}&channelId={channel_id}&channelName={channel_name}&avatarUrl={avatar_url}"
+        redirect_url = f"http://127.0.0.1:8000/channels/confirm?accountId={channel_id}&channelId={channel_id}&channelName={channel_name}&avatarUrl={avatar_url}"
         return RedirectResponse(redirect_url)
     except Exception as e:
         print(f"OAuth Error: {e}")
-        return RedirectResponse("http://127.0.0.1:8000/accounts?error=oauth_failed")
+        return RedirectResponse("http://127.0.0.1:8000/channels?error=oauth_failed")
 
-@router.get("/{account_id}", response_model=AccountDetailResponse)
-def get_account(account_id: str, db: Session = Depends(get_db)):
-    return ChannelService.get_by_id(db, account_id)
+@router.get("/{channel_id}", response_model=AccountDetailResponse)
+def get_account(channel_id: str, db: Session = Depends(get_db)):
+    return ChannelService.get_by_id(db, channel_id)
 
 @router.post("", response_model=AccountDetailResponse, status_code=status.HTTP_201_CREATED)
 def create_account(data: AccountCreate, db: Session = Depends(get_db)):
     return ChannelService.create(db, data)
 
-@router.put("/{account_id}", response_model=AccountDetailResponse)
-def update_account(account_id: str, data: AccountUpdate, db: Session = Depends(get_db)):
-    return ChannelService.update(db, account_id, data)
+@router.put("/{channel_id}", response_model=AccountDetailResponse)
+def update_account(channel_id: str, data: AccountUpdate, db: Session = Depends(get_db)):
+    return ChannelService.update(db, channel_id, data)
 
-@router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_account(account_id: str, db: Session = Depends(get_db)):
-    ChannelService.delete(db, account_id)
+@router.delete("/{channel_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_account(channel_id: str, db: Session = Depends(get_db)):
+    ChannelService.delete(db, channel_id)
     return None
 
-@router.get("/{account_id}/auth-url")
-def get_auth_url(account_id: str, db: Session = Depends(get_db)):
-    auth_url = ChannelService.get_auth_url(db, account_id, _temp_credentials)
+@router.get("/{channel_id}/auth-url")
+def get_auth_url(channel_id: str, db: Session = Depends(get_db)):
+    auth_url = ChannelService.get_auth_url(db, channel_id, _temp_credentials)
     return {"auth_url": auth_url}
 
-@router.post("/{account_id}/disconnect", response_model=AccountDetailResponse)
-def disconnect_channel(account_id: str, db: Session = Depends(get_db)):
-    return ChannelService.disconnect_channel(db, account_id)
+@router.post("/{channel_id}/disconnect", response_model=AccountDetailResponse)
+def disconnect_channel(channel_id: str, db: Session = Depends(get_db)):
+    return ChannelService.disconnect_channel(db, channel_id)
 
-@router.post("/{account_id}/refresh", response_model=AccountDetailResponse)
-def refresh_token(account_id: str, db: Session = Depends(get_db)):
-    return ChannelService.refresh_token(db, account_id)
+@router.post("/{channel_id}/refresh", response_model=AccountDetailResponse)
+def refresh_token(channel_id: str, db: Session = Depends(get_db)):
+    return ChannelService.refresh_token(db, channel_id)
 
-@router.post("/{account_id}/confirm-channel", response_model=AccountDetailResponse)
-def confirm_channel(account_id: str, request: ConfirmChannelRequest, db: Session = Depends(get_db)):
-    return ChannelService.confirm_channel(db, account_id, request, _temp_credentials)
+@router.post("/{channel_id}/confirm-channel", response_model=AccountDetailResponse)
+def confirm_channel(channel_id: str, request: ConfirmChannelRequest, db: Session = Depends(get_db)):
+    return ChannelService.confirm_channel(db, channel_id, request, _temp_credentials)
 
-@router.get("/{account_id}/playlists")
-def get_playlists(account_id: str, db: Session = Depends(get_db)):
-    return ChannelService.get_playlists(db, account_id)
+@router.get("/{channel_id}/playlists")
+def get_playlists(channel_id: str, db: Session = Depends(get_db)):
+    return ChannelService.get_playlists(db, channel_id)

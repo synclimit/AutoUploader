@@ -2,7 +2,7 @@ import os
 import json
 from sqlalchemy.orm import Session
 from database.db import SessionLocal
-from models import Account, UploadTask
+from models import Channel, UploadTask
 from services.watch_folder.validator import validate
 from services.watch_folder.importer import create_task
 
@@ -28,9 +28,9 @@ def test_metadata_import():
         json.dump(metadata, f)
         
     db = SessionLocal()
-    account = db.query(Account).first()
-    if not account:
-        print("No account found.")
+    channel = db.query(Channel).first()
+    if not channel:
+        print("No channel found.")
         return
         
     result = validate(pkg_dir)
@@ -39,7 +39,7 @@ def test_metadata_import():
         print("Error:", result.error_message)
         return
         
-    task = create_task(result, account, db)
+    task = create_task(result, channel, db)
     print("Task Created:", task.id)
     print("Category ID:", task.category_id)
     print("AI Use:", task.ai_use)

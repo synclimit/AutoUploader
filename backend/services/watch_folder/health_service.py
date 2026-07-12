@@ -1,7 +1,7 @@
 """
 health_service.py — WatchFolderHealthService
 
-Tracks per-account health state for the Watch Folder Engine.
+Tracks per-channel health state for the Watch Folder Engine.
 
 Design (Stage 3.5.2-R1):
   Hybrid persistence model:
@@ -51,11 +51,11 @@ class PipelineHealth:
 
 @dataclass
 class AccountHealth:
-    account_id: str
+    channel_id: str
     pipelines: dict[str, PipelineHealth] = field(default_factory=dict)
 
 
-# Module-level store: account_id → AccountHealth
+# Module-level store: channel_id → AccountHealth
 _health_store: dict[str, AccountHealth] = {}
 
 
@@ -63,55 +63,55 @@ _health_store: dict[str, AccountHealth] = {}
 # State mutations — called by engine
 # ---------------------------------------------------------------------------
 
-def _get_or_create_pipeline(account_id: str, pipeline_type: str) -> PipelineHealth:
-    if account_id not in _health_store:
-        _health_store[account_id] = AccountHealth(account_id=account_id)
-    account_health = _health_store[account_id]
+def _get_or_create_pipeline(channel_id: str, pipeline_type: str) -> PipelineHealth:
+    if channel_id not in _health_store:
+        _health_store[channel_id] = AccountHealth(channel_id=channel_id)
+    account_health = _health_store[channel_id]
     if pipeline_type not in account_health.pipelines:
         account_health.pipelines[pipeline_type] = PipelineHealth(pipeline_type=pipeline_type)
     return account_health.pipelines[pipeline_type]
 
 
-def update_status(account_id: str, pipeline_type: str, status: str) -> None:
+def update_status(channel_id: str, pipeline_type: str, status: str) -> None:
     """Update engine state for a pipeline (IDLE / SCANNING / ERROR / PAUSED)."""
-    _get_or_create_pipeline(account_id, pipeline_type).status = status
+    _get_or_create_pipeline(channel_id, pipeline_type).status = status
 
 
-def record_scan(account_id: str, pipeline_type: str) -> None:
+def record_scan(channel_id: str, pipeline_type: str) -> None:
     """Mark a scan cycle as completed for this pipeline."""
-    health = _get_or_create_pipeline(account_id, pipeline_type)
+    health = _get_or_create_pipeline(channel_id, pipeline_type)
     health.last_scan = datetime.utcnow()
 
 
-def record_error(account_id: str, pipeline_type: str, error_code: str) -> None:
+def record_error(channel_id: str, pipeline_type: str, error_code: str) -> None:
     """Log a validation or path error for this pipeline."""
-    health = _get_or_create_pipeline(account_id, pipeline_type)
+    health = _get_or_create_pipeline(channel_id, pipeline_type)
     health.error_count += 1
     health.last_error = error_code
-    logger.debug(f"[HEALTH] Error recorded | account={account_id!r} | pipeline={pipeline_type} | code={error_code!r} | total={health.error_count}")
+    logger.debug(f"[HEALTH] Error recorded | channel={channel_id!r} | pipeline={pipeline_type} | code={error_code!r} | total={health.error_count}")
 
 
-def record_path_unavailable(account_id: str, pipeline_type: str) -> None:
+def record_path_unavailable(channel_id: str, pipeline_type: str) -> None:
     """Shorthand: record PATH_UNAVAILABLE error and set ERROR status."""
-    record_error(account_id, pipeline_type, "PATH_UNAVAILABLE")
-    update_status(account_id, pipeline_type, "ERROR")
+    record_error(channel_id, pipeline_type, "PATH_UNAVAILABLE")
+    update_status(channel_id, pipeline_type, "ERROR")
 
 
-def record_scan_result(account_id: str, pipeline_type: str, status: str, count: int = 0) -> None:
+def record_scan_result(channel_id: str, pipeline_type: str, status: str, count: int = 0) -> None:
     """Record the final outcome of the scan cycle for this pipeline."""
-    health = _get_or_create_pipeline(account_id, pipeline_type)
+    health = _get_or_create_pipeline(channel_id, pipeline_type)
     health.last_scan_status = status
     health.last_scan_count = count
 
 
-def set_watch_folder_path(account_id: str, pipeline_type: str, path: str) -> None:
-    health = _get_or_create_pipeline(account_id, pipeline_type)
+def set_watch_folder_path(channel_id: str, pipeline_type: str, path: str) -> None:
+    health = _get_or_create_pipeline(channel_id, pipeline_type)
     health.watch_folder_path = path
 
 
-def record_log(account_id: str, pipeline_type: str, status: str, message: str) -> None:
+def record_log(channel_id: str, pipeline_type: str, status: str, message: str) -> None:
     """Record a live runtime log event for the UI."""
-    health = _get_or_create_pipeline(account_id, pipeline_type)
+    health = _get_or_create_pipeline(channel_id, pipeline_type)
     health.execution_log.append({
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "status": status,
@@ -126,17 +126,17 @@ def record_log(account_id: str, pipeline_type: str, status: str, message: str) -
 # Query — called by API
 # ---------------------------------------------------------------------------
 
-def get_health(account_id: str, db: Session) -> dict:
+def get_health(channel_id: str, db: Session) -> dict:
     """
-    Build the full health snapshot for one account, broken down by pipeline.
+    Build the full health snapshot for one channel, broken down by pipeline.
 
     Merges in-memory ephemeral fields with DB-derived persistent fields.
     """
-    db_stats = _derive_from_db(account_id, db)
+    db_stats = _derive_from_db(channel_id, db)
     
-    if account_id not in _health_store:
-        _health_store[account_id] = AccountHealth(account_id=account_id)
-    account_health = _health_store[account_id]
+    if channel_id not in _health_store:
+        _health_store[channel_id] = AccountHealth(channel_id=channel_id)
+    account_health = _health_store[channel_id]
 
     # Ensure all pipelines that exist in DB are present in memory store
     for p_type in db_stats.keys():
@@ -161,21 +161,21 @@ def get_health(account_id: str, db: Session) -> dict:
         }
 
     return {
-        "account_id": account_id,
+        "channel_id": channel_id,
         "pipelines": result
     }
 
 
 def get_all_health(account_ids: list[str], db: Session) -> list[dict]:
     """
-    Build health snapshots for all provided account IDs.
-    Used by GET /api/watch-folder/health to return all accounts.
+    Build health snapshots for all provided channel IDs.
+    Used by GET /api/watch-folder/health to return all channels.
     """
-    return [get_health(account_id, db) for account_id in account_ids]
+    return [get_health(channel_id, db) for channel_id in account_ids]
 
 
 def get_all_tracked_ids() -> list[str]:
-    """Return all account IDs currently tracked in the health store."""
+    """Return all channel IDs currently tracked in the health store."""
     return list(_health_store.keys())
 
 
@@ -183,10 +183,10 @@ def get_all_tracked_ids() -> list[str]:
 # DB-derived field helpers
 # ---------------------------------------------------------------------------
 
-def _derive_from_db(account_id: str, db: Session) -> dict:
+def _derive_from_db(channel_id: str, db: Session) -> dict:
     """
     Query the upload_tasks table to derive persistent health fields per pipeline:
-      - imported_count: COUNT(*) of tasks created by Watch Folder for this account
+      - imported_count: COUNT(*) of tasks created by Watch Folder for this channel
       - last_import:    MAX(created_at) of those tasks
 
     These values survive backend restarts because they come from the DB.
@@ -195,7 +195,7 @@ def _derive_from_db(account_id: str, db: Session) -> dict:
         tasks = (
             db.query(UploadTask)
             .filter(
-                UploadTask.account_id == account_id,
+                UploadTask.channel_id == channel_id,
                 UploadTask.metadata_source == "RENDERER",
             )
             .all()
@@ -214,5 +214,5 @@ def _derive_from_db(account_id: str, db: Session) -> dict:
                 
         return pipeline_stats
     except Exception as e:
-        logger.error(f"[HEALTH] DB query failed for account {account_id!r}: {e}")
+        logger.error(f"[HEALTH] DB query failed for channel {channel_id!r}: {e}")
         return {}

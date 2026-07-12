@@ -4,7 +4,7 @@ import uuid
 import shutil
 import pytest
 from database.db import SessionLocal, Base, engine as db_engine
-from models import Account, UploadTask
+from models import Channel, UploadTask
 from services.watch_folder.engine import get_engine
 
 WATCH_DIR = os.path.join(os.path.dirname(__file__), "mock_watch_folder_stress")
@@ -22,15 +22,15 @@ def teardown_module(module):
 def test_sprint_8_6_stress_and_runtime_proof():
     db = SessionLocal()
     
-    # 1. Prepare Mock Account
-    account_id = str(uuid.uuid4())
-    account = Account(
-        id=account_id,
-        channel_name=f"Stress Test Channel {account_id[:8]}",
+    # 1. Prepare Mock Channel
+    channel_id = str(uuid.uuid4())
+    channel = Channel(
+        id=channel_id,
+        channel_name=f"Stress Test Channel {channel_id[:8]}",
         watch_folder=WATCH_DIR,
         watch_folder_enabled=True,
     )
-    db.add(account)
+    db.add(channel)
     db.commit()
 
     try:
@@ -80,7 +80,7 @@ def test_sprint_8_6_stress_and_runtime_proof():
         assert summary.duplicates_skipped == 0
         
         # Verify DB records
-        tasks = db.query(UploadTask).filter(UploadTask.account_id == account_id).all()
+        tasks = db.query(UploadTask).filter(UploadTask.channel_id == channel_id).all()
         assert len(tasks) == 100
         
         # 5. Run manual scan again -> Should trigger 100 duplicates + 1 new task for the copying_video now that it's stable
@@ -92,10 +92,10 @@ def test_sprint_8_6_stress_and_runtime_proof():
         assert summary2.duplicates_skipped == 100
         
         # Total tasks
-        tasks_final = db.query(UploadTask).filter(UploadTask.account_id == account_id).all()
+        tasks_final = db.query(UploadTask).filter(UploadTask.channel_id == channel_id).all()
         assert len(tasks_final) == 101
 
     finally:
-        db.delete(account)
+        db.delete(channel)
         db.commit()
         db.close()

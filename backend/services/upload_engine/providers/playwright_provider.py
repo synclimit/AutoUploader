@@ -46,7 +46,7 @@ class PlaywrightUploader(BaseUploader):
         
         try:
             start_time = time.time()
-            profile_name = "youtube_automation" # Hardcoded or fetched from context.account
+            profile_name = "youtube_automation" # Hardcoded or fetched from context.channel
             
             profile_path = profile_manager.resolve_profile_path(profile_name)
             if not profile_manager.validate_profile(profile_path):

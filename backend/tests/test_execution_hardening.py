@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from models import (
-    Base, Account, Profile, CampaignAsset, CampaignReviewSession, 
+    Base, Channel, Profile, CampaignAsset, CampaignReviewSession, 
     CampaignUploadPlan, CampaignExecutionState, UploadTask, CampaignUploadJournal, FailureCategory
 )
 from schemas import UploadTaskCreate, QueueStatusEnum
@@ -27,34 +27,34 @@ def db():
 
 @pytest.fixture
 def test_data(db):
-    account = Account(id=str(uuid.uuid4()), channel_name="Test Channel")
-    db.add(account)
+    channel = Channel(id=str(uuid.uuid4()), channel_name="Test Channel")
+    db.add(channel)
     
     asset = CampaignAsset(
-        id=str(uuid.uuid4()), channel_id=account.id, filename="/test/video.mp4", 
+        id=str(uuid.uuid4()), channel_id=channel.id, filename="/test/video.mp4", 
         status="APPROVED", fingerprint="xyz", sha256="test-sha256", filesize=1024, duration_seconds=10
     )
     db.add(asset)
     
     session = CampaignReviewSession(
-        id=str(uuid.uuid4()), channel_id=account.id, status="APPROVED"
+        id=str(uuid.uuid4()), channel_id=channel.id, status="APPROVED"
     )
     db.add(session)
     
     plan = CampaignUploadPlan(
         id=str(uuid.uuid4()), review_session_id=session.id, campaign_asset_id=asset.id,
-        channel_id=account.id, pipeline_type="long", execution_status=CampaignExecutionState.PLANNED,
+        channel_id=channel.id, pipeline_type="long", execution_status=CampaignExecutionState.PLANNED,
         title="Test Title", publish_datetime=datetime.utcnow(), humanized_datetime=datetime.utcnow(),
         publish_order=1, publish_date="2026-07-10", publish_time="10:00:00"
     )
     db.add(plan)
     db.commit()
     
-    return {"account": account, "asset": asset, "session": session, "plan": plan}
+    return {"channel": channel, "asset": asset, "session": session, "plan": plan}
 
 def test_start_campaign_generates_correlation_id(db, test_data):
     session_id = test_data["session"].id
-    channel_id = test_data["account"].id
+    channel_id = test_data["channel"].id
     plan_id = test_data["plan"].id
     
     count = CampaignExecutionService.start_campaign(db, session_id, channel_id, "long")
@@ -118,7 +118,7 @@ def test_monitor_completed_finishes_campaign(db, test_data):
     plan.execution_status = CampaignExecutionState.UPLOADING
     
     task = UploadTask(
-        id=str(uuid.uuid4()), account_id=test_data["account"].id, 
+        id=str(uuid.uuid4()), channel_id=test_data["channel"].id, 
         source_type="CAMPAIGN_EXECUTION", source_id=plan.id,
         package_folder="/test", video_path="/test.mp4", metadata_source="CAMPAIGN",
         status=QueueStatusEnum.completed.value, youtube_video_id="YOUTUBE-123"

@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from services.upload_engine.providers.api_provider import APIUploader
 from services.upload_engine.providers.upload_context import UploadContext
 from services.watch_folder.validator import validate
-from models import Account
+from models import Channel
 
 def test_all_sprint55_priorities():
     print("====================================================================")

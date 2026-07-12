@@ -82,7 +82,9 @@ export default function ReviewCenterPanel({ video }) {
           
           {/* Top Channel Badge */}
           <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-[#05080e]/80 backdrop-blur-md rounded-[10px] border border-white/[0.1] shadow-lg pointer-events-none">
-             <div className="w-5 h-5 rounded-full bg-white/10 overflow-hidden"></div>
+             <div className="w-5 h-5 rounded-full bg-white/10 overflow-hidden">
+               {video.channelLogo && <img src={video.channelLogo} alt="" className="w-full h-full object-cover" />}
+             </div>
              <div className="flex flex-col">
                <span className="text-[10px] font-bold text-white leading-tight">{video.channelName}</span>
                <span className="text-[8px] font-bold text-green-400 uppercase tracking-wider flex items-center gap-1">

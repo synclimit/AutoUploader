@@ -21,7 +21,7 @@ import logging
 from datetime import datetime
 
 from sqlalchemy.orm import Session
-from models import Account, UploadTask
+from models import Channel, UploadTask
 from services.watch_folder.validator import ValidationResult
 
 logger = logging.getLogger("watch_folder.importer")
@@ -29,7 +29,7 @@ logger = logging.getLogger("watch_folder.importer")
 
 def create_task(
     result: ValidationResult,
-    account: Account,
+    channel: Channel,
     db: Session,
     p_key: str = None,
     p_config: dict = None,
@@ -40,7 +40,7 @@ def create_task(
 
     Args:
         result:  Populated ValidationResult from PackageValidator.
-        account: The Account that owns the watch folder.
+        channel: The Channel that owns the watch folder.
         db:      Active SQLAlchemy session.
         p_key:   Pipeline type (e.g. 'long', 'shorts')
         p_config: Pipeline configuration dictionary
@@ -72,14 +72,14 @@ def create_task(
     
     defaults_json = {}
     advanced_json = {}
-    if account.upload_defaults:
+    if channel.upload_defaults:
         try:
-            defaults_json = json.loads(account.upload_defaults)
+            defaults_json = json.loads(channel.upload_defaults)
         except Exception:
             pass
-    if account.advanced_settings:
+    if channel.advanced_settings:
         try:
-            advanced_json = json.loads(account.advanced_settings)
+            advanced_json = json.loads(channel.advanced_settings)
         except Exception:
             pass
 
@@ -113,7 +113,7 @@ def create_task(
         final_category = None
         
     if not final_category and p_defaults.get("category"): final_category = p_defaults.get("category")
-    if not final_category and account.category: final_category = account.category
+    if not final_category and channel.category: final_category = channel.category
     final_category_id = int(final_category) if final_category and str(final_category).isdigit() else 22
     
     final_playlist = result.playlist_id
@@ -148,13 +148,13 @@ def create_task(
     task = UploadTask(
         id=str(uuid.uuid4()),
 
-        account_id=account.id,
-        profile_id=account.profile_id,  # Inherited from account — nullable
+        channel_id=channel.id,
+        profile_id=channel.profile_id,  # Inherited from channel — nullable
 
         # State (Architecture Rule 2: must keep existing initial state -> WATCHED)
         status="WATCHED",
         metadata_source="RENDERER",           # Always RENDERER for Watch Folder imports
-        source_type=account.source_type,      # M1_VIDEO_SPLITTER or M3_PLAYLIST_BUILDER
+        source_type=channel.source_type,      # M1_VIDEO_SPLITTER or M3_PLAYLIST_BUILDER
 
         # Package paths
         package_folder=result.package_folder,
@@ -198,7 +198,7 @@ def create_task(
         humanize_max=int(p_config.get("humanize", {}).get("max_delay_minutes", 0)),
         
         # Sprint 10.5 Metadata Automation
-        upload_mode=p_config.get("upload_mode", "Waiting For Approval"),
+        upload_mode="Auto Upload" if p_config.get("require_approval") is False else p_config.get("upload_mode", "Waiting For Approval"),
         ai_metadata_generated=False if p_config.get("ai_metadata_enabled", False) else True,
     )
 
@@ -212,7 +212,7 @@ def create_task(
             f"task_id={task.id} | "
             f"video_id={task.video_id!r} | "
             f"title={task.title!r} | "
-            f"account={account.channel_name!r} | "
+            f"channel={channel.channel_name!r} | "
             f"folder={result.package_folder!r} | "
             f"pipeline={pipeline_type}"
         )

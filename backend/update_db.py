@@ -3,7 +3,7 @@ import sqlite3
 try:
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-    cursor.execute("ALTER TABLE accounts ADD COLUMN subscribers VARCHAR;")
+    cursor.execute("ALTER TABLE channels ADD COLUMN subscribers VARCHAR;")
     conn.commit()
     print("Column added successfully.")
 except Exception as e:

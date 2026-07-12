@@ -1,0 +1,13 @@
+from enum import Enum
+
+class UploadState(Enum):
+    READY = "READY"
+    VALIDATING = "VALIDATING"
+    PREPARING = "PREPARING"
+    UPLOADING = "UPLOADING"
+    PROCESSING = "PROCESSING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+    QUOTA_WAIT = "QUOTA_WAIT"
+    RETRY = "RETRY"
+    CANCELLED = "CANCELLED"

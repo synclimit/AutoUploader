@@ -15,7 +15,7 @@ import alembic.command
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import UploadTask, GlobalSettings, AIGenerationHistory, Account, Profile
+from models import UploadTask, GlobalSettings, AIGenerationHistory, Channel, Profile
 from services.upload_service import UploadService, GenerateMetadataRequest
 from prompts.manager import PromptManager
 
@@ -120,12 +120,12 @@ async def worker(kw_data, SessionLocal, sem, worker_id, progress_state):
     async with sem:
         db = SessionLocal()
         try:
-            account = db.query(Account).first()
+            channel = db.query(Channel).first()
             profile = db.query(Profile).first()
             
             task = UploadTask(
                 id=f"test_qa_task_{worker_id}_{int(time.time()*1000)}",
-                account_id=account.id,
+                channel_id=channel.id,
                 profile_id=profile.id,
                 metadata_source="GEMINI",
                 source_type="MANUAL_UPLOAD",
@@ -241,10 +241,10 @@ async def main():
         print("[ERROR] No GlobalSettings found in DB!")
         sys.exit(1)
         
-    account = db.query(Account).first()
-    if not account:
-        account = Account(id="test_acc_123", channel_name="Test Account")
-        db.add(account)
+    channel = db.query(Channel).first()
+    if not channel:
+        channel = Channel(id="test_acc_123", channel_name="Test Channel")
+        db.add(channel)
         db.commit()
         
     profile = db.query(Profile).first()

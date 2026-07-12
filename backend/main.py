@@ -46,7 +46,7 @@ from models import Base
 from models import UploadTask
 from fastapi.middleware.cors import CORSMiddleware
 from api.profiles import router as profiles_router
-from api.accounts import router as accounts_router
+from api.channels import router as accounts_router
 from api.queue import router as queue_router
 from api.watch_folder import router as watch_folder_router
 from api.upload_engine import router as upload_engine_router
@@ -64,6 +64,7 @@ from api.campaign_scan import router as campaign_scan_router
 from api.campaign_review import router as campaign_review_router
 from api.campaign_queue import router as campaign_queue_router
 from api.campaign_execution import router as campaign_execution_router
+from api.routers.oauth_router import router as oauth_router
 
 from services.watch_folder.engine import get_engine as get_wf_engine
 from services.upload_engine.engine import get_engine as get_upload_engine
@@ -97,6 +98,7 @@ app.add_middleware(
 
 app.include_router(profiles_router)
 app.include_router(accounts_router)
+app.include_router(oauth_router)
 app.include_router(queue_router)
 app.include_router(watch_folder_router)
 app.include_router(upload_engine_router)
@@ -129,7 +131,7 @@ def startup_event():
         inspector = inspect(engine)
         
         migrations = {
-            "accounts": [
+            "channels": [
                 ("avatar_url", "VARCHAR"),
                 ("subscribers", "VARCHAR"),
                 ("upload_provider", "VARCHAR DEFAULT 'api'"),
@@ -285,11 +287,19 @@ async def serve_spa(full_path: str):
         
     file_path = os.path.join(frontend_dist_path, full_path)
     if full_path and os.path.isfile(file_path):
-        return FileResponse(file_path)
+        from fastapi.responses import Response
+        with open(file_path, 'rb') as f:
+            content = f.read()
+        headers = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+        return Response(content=content, media_type="text/html" if file_path.endswith(".html") else "application/javascript" if file_path.endswith(".js") else "text/css" if file_path.endswith(".css") else None, headers=headers)
         
     index_path = os.path.join(frontend_dist_path, "index.html")
     if os.path.exists(index_path):
-        return FileResponse(index_path)
+        from fastapi.responses import Response
+        with open(index_path, 'rb') as f:
+            content = f.read()
+        headers = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+        return Response(content=content, media_type="text/html", headers=headers)
         
     return {"status": "backend_running", "message": "Frontend build not found."}
 
@@ -376,9 +386,11 @@ if __name__ == "__main__":
                 webview.windows[0].toggle_fullscreen()
 
     api = Api()
+    import time
+    url = f"http://127.0.0.1:8000/?_cb={int(time.time())}"
     webview.create_window(
         "Ryanz Pitstop", 
-        "http://127.0.0.1:8000", 
+        url, 
         width=1200, 
         height=800,
         frameless=True,
