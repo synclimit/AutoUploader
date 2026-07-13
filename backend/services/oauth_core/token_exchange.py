@@ -11,6 +11,9 @@ class TokenExchange:
     
     @classmethod
     def exchange_code(cls, channel_id: str, code: str, redirect_uri: str = None) -> OAuthToken:
+        import os
+        os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+        
         try:
             flow = OAuthFlow._create_flow(channel_id)
             
