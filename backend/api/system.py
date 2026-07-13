@@ -32,16 +32,19 @@ def browse_folder():
     if sys.platform == "win32":
         # Use PowerShell for a more reliable dialog that doesn't hang in background threads
         script = """
-        Add-Type -AssemblyName System.windows.forms
-        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
-        $folderBrowser.Description = 'Select Watch Folder'
-        $folderBrowser.ShowNewFolderButton = $true
-        # Bring to front hack
+        Add-Type -AssemblyName System.Windows.Forms
+        $dlg = New-Object System.Windows.Forms.OpenFileDialog
+        $dlg.Title = 'Select Watch Folder'
+        $dlg.Filter = 'Folder|*.none'
+        $dlg.CheckFileExists = $false
+        $dlg.CheckPathExists = $true
+        $dlg.FileName = 'Folder Selection'
+        $dlg.ValidateNames = $false
         $form = New-Object System.Windows.Forms.Form
         $form.TopMost = $true
-        $result = $folderBrowser.ShowDialog($form)
+        $result = $dlg.ShowDialog($form)
         if ($result -eq 'OK') {
-            Write-Output $folderBrowser.SelectedPath
+            Write-Output (Split-Path $dlg.FileName)
         }
         """
         try:
