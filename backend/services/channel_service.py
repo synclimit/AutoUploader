@@ -171,6 +171,25 @@ class ChannelService:
             else:
                 channel.coverage = "Active"
                 channel.notification = "Campaign Running"
+                
+            # Populate watch_folder and folder for UI Pickers
+            channel.folder = None
+            channel.watch_folder = None
+            try:
+                import json
+                if getattr(channel, "pipelines", None):
+                    pipelines = json.loads(channel.pipelines)
+                    long_p = pipelines.get("long", {})
+                    # For UI display purposes, if it's campaign strategy, show campaign folder, otherwise watch folder
+                    strat = long_p.get("automation_strategy", "continuous")
+                    if strat == "campaign":
+                        channel.folder = long_p.get("campaign_folder")
+                        channel.watch_folder = long_p.get("campaign_folder") # For the ReviewWorkspace backwards compatibility
+                    else:
+                        channel.folder = long_p.get("watch_folder")
+                        channel.watch_folder = long_p.get("watch_folder")
+            except:
+                pass
             
             ChannelService._debug_log("SUCCESS _populate_dashboard_fields")
         except Exception as e:

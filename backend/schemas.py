@@ -186,6 +186,8 @@ class AccountListResponse(BaseModel):
     coverage: Optional[str] = "0 Days"
     notification: Optional[str] = ""
     mode: Optional[str] = "Campaign"
+    watch_folder: Optional[str] = None
+    folder: Optional[str] = None
 
     class Config:
         from_attributes = True
