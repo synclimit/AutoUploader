@@ -457,7 +457,7 @@ class ChannelService:
             raise HTTPException(status_code=400, detail="No YouTube channel found for this Google channel.")
             
         channel_info = channels_response["items"][0]
-        channel_id = channel_info["id"]
+        yt_channel_id = channel_info["id"]
         channel_name = channel_info["snippet"]["title"]
         subscribers = channel_info.get("statistics", {}).get("subscriberCount", "0")
         avatar_url = channel_info.get("snippet", {}).get("thumbnails", {}).get("default", {}).get("url")
@@ -471,8 +471,8 @@ class ChannelService:
         db.commit()
         
         return {
-            "channel_id": channel_id,
-            "channel_id": channel_id,
+            "account_id": channel_id,
+            "channel_id": yt_channel_id,
             "channel_name": channel_name,
             "avatar_url": avatar_url
         }

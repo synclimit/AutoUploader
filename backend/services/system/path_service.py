@@ -148,7 +148,16 @@ class PathService:
         appdata_secret = os.path.join(appdata_dir, "client_secret.json")
         local_secret = os.path.join(base_dir, "client_secret.json")
         if getattr(sys, 'frozen', False):
-            local_secret = os.path.join(sys._MEIPASS, "client_secret.json")
+            # Check MEIPASS first (if bundled)
+            meipass_secret = os.path.join(sys._MEIPASS, "client_secret.json")
+            if os.path.exists(meipass_secret):
+                local_secret = meipass_secret
+            else:
+                # Check next to the .exe
+                exe_dir_secret = os.path.join(os.path.dirname(sys.executable), "client_secret.json")
+                if os.path.exists(exe_dir_secret):
+                    local_secret = exe_dir_secret
+                    
         if os.path.exists(local_secret) and not os.path.exists(appdata_secret):
             try:
                 shutil.copy2(local_secret, appdata_secret)

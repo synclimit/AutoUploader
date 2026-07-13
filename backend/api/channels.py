@@ -54,11 +54,11 @@ def get_accounts(db: Session = Depends(get_db)):
 def oauth_callback(code: str, state: str, db: Session = Depends(get_db)):
     try:
         result = ChannelService.oauth_callback(db, code, state, _temp_credentials)
-        channel_id = result["channel_id"]
-        channel_id = result["channel_id"]
+        account_id = result["account_id"]
+        yt_channel_id = result["channel_id"]
         channel_name = urllib.parse.quote(result["channel_name"])
         avatar_url = urllib.parse.quote(result.get("avatar_url") or "")
-        redirect_url = f"http://127.0.0.1:8000/channels/confirm?accountId={channel_id}&channelId={channel_id}&channelName={channel_name}&avatarUrl={avatar_url}"
+        redirect_url = f"http://127.0.0.1:8000/accounts/confirm?accountId={account_id}&channelId={yt_channel_id}&channelName={channel_name}&avatarUrl={avatar_url}"
         return RedirectResponse(redirect_url)
     except Exception as e:
         print(f"OAuth Error: {e}")

@@ -25,35 +25,60 @@ def open_url(req: OpenUrlRequest):
 @router.get("/browse-folder", response_model=BrowseFolderResponse)
 def browse_folder():
     """Opens a native folder picker dialog on the server machine."""
-    import tkinter as tk
-    from tkinter import filedialog
+    import sys
+    import subprocess
     import threading
 
-    folder_path = [None]
-
-    def _open_dialog():
+    if sys.platform == "win32":
+        # Use PowerShell for a more reliable dialog that doesn't hang in background threads
+        script = """
+        Add-Type -AssemblyName System.windows.forms
+        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+        $folderBrowser.Description = 'Select Watch Folder'
+        $folderBrowser.ShowNewFolderButton = $true
+        # Bring to front hack
+        $form = New-Object System.Windows.Forms.Form
+        $form.TopMost = $true
+        $result = $folderBrowser.ShowDialog($form)
+        if ($result -eq 'OK') {
+            Write-Output $folderBrowser.SelectedPath
+        }
+        """
         try:
-            root = tk.Tk()
-            root.withdraw()
-            root.attributes('-topmost', True)
-            folder_path[0] = filedialog.askdirectory(title="Select Watch Folder")
-            root.destroy()
-        except Exception as e:
-            print("Tkinter error:", e)
-
-    try:
-        # Run in a separate thread to ensure Tkinter has its own mainloop if needed
-        t = threading.Thread(target=_open_dialog)
-        t.start()
-        t.join()
-        
-        if not folder_path[0]:
+            out = subprocess.check_output(
+                ["powershell", "-NoProfile", "-Command", script],
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            path = out.decode("utf-8").strip()
+            if path:
+                return BrowseFolderResponse(path=path)
             return BrowseFolderResponse(path=None)
-            
-        return BrowseFolderResponse(path=folder_path[0])
-    except Exception as e:
-        print("Browse folder error:", e)
-        return BrowseFolderResponse(path=None)
+        except Exception as e:
+            print("Browse folder error (PS):", e)
+            return BrowseFolderResponse(path=None)
+    else:
+        # Fallback to Tkinter for non-Windows (if any)
+        import tkinter as tk
+        from tkinter import filedialog
+        folder_path = [None]
+        def _open_dialog():
+            try:
+                root = tk.Tk()
+                root.withdraw()
+                root.attributes('-topmost', True)
+                folder_path[0] = filedialog.askdirectory(title="Select Watch Folder")
+                root.destroy()
+            except Exception as e:
+                print("Tkinter error:", e)
+
+        try:
+            t = threading.Thread(target=_open_dialog)
+            t.start()
+            t.join()
+            return BrowseFolderResponse(path=folder_path[0] or None)
+        except Exception as e:
+            print("Browse folder error:", e)
+            return BrowseFolderResponse(path=None)
 
 
 @router.get("/logs")

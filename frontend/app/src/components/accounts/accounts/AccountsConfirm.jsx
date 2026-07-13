@@ -24,7 +24,7 @@ export default function AccountsConfirm() {
 
     const confirmChannel = async () => {
       try {
-        await apiClient.post(`/accounts/${accountId}/confirm-channel`, {
+        await apiClient.post(`/channels/${accountId}/confirm-channel`, {
           channel_id: channelId,
           channel_name: channelName,
           avatar_url: avatarUrl || null

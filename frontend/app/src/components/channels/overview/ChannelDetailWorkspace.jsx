@@ -198,8 +198,13 @@ export default function ChannelDetailWorkspace({ channel }) {
               onClick={async () => {
                 try {
                   const res = await apiClient.get(`/channels/${channel.id}/auth-url`)
-                  if (res && res.auth_url) window.location.href = res.auth_url
-                } catch (err) { console.error(err) }
+                  if (res && res.auth_url) await apiClient.post('/system/open-url', { url: res.auth_url })
+                } catch (err) {
+                  console.error(err)
+                  toast.error(err?.response?.data?.detail || "Failed to get authentication URL. Check if client_secret.json is configured.", {
+                    style: { background: '#0a0f18', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }
+                  })
+                }
               }}
               className={`h-[38px] px-4.5 rounded-[10px] backdrop-blur-md font-bold text-[12px] transition-all flex items-center gap-2 ${
                 channel.status !== 'Connected'
@@ -234,8 +239,13 @@ export default function ChannelDetailWorkspace({ channel }) {
               onClick={async () => {
                 try {
                   const res = await apiClient.get(`/channels/${channel.id}/auth-url`)
-                  if (res && res.auth_url) window.location.href = res.auth_url
-                } catch (err) { console.error(err) }
+                  if (res && res.auth_url) await apiClient.post('/system/open-url', { url: res.auth_url })
+                } catch (err) {
+                  console.error(err)
+                  toast.error(err?.response?.data?.detail || "Failed to get authentication URL. Check if client_secret.json is configured.", {
+                    style: { background: '#0a0f18', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }
+                  })
+                }
               }}
               className="h-[38px] px-5 rounded-[10px] bg-red-500 text-white font-bold text-[12px] hover:bg-red-600 transition-all shadow-lg flex items-center gap-2 shrink-0 animate-pulse">
               <RefreshCw size={14} /> Reconnect Now

@@ -187,8 +187,9 @@ export default function AccountsPanel() {
                       </button>
                       <button 
                         onClick={() => {
-                          apiClient.get(`/accounts/${selectedAccount.id}/auth-url`)
-                            .then(data => window.location.href = data.auth_url)
+                          apiClient.get(`/channels/${selectedAccount.id}/auth-url`)
+                            .then(data => { if(data && data.auth_url) apiClient.post('/system/open-url', { url: data.auth_url }) })
+                            .catch(err => console.error(err))
                         }}
                         className="text-[10px] uppercase font-bold text-white/50 hover:text-white transition-colors">
                         Reconnect
@@ -209,8 +210,9 @@ export default function AccountsPanel() {
                     <span className="text-red-300 text-[11px] font-medium">Not Connected</span>
                       <button 
                         onClick={() => {
-                          apiClient.get(`/accounts/${selectedAccount.id}/auth-url`)
-                            .then(data => window.location.href = data.auth_url)
+                          apiClient.get(`/channels/${selectedAccount.id}/auth-url`)
+                            .then(data => { if(data && data.auth_url) apiClient.post('/system/open-url', { url: data.auth_url }) })
+                            .catch(err => console.error(err))
                         }}
                         className="text-[10px] uppercase font-bold text-white/70 hover:text-white transition-colors">
                       Connect YouTube
