@@ -120,12 +120,12 @@ def validate(path: str) -> ValidationResult:
 
     if not is_direct_file:
         try:
-            mp4_files = [f for f in os.listdir(folder_path) if f.lower().endswith(".mp4")]
+            mp4_files = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".mov", ".mkv"))]
         except OSError:
             mp4_files = []
             
         if not mp4_files:
-            return _fail(folder_path, MISSING_VIDEO, f"No video.mp4 found in folder: {folder_path!r}")
+            return _fail(folder_path, MISSING_VIDEO, f"No video found in folder: {folder_path!r}")
             
         if len(mp4_files) == 1:
             video_mp4 = os.path.join(folder_path, mp4_files[0])

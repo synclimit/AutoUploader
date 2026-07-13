@@ -53,7 +53,7 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
             continue
         if entry.is_dir(follow_symlinks=False):
             candidate_path = entry.path
-        elif entry.is_file(follow_symlinks=False) and entry.name.lower().endswith(".mp4"):
+        elif entry.is_file(follow_symlinks=False) and entry.name.lower().endswith((".mp4", ".mov", ".mkv")):
             candidate_path = entry.path
         else:
             continue

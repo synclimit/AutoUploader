@@ -43,7 +43,7 @@ async def upload_files(
             ext = os.path.splitext(safe_name)[1].lower()
             if ext in [".mp4", ".mov", ".mkv"]:
                 basename = os.path.splitext(safe_name)[0]
-                safe_name = os.path.join(basename, "video.mp4")
+                safe_name = os.path.join(basename, f"video{ext}")
             else:
                 safe_name = os.path.join("package", safe_name)
             
@@ -68,7 +68,7 @@ async def upload_files(
     for folder_path in folders_to_process:
         metadata_path = os.path.join(folder_path, "metadata.json")
         if not os.path.exists(metadata_path):
-            videos = [f for f in os.listdir(folder_path) if f.endswith((".mp4", ".mov", ".mkv"))]
+            videos = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".mov", ".mkv"))]
             if videos:
                 title = os.path.basename(folder_path)
                 video_id = f"RAW_{uuid.uuid4().hex[:12]}"
