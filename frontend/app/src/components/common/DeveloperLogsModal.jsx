@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, X, RefreshCw, Copy, Download, Trash2, CheckCircle2 } from 'lucide-react';
-import apiClient from '../../../api/client';
+import apiClient from '../../api/client';
 import toast from 'react-hot-toast';
 
 export default function DeveloperLogsModal({ isOpen, onClose }) {

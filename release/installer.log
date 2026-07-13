@@ -19,3 +19,33 @@
 [2026-07-13 21:31:35] 
 [2026-07-13 21:31:37] [36mvite v8.0.14 [32mbuilding client environment for production...[36m[39m
 [2026-07-13 21:31:37] [2K
+[2026-07-13 21:31:48] transforming...âœ“ 2786 modules transformed.
+[2026-07-13 21:31:48] [31mâœ—[39m Build failed in 11.22s
+[2026-07-13 21:31:48] [31merror during build:
+[2026-07-13 21:31:48] [31mBuild failed with 1 error:
+[2026-07-13 21:31:48] 
+[2026-07-13 21:31:48] [31m[UNRESOLVED_IMPORT] [0mCould not resolve '../../../api/client' in src/components/common/DeveloperLogsModal.jsx
+[2026-07-13 21:31:48] [38;5;246mâ•­[0m[38;5;246mâ”€[0m[38;5;246m[[0m src/components/common/DeveloperLogsModal.jsx:3:23 [38;5;246m][0m
+[2026-07-13 21:31:48] [38;5;246mâ”‚[0m
+[2026-07-13 21:31:48] [38;5;246m3 â”‚[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249ma[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mC[0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m"../../../api/client"[38;5;249m;[0m
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m                       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m                                 â•°â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Module not found.
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m [38;5;115mHelp[0m: 'src/components/common/DeveloperLogsModal.jsx' is imported by the following path:
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m         - src/components/common/DeveloperLogsModal.jsx
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m         - src/components/Topbar.jsx
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m         - src/App.jsx
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m         - src/main.jsx
+[2026-07-13 21:31:48] [38;5;240m  â”‚[0m         - index.html
+[2026-07-13 21:31:48] [38;5;246mâ”€â”€â”€â•¯[0m
+[2026-07-13 21:31:48] [31m
+[2026-07-13 21:31:48] at aggregateBindingErrorsIntoJsError (file:///D:/AutoUploader/frontend/app/node_modules/rolldown/dist/shared/error-B8po7KiL.mjs:48:18)
+[2026-07-13 21:31:48] at unwrapBindingResult (file:///D:/AutoUploader/frontend/app/node_modules/rolldown/dist/shared/error-B8po7KiL.mjs:18:128)
+[2026-07-13 21:31:48] at #build (file:///D:/AutoUploader/frontend/app/node_modules/rolldown/dist/shared/rolldown-build-9MccaWPU.mjs:3236:34)
+[2026-07-13 21:31:48] at async buildEnvironment (file:///D:/AutoUploader/frontend/app/node_modules/vite/dist/node/chunks/node.js:33137:64)
+[2026-07-13 21:31:48] at async Object.build (file:///D:/AutoUploader/frontend/app/node_modules/vite/dist/node/chunks/node.js:33559:19)
+[2026-07-13 21:31:48] at async Object.buildApp (file:///D:/AutoUploader/frontend/app/node_modules/vite/dist/node/chunks/node.js:33556:153)
+[2026-07-13 21:31:48] at async CAC.<anonymous> (file:///D:/AutoUploader/frontend/app/node_modules/vite/dist/node/cli.js:777:3) {
+[2026-07-13 21:31:48] errors: [Getter/Setter]
+[2026-07-13 21:31:48] }[39m
+[2026-07-13 21:31:48] Command failed with code 1: D:\AutoUploader\build\build_frontend.bat
