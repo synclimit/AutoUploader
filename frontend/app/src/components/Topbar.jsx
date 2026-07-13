@@ -1,12 +1,14 @@
 import { useAppStore } from '../store/app/appStore'
 import { useState, useRef, useEffect } from 'react'
-import { Bell, UploadCloud, CheckSquare, CheckCircle2, LayoutDashboard, Radio, Activity, AlertTriangle, X, ShieldAlert } from 'lucide-react'
+import { Bell, UploadCloud, CheckSquare, CheckCircle2, LayoutDashboard, Radio, Activity, AlertTriangle, X, ShieldAlert, Terminal } from 'lucide-react'
 import { useQueueStore } from '../store/upload/uploadStore'
 import { useAccountsStore } from '../store/accounts/accountsStore'
+import DeveloperLogsModal from './common/DeveloperLogsModal'
 
 export default function Topbar() {
   const { activeModule, userName } = useAppStore()
   const [showNotifs, setShowNotifs] = useState(false)
+  const [showDevLogs, setShowDevLogs] = useState(false)
   const notifRef = useRef(null)
   
   const tasks = useQueueStore(s => s.tasks || [])
@@ -149,6 +151,14 @@ export default function Topbar() {
             )}
           </div>
 
+          <button 
+            onClick={() => setShowDevLogs(true)}
+            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/40 flex items-center justify-center hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0"
+            title="Developer Logs"
+          >
+            <Terminal size={16} />
+          </button>
+
           <button aria-label="User Profile" className="w-9 h-9 rounded-full bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/30 text-[var(--accent-400)] font-bold text-[13px] flex items-center justify-center hover:bg-[var(--accent-500)]/20 hover:shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:scale-105 transition-all cursor-pointer shrink-0 mr-4">
             {(userName || 'Admin').substring(0, 2).toUpperCase()}
           </button>
@@ -167,6 +177,7 @@ export default function Topbar() {
           </div>
         </div>
       </div>
+      <DeveloperLogsModal isOpen={showDevLogs} onClose={() => setShowDevLogs(false)} />
     </header>
   )
 }

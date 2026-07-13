@@ -230,3 +230,21 @@ def install_update(req: InstallUpdateRequest):
         print("Install update error:", e)
         return {"success": False, "error": str(e)}
 
+@router.get("/app-logs")
+def get_app_logs(lines: int = 500):
+    """Fetches the last N lines from the autouploader.log file."""
+    from services.system.path_service import PathService
+    import os
+    import collections
+    
+    log_file = os.path.join(PathService.get_logs_dir(), "autouploader.log")
+    if not os.path.exists(log_file):
+        return {"success": True, "logs": "No log file found at: " + log_file}
+        
+    try:
+        with open(log_file, "r", encoding="utf-8", errors="replace") as f:
+            last_lines = collections.deque(f, lines)
+            return {"success": True, "logs": "".join(last_lines)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
