@@ -197,7 +197,7 @@ export default function ChannelDetailWorkspace({ channel }) {
             <button 
               onClick={async () => {
                 try {
-                  const res = await apiClient.get(`/channels/${channel.id}/auth-url`)
+                  const res = await apiClient.post(`/oauth/channels/${channel.id}/reconnect`)
                   if (res && res.auth_url) await apiClient.post('/system/open-url', { url: res.auth_url })
                 } catch (err) {
                   console.error(err)
@@ -238,7 +238,7 @@ export default function ChannelDetailWorkspace({ channel }) {
             <button 
               onClick={async () => {
                 try {
-                  const res = await apiClient.get(`/channels/${channel.id}/auth-url`)
+                  const res = await apiClient.post(`/oauth/channels/${channel.id}/reconnect`)
                   if (res && res.auth_url) await apiClient.post('/system/open-url', { url: res.auth_url })
                 } catch (err) {
                   console.error(err)

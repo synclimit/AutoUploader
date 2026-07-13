@@ -187,7 +187,7 @@ export default function AccountsPanel() {
                       </button>
                       <button 
                         onClick={() => {
-                          apiClient.get(`/channels/${selectedAccount.id}/auth-url`)
+                          apiClient.post(`/oauth/channels/${selectedAccount.id}/reconnect`)
                             .then(data => { if(data && data.auth_url) apiClient.post('/system/open-url', { url: data.auth_url }) })
                             .catch(err => console.error(err))
                         }}
@@ -210,7 +210,7 @@ export default function AccountsPanel() {
                     <span className="text-red-300 text-[11px] font-medium">Not Connected</span>
                       <button 
                         onClick={() => {
-                          apiClient.get(`/channels/${selectedAccount.id}/auth-url`)
+                          apiClient.post(`/oauth/channels/${selectedAccount.id}/reconnect`)
                             .then(data => { if(data && data.auth_url) apiClient.post('/system/open-url', { url: data.auth_url }) })
                             .catch(err => console.error(err))
                         }}
