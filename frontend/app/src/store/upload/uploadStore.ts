@@ -236,7 +236,7 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
     set({ isUploading: true, uploadProgress: 0 });
     try {
       const formData = new FormData();
-      formData.append('account_id', account_id);
+      formData.append('channel_id', account_id);
 
       Array.from(files).forEach(file => {
         // @ts-ignore - customPath added by directory reader

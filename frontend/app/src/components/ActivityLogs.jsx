@@ -24,8 +24,9 @@ export default function ActivityLogs() {
       
       let combined = [];
 
-      if (sysRes.success && sysRes.data) {
-        const sysParsed = sysRes.data.map(log => {
+      // sysRes is already the data array because apiClient unwraps { success: true, data: [...] }
+      if (Array.isArray(sysRes)) {
+        const sysParsed = sysRes.map(log => {
           let module = 'SYSTEM'
           let level = 'INFO'
           let message = log.message
