@@ -5,33 +5,33 @@ import { useQueueStore } from '../../../store/upload/uploadStore'
 const CompletedTableRow = memo(function CompletedTableRow({ video, onRetry }) {
   // Status Colors
   const statusColors = {
-    'Uploading': 'text-[var(--accent-400)]',
-    'Scheduled': 'text-amber-400',
-    'Completed': 'text-green-400',
-    'Failed': 'text-red-400'
+    'Mengunggah': 'text-[var(--accent-400)]',
+    'Dijadwalkan': 'text-amber-400',
+    'Selesai': 'text-green-400',
+    'Gagal': 'text-red-400'
   }
 
   const getStatusAction = () => {
     switch(video.status) {
-      case 'Uploading':
+      case 'Mengunggah':
         return (
           <button className="w-8 h-8 rounded-[6px] border border-white/[0.08] hover:border-[var(--accent-500)]/50 hover:bg-[var(--accent-500)]/10 flex items-center justify-center transition-all neon-interactive text-white/70">
             <Pause size={14} />
           </button>
         )
-      case 'Scheduled':
+      case 'Dijadwalkan':
         return (
           <button className="w-8 h-8 rounded-[6px] border border-white/[0.08] hover:border-amber-500/50 hover:bg-amber-500/10 flex items-center justify-center transition-all neon-interactive text-white/70">
             <Clock size={14} />
           </button>
         )
-      case 'Completed':
+      case 'Selesai':
         return (
           <button className="w-8 h-8 rounded-[6px] border border-white/[0.08] hover:border-green-500/50 hover:bg-green-500/10 flex items-center justify-center transition-all neon-interactive text-green-400">
             <Check size={14} />
           </button>
         )
-      case 'Failed':
+      case 'Gagal':
         return (
           <button 
             onClick={() => onRetry && onRetry(video.id)}
@@ -46,7 +46,7 @@ const CompletedTableRow = memo(function CompletedTableRow({ video, onRetry }) {
 
   const getProgressDisplay = () => {
     switch(video.status) {
-      case 'Uploading':
+      case 'Mengunggah':
         return (
           <div className="flex items-center gap-3 w-full pr-4">
              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -57,12 +57,12 @@ const CompletedTableRow = memo(function CompletedTableRow({ video, onRetry }) {
              <span className="text-[12px] font-mono text-white/80 w-10 text-right">{video.progress}%</span>
           </div>
         )
-      case 'Scheduled':
-      case 'Completed':
+      case 'Dijadwalkan':
+      case 'Selesai':
         return (
           <span className="text-[13px] font-bold text-green-400">Done</span>
         )
-      case 'Failed':
+      case 'Gagal':
         return (
           <div className="flex flex-col">
             <span className="text-[13px] text-white/70">{video.timeText}</span>
@@ -112,7 +112,7 @@ const CompletedTableRow = memo(function CompletedTableRow({ video, onRetry }) {
       <div className="w-[30%] shrink-0 pl-2 pr-4 flex flex-col justify-center">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">Via:</span>
-          <span className="text-[12px] font-medium text-cyan-200/80">{(video.schedule_mode === 'api' || video.schedule_mode === 'manual' || !video.schedule_mode) ? 'AutoUploader' : 'YT Scheduler'}</span>
+          <span className="text-[12px] font-medium text-cyan-200/80">{(video.schedule_mode === 'api' || video.schedule_mode === 'manual' || !video.schedule_mode) ? 'Raynz PitStop' : 'YT Scheduler'}</span>
           <span className="text-[11px] text-white/20 px-1">•</span>
           <span className="text-[12px] font-medium text-white/70">{(video.pipeline_type || '').toLowerCase().includes('short') ? 'Shorts' : 'Long Video'}</span>
         </div>
@@ -131,7 +131,7 @@ const CompletedTableRow = memo(function CompletedTableRow({ video, onRetry }) {
 
       {/* Progress & Action (Col 4) */}
       <div className="w-[15%] shrink-0 pr-4 flex items-center justify-end">
-        {video.status === 'Failed' ? (
+        {video.status === 'Gagal' ? (
           <div className="flex flex-col items-end">
             <button 
               onClick={(e) => { e.stopPropagation(); onRetry && onRetry(video.id); }}

@@ -46,10 +46,10 @@ export default function UploadDefaultsTab({ draft, original, onChange, playlists
       { label: 'Yes, it is made for kids', value: 'kids' },
       { label: 'No, it is not made for kids', value: 'not_kids' }
     ]},
-    { id: 'visibility', label: 'Visibility', type: 'select', helpText: 'Status privasi saat video pertama kali diupload.', options: [
-      { label: 'Public', value: 'public' },
-      { label: 'Unlisted', value: 'unlisted' },
-      { label: 'Private', value: 'private' }
+    { id: 'visibility', label: 'Visibilitas', type: 'select', helpText: 'Status privasi saat video pertama kali diupload.', options: [
+      { label: 'Publik', value: 'public' },
+      { label: 'Tidak Publik', value: 'unlisted' },
+      { label: 'Pribadi', value: 'private' }
     ]},
     { id: 'license', label: 'License', type: 'select', helpText: 'Lisensi hak cipta video Anda.', options: [
       { label: 'Standard YouTube License', value: 'standard' },

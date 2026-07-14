@@ -122,14 +122,26 @@ class ChannelService:
             health_report = OAuthHealth.evaluate(db, channel.id)
             
             if health_report.status != OAuthHealthStatus.READY:
-                channel.authentication_status = "Disconnected"
-                channel.status = "error"
                 if health_report.status == OAuthHealthStatus.REFRESH_REQUIRED:
-                    channel.attention = "⚠ Refresh Required"
-                elif health_report.status == OAuthHealthStatus.NOT_CONNECTED:
-                    channel.attention = "⚠ Not Connected"
+                    try:
+                        from services.oauth_core.refresh_service import RefreshService
+                        current_token = OAuthRepository.load_token(db, channel.id)
+                        new_token = RefreshService.refresh(channel.id, current_token)
+                        OAuthRepository.save_or_update_token(db, channel.id, new_token)
+                        channel.authentication_status = "Connected"
+                        channel.status = "healthy"
+                        channel.attention = "✓ Normal"
+                    except Exception as e:
+                        channel.authentication_status = "Disconnected"
+                        channel.status = "error"
+                        channel.attention = "⚠ Refresh Failed"
                 else:
-                    channel.attention = "⚠ OAuth Expired"
+                    channel.authentication_status = "Disconnected"
+                    channel.status = "error"
+                    if health_report.status == OAuthHealthStatus.NOT_CONNECTED:
+                        channel.attention = "⚠ Not Connected"
+                    else:
+                        channel.attention = "⚠ OAuth Expired"
             else:
                 channel.authentication_status = "Connected"
                 
@@ -484,7 +496,8 @@ class ChannelService:
         temp_credentials[channel_id] = {
             "credentials": credentials,
             "subscribers": subscribers,
-            "avatar_url": avatar_url
+            "avatar_url": avatar_url,
+            "channel_name": channel_name
         }
         channel.authentication_status = "Pending Confirmation"
         db.commit()
@@ -530,8 +543,13 @@ class ChannelService:
             raise HTTPException(status_code=500, detail=f"Failed to save credentials to database: {str(e)}")
             
         channel.channel_id = request.channel_id
-        if request.channel_name:
-            channel.channel_name = request.channel_name
+        
+        yt_name = temp_data.get("channel_name") or getattr(request, "channel_name", None)
+        if yt_name and channel.alias_name != yt_name:
+            existing = db.query(Channel).filter(Channel.alias_name == yt_name, Channel.id != channel_id).first()
+            if not existing:
+                channel.alias_name = yt_name
+                
         channel.subscribers = subscribers
         if avatar_url:
             channel.avatar_url = avatar_url

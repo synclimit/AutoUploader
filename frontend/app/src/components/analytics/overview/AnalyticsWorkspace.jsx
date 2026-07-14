@@ -100,11 +100,11 @@ export default function AnalyticsWorkspace() {
 
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/[0.06]">
                   <div className="flex flex-col bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.04]">
-                    <span className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Subscribers</span>
+                    <span className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Pelanggan</span>
                     <span className="text-sm font-black text-white">{acc.subscribers || acc.subs || '0'}</span>
                   </div>
                   <div className="flex flex-col bg-white/[0.02] p-2.5 rounded-xl border border-white/[0.04]">
-                    <span className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Total Views</span>
+                    <span className="text-[10px] uppercase font-bold text-white/40 tracking-wider">Total Tayangan</span>
                     <span className="text-sm font-black text-cyan-400">{acc.views || acc.total_views || '0'}</span>
                   </div>
                 </div>

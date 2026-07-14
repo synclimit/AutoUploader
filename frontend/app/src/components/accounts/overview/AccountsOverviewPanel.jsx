@@ -26,7 +26,7 @@ export default function AccountsOverviewPanel() {
   const accounts = useAccountsStore((s) => s.accounts)
   const logs = useAccountsStore((s) => s.logs)
 
-  const [activeTab, setActiveTab] = useState('Channels')
+  const [activeTab, setActiveTab] = useState('Saluran')
   const [isCreatingAccount, setIsCreatingAccount] = useState(false)
   const [isCreatingProfile, setIsCreatingProfile] = useState(false)
 
@@ -53,9 +53,9 @@ export default function AccountsOverviewPanel() {
       {/* TABS NAVIGATION */}
       <div className="flex gap-2">
         <button
-          onClick={() => setActiveTab('Channels')}
+          onClick={() => setActiveTab('Saluran')}
           className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-            activeTab === 'Channels' 
+            activeTab === 'Saluran' 
               ? 'bg-[var(--accent-500)]/20 text-[var(--accent-400)] border border-[var(--accent-500)]/30' 
               : 'bg-[#101722] text-white/40 border border-white/5 hover:bg-white/5 hover:text-white/60'
           }`}
@@ -75,7 +75,7 @@ export default function AccountsOverviewPanel() {
       </div>
 
       <div className="flex-1 overflow-hidden grid gap-4 min-h-0" style={{ gridTemplateColumns: '35% 65%' }}>
-        {activeTab === 'Channels' ? (
+        {activeTab === 'Saluran' ? (
           <>
             <WorkspacePanel onAddAccount={() => setIsCreatingAccount(true)}>
               {accounts.length === 0 ? (

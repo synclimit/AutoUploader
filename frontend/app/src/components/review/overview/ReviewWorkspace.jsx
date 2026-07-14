@@ -223,7 +223,7 @@ export default function ReviewWorkspace() {
                 ))
               )}
             </div>
-            <button onClick={() => setIsLogOpen(false)} className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-[8px] text-white text-[12px] font-bold neon-interactive">Close</button>
+            <button onClick={() => setIsLogOpen(false)} className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-[8px] text-white text-[12px] font-bold neon-interactive">Tutup</button>
           </div>
         </div>
       )}
@@ -258,13 +258,13 @@ export default function ReviewWorkspace() {
               {val: "REVIEW_QUEUE", label: "Needs Attention (Default)"},
               {val: "ALL", label: "Show All (Global)"},
               {val: "REVIEW", label: "Needs Review"},
-              {val: "WATCHED", label: "Watched"},
-              {val: "SCHEDULED", label: "Scheduled"},
+              {val: "WATCHED", label: "Ditonton"},
+              {val: "SCHEDULED", label: "Dijadwalkan"},
               {val: "QUEUED", label: "Queued"},
-              {val: "UPLOADING", label: "Uploading"},
-              {val: "COMPLETED", label: "Completed"},
-              {val: "FAILED", label: "Failed"},
-              {val: "CANCELLED", label: "Cancelled"}
+              {val: "UPLOADING", label: "Mengunggah"},
+              {val: "COMPLETED", label: "Selesai"},
+              {val: "FAILED", label: "Gagal"},
+              {val: "CANCELLED", label: "Dibatalkan"}
             ]}
             className="w-[180px]"
           />
@@ -302,9 +302,6 @@ export default function ReviewWorkspace() {
             className="w-[140px]"
           />
 
-          <button disabled className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] border border-white/[0.05] text-white/30 bg-white/[0.02] cursor-not-allowed ml-2">
-            <Filter size={14} /> Filter
-          </button>
         </div>
 
         {/* Global Action Tools */}

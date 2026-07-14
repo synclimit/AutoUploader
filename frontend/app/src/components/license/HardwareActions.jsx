@@ -20,7 +20,7 @@ export default function HardwareActions({ hardwareId }) {
     
     const content = `====================================
 
-AutoUploader License Request
+Raynz PitStop License Request
 
 ====================================
 
@@ -33,7 +33,7 @@ Hardware ID :
 ${hardwareId}
 
 Application :
-AutoUploader Professional
+Raynz PitStop Professional
 
 Version :
 1.0

@@ -83,7 +83,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
     
     const headers = []
     if (visibleColumns.status) headers.push('Status')
-    headers.push('Channel', 'Attention', 'Mode', 'Coverage', 'Completed', 'Subs', 'Views', 'CTR', 'Videos', 'Monetized')
+    headers.push('Channel', 'Attention', 'Mode', 'Coverage', 'Selesai', 'Subs', 'Views', 'CTR', 'Videos', 'Monetized')
     
     const rows = sortedChannels.map(c => {
       const r = []
@@ -160,7 +160,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
     if (filter !== 'All') {
       if (filter === 'Healthy') filtered = filtered.filter(c => c?.status === 'healthy')
       if (filter === 'Warning' || filter === 'Low') filtered = filtered.filter(c => c?.status === 'warning')
-      if (filter === 'Error' || filter === 'Critical' || filter === 'Failed') filtered = filtered.filter(c => c?.status === 'error')
+      if (filter === 'Error' || filter === 'Critical' || filter === 'Gagal') filtered = filtered.filter(c => c?.status === 'error')
       if (filter === 'Monetized') filtered = filtered.filter(c => c?.monetized)
       if (filter === 'Non Monetized') filtered = filtered.filter(c => c && !c.monetized)
       if (filter === 'Continuous') filtered = filtered.filter(c => (c.mode || c.automation_strategy || 'Continuous').toLowerCase().includes('continuous'))
@@ -175,7 +175,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
       if (sortBy === 'Attention') {
         return (b?.attention || '').localeCompare(a?.attention || '')
       }
-      if (sortBy === 'Subscribers') {
+      if (sortBy === 'Pelanggan') {
         return Number(b?.subs || 0) - Number(a?.subs || 0)
       }
       if (sortBy === 'Views') {
@@ -372,7 +372,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
           
           {showSortMenu && (
             <div className="absolute top-[100%] left-0 mt-1 w-[160px] bg-[#0b1d25] border border-[var(--accent-500)]/20 shadow-2xl rounded-[8px] overflow-hidden z-50">
-              {['Default', 'Coverage', 'Attention', 'Subscribers', 'Views', 'Videos'].map(s => (
+              {['Default', 'Coverage', 'Attention', 'Pelanggan', 'Views', 'Videos'].map(s => (
                 <div 
                   key={s}
                   onClick={() => { setSortBy(s); setShowSortMenu(false); }}
@@ -470,7 +470,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
               {visibleColumns.attention && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Attention</th>}
               {visibleColumns.mode && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Mode</th>}
               {visibleColumns.coverage && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Coverage</th>}
-              {visibleColumns.completed && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Completed</th>}
+              {visibleColumns.completed && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Selesai</th>}
               {visibleColumns.subscribers && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Subs</th>}
               {visibleColumns.views && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">Views ({timeMode === 'yesterday' ? '1d' : timeMode === '7d' ? '7d' : timeMode === '28d' ? '28d' : timeMode === '1y' ? '1y' : 'All'})</th>}
               {visibleColumns.ctr && <th className="px-3 py-2 text-[11px] font-bold text-cyan-200/50 uppercase tracking-wider">CTR</th>}
@@ -485,7 +485,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
                   <div className="flex flex-col items-center justify-center">
                     <Video size={32} className="text-white/20 mb-3" />
                     <span className="text-[13px] font-bold text-white/70">No channels connected yet.</span>
-                    <button onClick={() => setActiveModule && setActiveModule('Channels')} className="mt-4 px-4 py-2 bg-[var(--accent-500)]/10 text-[var(--accent-400)] font-bold text-[12px] rounded-[6px] border border-[var(--accent-500)]/20 hover:bg-[var(--accent-500)]/20 transition-colors">Connect Your First Channel</button>
+                    <button onClick={() => setActiveModule && setActiveModule('Saluran')} className="mt-4 px-4 py-2 bg-[var(--accent-500)]/10 text-[var(--accent-400)] font-bold text-[12px] rounded-[6px] border border-[var(--accent-500)]/20 hover:bg-[var(--accent-500)]/20 transition-colors">Connect Your First Channel</button>
                   </div>
                 </td>
               </tr>
@@ -573,7 +573,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
           <button 
             onClick={() => {
               useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
-              if (setActiveModule) setActiveModule('Channels');
+              if (setActiveModule) setActiveModule('Saluran');
               closePopups();
             }}
             className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"

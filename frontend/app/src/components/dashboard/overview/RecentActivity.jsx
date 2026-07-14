@@ -36,7 +36,7 @@ export default function RecentActivity() {
         <Log time="14:15" level="INFO" module="AI" message="Metadata Generation Started" />
         <Log time="14:12" level="PASS" module="WATCH LONG" message="Package Imported: Rain.mp4" />
         <Log time="14:05" level="PASS" module="SCHEDULER" message="Checked upcoming schedule" />
-        <Log time="14:00" level="INFO" module="SYSTEM" message="AutoUploader Agent Started" />
+        <Log time="14:00" level="INFO" module="SYSTEM" message="Raynz PitStop Agent Started" />
       </div>
     </div>
   )

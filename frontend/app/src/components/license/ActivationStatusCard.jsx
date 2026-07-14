@@ -32,7 +32,7 @@ export default function ActivationStatusCard({ statusData }) {
         <p className="text-[12px] text-white/60">
           {isValid 
             ? 'Lifetime license verified. All features are unlocked.' 
-            : errorMsg || 'Please import a valid license to use AutoUploader.'}
+            : errorMsg || 'Please import a valid license to use Raynz PitStop.'}
         </p>
       </div>
     </div>

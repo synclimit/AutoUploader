@@ -7,7 +7,7 @@ export default function ChannelListPanel({ channels, selectedChannelId, onSelect
       case 'Connected': return <CheckCircle2 size={12} className="text-green-400" />
       case 'Disconnected': return <XCircle size={12} className="text-red-400" />
       case 'Warning': return <AlertCircle size={12} className="text-amber-400" />
-      case 'Uploading': return <CloudUpload size={12} className="text-[var(--accent-400)] animate-pulse" />
+      case 'Mengunggah': return <CloudUpload size={12} className="text-[var(--accent-400)] animate-pulse" />
       case 'Disabled': return <div className="w-3 h-3 rounded-full bg-white/20 border border-white/30" />
       default: return null
     }
@@ -48,8 +48,8 @@ export default function ChannelListPanel({ channels, selectedChannelId, onSelect
 
               {/* Avatar */}
               <div className={`w-[44px] h-[44px] rounded-full overflow-hidden border-2 shrink-0 transition-colors ${isSelected ? 'border-[var(--accent-400)]/50 shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'border-white/10 group-hover:border-white/20'}`}>
-                {channel.avatar ? (
-                  <img src={channel.avatar} alt={channel.name} className="w-full h-full object-cover" />
+                {channel.avatar_url ? (
+                  <img src={channel.avatar_url} alt={channel.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className={`w-full h-full flex items-center justify-center text-[15px] font-bold text-white shadow-inner ${channel.color}`}>
                     {channel.initials}

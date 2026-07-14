@@ -15,11 +15,12 @@ export default function DeveloperLogsModal({ isOpen, onClose }) {
   const fetchLogs = async () => {
     setIsRefreshing(true);
     try {
-      const res = await apiClient.get('/api/v1/system/app-logs?lines=500');
-      if (res && res.success) {
-        setLogs(res.logs || "No logs available.");
+      const res = await fetch('http://127.0.0.1:8000/api/v1/system/app-logs?lines=500');
+      const data = await res.json();
+      if (data && data.success) {
+        setLogs(data.logs || "No logs available.");
       } else {
-        setLogs("Error fetching logs: " + (res?.error || "Unknown error"));
+        setLogs("Error fetching logs: " + (data?.error || "Unknown error"));
       }
     } catch (e) {
       setLogs("Failed to connect to backend log server.\n" + String(e));
@@ -106,7 +107,7 @@ export default function DeveloperLogsModal({ isOpen, onClose }) {
           </div>
           
           <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2 mr-3 cursor-pointer group">
+            <label className="flex items-center gap-2 mr-3 cursor-pointer group" onClick={() => setAutoRefresh(!autoRefresh)}>
               <div className={`w-8 h-4 rounded-full relative transition-colors ${autoRefresh ? 'bg-[var(--accent-500)]' : 'bg-white/10'}`}>
                 <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${autoRefresh ? 'translate-x-4' : 'translate-x-0'}`}></div>
               </div>

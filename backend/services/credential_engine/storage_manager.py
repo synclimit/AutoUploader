@@ -40,7 +40,12 @@ class StorageManager:
     def load_json(cls, channel_id: str) -> Dict[str, Any]:
         file_path = cls._get_secret_file(channel_id)
         if not file_path.exists():
-            raise MissingJsonException(f"Credential file not found for channel {channel_id}")
+            from core.config import get_client_secret_path
+            fallback_path = get_client_secret_path()
+            if fallback_path and fallback_path.exists():
+                file_path = fallback_path
+            else:
+                raise MissingJsonException(f"Credential file not found for channel {channel_id}")
             
         try:
             with open(file_path, "r", encoding="utf-8") as f:

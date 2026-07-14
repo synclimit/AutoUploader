@@ -20,7 +20,7 @@ export default function ActivationWizard({ statusData, checkLicense }) {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center shadow-[0_0_30px_rgba(34,211,238,0.3)]">
             <Key size={32} className="text-white" />
           </div>
-          <h1 className="text-[24px] font-bold text-white tracking-tight">AutoUploader Activation</h1>
+          <h1 className="text-[24px] font-bold text-white tracking-tight">Raynz PitStop Activation</h1>
           <p className="text-[13px] text-white/50 px-8">
             This is a premium software. Please activate your Lifetime License to unlock all features.
           </p>

@@ -13,7 +13,7 @@ export default function ReviewPreviewDrawer({ video, onClose }) {
         description: video.description || '',
         tags: video.tags || '',
         category: video.category || 'Entertainment',
-        visibility: video.visibility || 'Public'
+        visibility: video.visibility || 'Publik'
       })
       setIsEditing(false) // Reset edit mode on new selection
     }
@@ -131,9 +131,9 @@ export default function ReviewPreviewDrawer({ video, onClose }) {
                  onChange={(e) => { setFormData({...formData, visibility: e.target.value}); setIsEditing(true); }}
                  className="w-full bg-[#05070a] border border-white/[0.1] rounded-[12px] px-3 py-2.5 text-[13px] text-white/80 focus:border-[var(--accent-500)]/50 focus:outline-none"
                >
-                 <option>Public</option>
-                 <option>Unlisted</option>
-                 <option>Private</option>
+                 <option>Publik</option>
+                 <option>Tidak Publik</option>
+                 <option>Pribadi</option>
                </select>
              </div>
            </div>

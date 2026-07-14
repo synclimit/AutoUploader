@@ -11,8 +11,8 @@ const mainItems = [
   { label: 'Upload', transKey: 'nav.upload', icon: UploadCloud },
   { label: 'Review', transKey: 'nav.review', icon: CheckSquare },
   { label: 'Complete', transKey: 'nav.complete', icon: CheckCircle2 },
-  { label: 'Channels', transKey: 'nav.channels', icon: Radio },
-  { label: 'Analytics', transKey: 'nav.analytics', icon: Activity },
+  { label: 'Saluran', transKey: 'nav.channels', icon: Radio },
+  { label: 'Analitik', transKey: 'nav.analytics', icon: Activity },
   { label: 'Settings', transKey: 'nav.settings', icon: Settings2 },
 ]
 
@@ -134,8 +134,8 @@ export default function Sidebar() {
               }}
             />
             <div className="flex gap-2">
-               <button onClick={() => setShowNameEdit(false)} className="flex-1 px-2 py-1.5 rounded-[6px] border border-white/10 text-white/50 hover:text-white hover:bg-white/5 text-[11px] font-bold transition-colors">Cancel</button>
-               <button onClick={() => { setUserName(tempName || 'Admin'); setShowNameEdit(false); }} className="flex-1 px-2 py-1.5 rounded-[6px] bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/30 text-[var(--accent-400)] hover:bg-[var(--accent-500)]/20 text-[11px] font-bold transition-colors">Save</button>
+               <button onClick={() => setShowNameEdit(false)} className="flex-1 px-2 py-1.5 rounded-[6px] border border-white/10 text-white/50 hover:text-white hover:bg-white/5 text-[11px] font-bold transition-colors">Batal</button>
+               <button onClick={() => { setUserName(tempName || 'Admin'); setShowNameEdit(false); }} className="flex-1 px-2 py-1.5 rounded-[6px] bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/30 text-[var(--accent-400)] hover:bg-[var(--accent-500)]/20 text-[11px] font-bold transition-colors">Simpan</button>
             </div>
           </div>
         )}

@@ -1,4 +1,10 @@
-export const translations = {
+import json
+
+with open(r'd:\AutoUploader\frontend\app\src\i18n\translations.ts', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# We will just write a new translations.ts file with extensive keys.
+new_ts = """export const translations = {
   en: {
     // Sidebar
     'nav.dashboard': 'Dashboard',
@@ -218,3 +224,7 @@ export const translations = {
     'common.info': 'Info'
   }
 }
+"""
+
+with open(r'd:\AutoUploader\frontend\app\src\i18n\translations.ts', 'w', encoding='utf-8') as f:
+    f.write(new_ts)

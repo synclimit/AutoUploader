@@ -1,5 +1,5 @@
 /**
- * Deterministic Local SEO Analyzer for AutoUploader
+ * Deterministic Local SEO Analyzer for Raynz PitStop
  * Calculates stable metrics based purely on text content.
  */
 

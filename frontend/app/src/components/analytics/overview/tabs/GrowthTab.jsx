@@ -113,7 +113,7 @@ export default function GrowthTab({ channel }) {
     <div className="flex flex-col gap-6 mt-4 pb-10">
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="Subscribers" value={stats.subscribers} trend="▲ Auto-Sync" positive={true} />
+        <Stat label="Pelanggan" value={stats.subscribers} trend="▲ Auto-Sync" positive={true} />
         <Stat label="Views" value={stats.views} trend="▲ Auto-Sync" positive={true} />
         <Stat label="Uploads" value={stats.videos} trend="Total Videos" positive={null} />
         <Stat label="Growth Rate" value={stats.growthRate} trend="Stable" positive={null} />

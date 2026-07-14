@@ -480,7 +480,7 @@ if __name__ == "__main__":
     import time
     url = f"http://127.0.0.1:8000/?_cb={int(time.time())}"
     webview.create_window(
-        "Ryanz Pitstop", 
+        "Raynz PitStop", 
         url, 
         width=1200, 
         height=800,

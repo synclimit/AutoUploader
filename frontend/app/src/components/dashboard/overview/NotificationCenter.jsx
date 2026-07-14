@@ -30,7 +30,7 @@ export default function NotificationCenter({ notifications = [], setActiveModule
     } else if (notif.action === 'Open Upload Journal') {
       setActiveModule && setActiveModule('Journal')
     } else {
-      setActiveModule && setActiveModule('Channels')
+      setActiveModule && setActiveModule('Saluran')
     }
     setIsOpen(false)
   }

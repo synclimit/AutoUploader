@@ -67,11 +67,11 @@ export default function PreferencesWorkspace() {
       if (window.Notification && Notification.permission !== 'granted') {
         Notification.requestPermission().then(perm => {
           if (perm === 'granted') {
-            new Notification('AutoUploader', { body: 'Desktop Notifications Enabled!' })
+            new Notification('Raynz PitStop', { body: 'Desktop Notifications Enabled!' })
           }
         })
       } else if (window.Notification && Notification.permission === 'granted') {
-        new Notification('AutoUploader', { body: 'Desktop Notifications Enabled!' })
+        new Notification('Raynz PitStop', { body: 'Desktop Notifications Enabled!' })
       }
     }
     

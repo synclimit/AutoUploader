@@ -94,7 +94,7 @@ export default function AccountsPanel() {
           <div className="text-[11px] font-bold text-white/90 mb-3 tracking-wide">General</div>
           <div className="space-y-1.5">
             <div className="min-h-[72px] flex flex-col justify-center border-b border-white/[0.02] py-1.5">
-              <Section title="Channel Name">
+              <Section title="Nama Saluran">
                 <Input value={channelName} onChange={(e) => setChannelName(e.target.value)} />
               </Section>
             </div>
@@ -350,7 +350,7 @@ export default function AccountsPanel() {
         subtitle="This action cannot be undone."
         itemLabel="Account"
         itemValue={selectedAccount.channel_name}
-        confirmLabel="Delete"
+        confirmLabel="Hapus"
         confirmColor="red"
       />
     </>

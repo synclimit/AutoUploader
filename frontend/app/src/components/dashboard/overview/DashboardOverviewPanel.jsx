@@ -4,11 +4,13 @@ import { useDashboardStore } from '../../../store/dashboard/dashboardStore'
 import { useAccountsStore } from '../../../store/accounts/accountsStore'
 import { Users, FileVideo, CheckCircle2, DollarSign, Activity, Calendar, Download, ChevronRight } from 'lucide-react'
 
+import { useTranslation } from '../../../i18n/useTranslation'
 import HomeHero from './HomeHero'
 import StatCard from './StatCard'
 import ChannelOverviewTable from './ChannelOverviewTable'
 
 export default function DashboardOverviewPanel() {
+  const { t } = useTranslation()
   const setActiveModule = useAppStore((s) => s.setActiveModule)
   const connected_channels = useDashboardStore((s) => s.connected_channels || { connected_channels: 0, authenticated_channels: 0, disconnected_channels: 0 })
   const statistics = useDashboardStore((s) => s.statistics || {})
@@ -57,7 +59,7 @@ export default function DashboardOverviewPanel() {
               </div>
               <div>
                 <h3 className="text-white font-bold text-sm tracking-wide">Update Available: {updateInfo.latest_version}</h3>
-                <p className="text-white/60 text-xs mt-0.5">A new version of AutoUploader is ready to install.</p>
+                <p className="text-white/60 text-xs mt-0.5">A new version of Raynz PitStop is ready to install.</p>
               </div>
             </div>
             <button 
@@ -102,7 +104,7 @@ export default function DashboardOverviewPanel() {
           </div>
         </div>
 
-        {/* 5 Compressed AutoUploader Stat Cards */}
+        {/* 5 Compressed Raynz PitStop Stat Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 shrink-0">
           <StatCard 
             title="Connected Channels" 

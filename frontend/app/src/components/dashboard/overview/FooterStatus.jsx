@@ -16,7 +16,7 @@ export default function FooterStatus({ engine }) {
       </div>
       <div className="text-white/30 text-[12px] font-medium flex items-center gap-4">
         <span>Workers: {engine.worker_count}</span>
-        <span>AutoUploader v1.0.0</span>
+        <span>Raynz PitStop v1.0.0</span>
       </div>
     </div>
   )

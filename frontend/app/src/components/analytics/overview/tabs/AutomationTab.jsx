@@ -162,7 +162,7 @@ export default function AutomationTab({ channel }) {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-green-500/20"><CheckCircle2 size={16} /></div>
               </div>
               <div className="flex flex-col items-center text-center gap-2">
-                <span className="text-[12px] font-bold text-white/40 uppercase tracking-widest">Completed</span>
+                <span className="text-[12px] font-bold text-white/40 uppercase tracking-widest">Selesai</span>
                 <span className="text-3xl font-black text-green-400 transition-all duration-300">{data.completed}</span>
               </div>
             </div>

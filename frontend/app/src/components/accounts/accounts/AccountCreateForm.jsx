@@ -48,7 +48,7 @@ export default function AccountCreateForm({ onCancel }) {
           <div className="text-[11px] font-bold text-white/90 mb-3 tracking-wide">General</div>
           <div className="space-y-1.5">
             <div className="min-h-[72px] flex flex-col justify-center border-b border-white/[0.02] py-1.5">
-              <Section title="Channel Name">
+              <Section title="Nama Saluran">
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. DJ Channel X" />
               </Section>
             </div>

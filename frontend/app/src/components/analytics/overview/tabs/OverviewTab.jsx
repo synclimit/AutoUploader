@@ -99,8 +99,8 @@ export default function OverviewTab({ channel }) {
           <Select value={timeRange} onChange={setTimeRange} options={periodOptions} className="w-[150px]" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Subscribers" value={formatNumber(data?.channel?.subscribers ?? channel?.subscribers)} trend="+0" icon={Users} color="text-red-400" bg="bg-red-500/10" />
-          <StatCard title="Total Views" value={formatNumber(data?.channel?.views ?? channel?.views)} trend="+0" icon={Eye} color="text-blue-400" bg="bg-blue-500/10" />
+          <StatCard title="Pelanggan" value={formatNumber(data?.channel?.subscribers ?? channel?.subscribers)} trend="+0" icon={Users} color="text-red-400" bg="bg-red-500/10" />
+          <StatCard title="Total Tayangan" value={formatNumber(data?.channel?.views ?? channel?.views)} trend="+0" icon={Eye} color="text-blue-400" bg="bg-blue-500/10" />
           <StatCard title="Watch Time" value={formatDuration(data?.analytics?.watchTime || data?.analytics?.watch_time_minutes)} trend="+0%" icon={Clock} color="text-purple-400" bg="bg-purple-500/10" />
           <StatCard title="Total Videos" value={formatNumber(data?.channel?.videos ?? channel?.videos)} icon={Video} color="text-emerald-400" bg="bg-emerald-500/10" />
         </div>
@@ -108,7 +108,7 @@ export default function OverviewTab({ channel }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
-        {/* AutoUploader Ops */}
+        {/* Raynz PitStop Ops */}
         <div className="col-span-2 flex flex-col gap-3">
           <h2 className="text-[12px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2"><Server size={14} className="text-cyan-500"/> Operations</h2>
           <div className="grid grid-cols-2 gap-4 mb-1">

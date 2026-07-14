@@ -108,7 +108,7 @@ export default function ScheduleTab({ channel, updateAccount }) {
               <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${scheduleProfile.schedule_mode === 'autouploader' ? 'border-[var(--accent-400)]' : 'border-white/30'}`}>
                 {scheduleProfile.schedule_mode === 'autouploader' && <div className="w-2 h-2 bg-[var(--accent-400)] rounded-full"></div>}
               </div>
-              <span className="text-[14px] font-bold text-white">AutoUploader Schedule</span>
+              <span className="text-[14px] font-bold text-white">Raynz PitStop Schedule</span>
             </div>
             <p className="text-[12px] text-white/50 ml-7">Video stays inside queue. Upload occurs only at scheduled time.</p>
           </label>

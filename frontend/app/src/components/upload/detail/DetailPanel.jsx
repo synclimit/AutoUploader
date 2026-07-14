@@ -359,8 +359,8 @@ export default function DetailPanel() {
               <div className="text-[16px] font-bold text-white mb-2">Delete Task</div>
               <div className="text-[12px] text-white/60 mb-4">Are you sure you want to delete this task? It will be permanently removed.</div>
               <div className="flex justify-end gap-3">
-                <button onClick={handleCancel} className="h-[36px] px-4 rounded-xl border border-white/[0.08] text-white/60 text-[12px] font-medium hover:bg-white/[0.03] transition-all">Cancel</button>
-                <button onClick={handleConfirmReject} className="h-[36px] px-4 rounded-xl bg-red-500/15 border border-red-500/25 text-red-300 text-[12px] font-bold hover:bg-red-500/25 transition-all">Delete</button>
+                <button onClick={handleCancel} className="h-[36px] px-4 rounded-xl border border-white/[0.08] text-white/60 text-[12px] font-medium hover:bg-white/[0.03] transition-all">Batal</button>
+                <button onClick={handleConfirmReject} className="h-[36px] px-4 rounded-xl bg-red-500/15 border border-red-500/25 text-red-300 text-[12px] font-bold hover:bg-red-500/25 transition-all">Hapus</button>
               </div>
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function DetailPanel() {
                 </div>
               </div>
               <div className="flex justify-end gap-3 mt-6">
-                <button onClick={() => setShowScheduleModal(false)} className="h-[36px] px-4 rounded-xl border border-white/[0.08] text-white/60 text-[12px] font-medium hover:bg-white/[0.03] transition-all">Cancel</button>
+                <button onClick={() => setShowScheduleModal(false)} className="h-[36px] px-4 rounded-xl border border-white/[0.08] text-white/60 text-[12px] font-medium hover:bg-white/[0.03] transition-all">Batal</button>
                 <button onClick={handleConfirmSchedule} disabled={!scheduleDate || !scheduleTime} className="h-[36px] px-4 rounded-xl bg-purple-500/15 border border-purple-500/25 text-purple-300 text-[12px] font-bold hover:bg-purple-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed">Schedule</button>
               </div>
             </div>

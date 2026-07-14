@@ -40,21 +40,21 @@ export default function Topbar() {
       icon: <UploadCloud size={20} className="text-[var(--accent-400)] drop-shadow-[0_0_8px_var(--color-primary-cyan)]" />
     },
     'Review': {
-      title: 'Review Videos',
+      title: 'Tinjau Video',
       subtitle: 'Inspect, edit metadata, and approve your videos for publishing.',
       icon: <CheckSquare size={20} className="text-[var(--accent-400)] drop-shadow-[0_0_8px_var(--color-primary-cyan)]" />
     },
-    'Completed': {
-      title: 'Completed',
+    'Selesai': {
+      title: 'Selesai',
       subtitle: 'Monitor all approved videos and scheduled uploads in real time.',
       icon: <CheckCircle2 size={20} className="text-[var(--accent-400)] drop-shadow-[0_0_8px_var(--color-primary-cyan)]" />
     },
-    'Channels': {
+    'Saluran': {
       title: 'Channel Management',
       subtitle: 'Configure watch folders, defaults, and connection profiles for all your channels.',
       icon: <Radio size={20} className="text-[var(--accent-400)] drop-shadow-[0_0_8px_var(--color-primary-cyan)]" />
     },
-    'Analytics': {
+    'Analitik': {
       title: 'Channel Analytics',
       subtitle: 'Comprehensive performance telemetries, AI diagnostics, and growth insights.',
       icon: <Activity size={20} className="text-[var(--accent-400)] drop-shadow-[0_0_8px_var(--color-primary-cyan)]" />
@@ -75,7 +75,7 @@ export default function Topbar() {
 
   return (
     <header className="px-5 pt-2 pb-0 shrink-0 relative z-40 pywebview-drag-region select-none">
-      <div className="w-full h-[56px] min-h-[56px] px-5 bg-[#05080e]/60 backdrop-blur-3xl border border-white/[0.08] rounded-[16px] flex items-center justify-between relative overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.3)] group neon-interactive">
+      <div className="w-full h-[56px] min-h-[56px] px-5 bg-[#05080e]/60 backdrop-blur-3xl border border-white/[0.08] rounded-[16px] flex items-center justify-between relative shadow-[0_4px_24px_rgba(0,0,0,0.3)] group neon-interactive">
         
         {/* Animated Background Effects */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/10 via-[#05080e]/20 to-[#05080e]/60 z-0 pointer-events-none"></div>
@@ -171,7 +171,7 @@ export default function Topbar() {
             <button aria-label="Maximize" onClick={() => window.pywebview?.api?.maximize()} className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 rounded-md transition-colors cursor-pointer">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="8" height="8" strokeWidth="1.5" rx="1"/></svg>
             </button>
-            <button aria-label="Close" onClick={() => window.pywebview?.api?.close()} className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-red-500 rounded-md transition-colors cursor-pointer">
+            <button aria-label="Tutup" onClick={() => window.pywebview?.api?.close()} className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-red-500 rounded-md transition-colors cursor-pointer">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3 3L9 9M9 3L3 9" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </button>
           </div>

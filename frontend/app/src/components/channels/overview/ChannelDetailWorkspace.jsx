@@ -159,8 +159,8 @@ export default function ChannelDetailWorkspace({ channel }) {
           
           <div className="flex items-center gap-5 relative z-10">
             <div className="w-[60px] h-[60px] rounded-full overflow-hidden border-[2.5px] border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.6)] shrink-0 bg-[#0a0f18] relative">
-              {channel.avatar ? (
-                <img src={channel.avatar} alt={channel.name} className="w-full h-full object-cover" />
+              {channel.avatar_url ? (
+                <img src={channel.avatar_url} alt={channel.name} className="w-full h-full object-cover" />
               ) : (
                 <div className={`w-full h-full flex items-center justify-center text-[22px] font-bold text-white shadow-inner ${channel.color}`}>
                   {channel.initials}

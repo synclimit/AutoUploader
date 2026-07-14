@@ -5,13 +5,13 @@ import sys
 class PathService:
     @staticmethod
     def get_appdata_dir() -> str:
-        """Get the root AppData directory for AutoUploader."""
+        """Get the root AppData directory for Raynz PitStop."""
         appdata = os.environ.get('APPDATA')
         if appdata:
-            base_dir = os.path.join(appdata, 'AutoUploader')
+            base_dir = os.path.join(appdata, 'RaynzPitStop')
         else:
             # Fallback for systems where APPDATA is not set
-            base_dir = os.path.join(os.path.expanduser('~'), '.autouploader')
+            base_dir = os.path.join(os.path.expanduser('~'), '.raynzpitstop')
             
         os.makedirs(base_dir, exist_ok=True)
         return base_dir
@@ -97,6 +97,30 @@ class PathService:
         appdata_workspace = PathService.get_workspace_dir()
         
         migration_occurred = False
+
+        # Migrate from old AutoUploader AppData folder if RaynzPitStop is empty
+        old_appdata = os.environ.get('APPDATA')
+        if old_appdata:
+            old_base = os.path.join(old_appdata, 'AutoUploader')
+        else:
+            old_base = os.path.join(os.path.expanduser('~'), '.autouploader')
+
+        is_new_empty = not os.path.exists(appdata_db) or os.path.getsize(appdata_db) < 10000
+        if is_new_empty and os.path.exists(old_base):
+            print(f"[MIGRATION] Migrating from old AutoUploader AppData to RaynzPitStop...")
+            try:
+                for item in os.listdir(old_base):
+                    s = os.path.join(old_base, item)
+                    d = os.path.join(appdata_dir, item)
+                    if os.path.isdir(s):
+                        if not os.path.exists(d):
+                            shutil.copytree(s, d)
+                    else:
+                        if not os.path.exists(d):
+                            shutil.copy2(s, d)
+                migration_occurred = True
+            except Exception as e:
+                print(f"[MIGRATION ERROR] Failed to copy old AppData: {e}")
         
         local_db = os.path.join(base_dir, "app_v2.db")
         backend_db = os.path.join(base_dir, "backend", "app_v2.db")

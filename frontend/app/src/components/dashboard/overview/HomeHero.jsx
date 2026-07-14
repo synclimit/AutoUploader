@@ -1,8 +1,10 @@
 import { Upload } from 'lucide-react'
 import { useAppStore } from '../../../store/app/appStore'
+import { useTranslation } from '../../../i18n/useTranslation'
 
 export default function HomeHero() {
   const { setActiveModule, userName } = useAppStore()
+  const { t } = useTranslation()
 
   return (
     <div className="relative w-full h-[85px] min-h-[85px] rounded-[16px] overflow-hidden flex items-center bg-[#05080e]/60 backdrop-blur-2xl border border-[var(--accent-500)]/20 shadow-[0_4px_24px_rgba(34,211,238,0.05)] shrink-0">
@@ -28,8 +30,8 @@ export default function HomeHero() {
       <div className="relative z-10 px-6 flex-1 flex justify-between items-center h-full">
         {/* Left Content */}
         <div className="max-w-xl flex flex-col justify-center items-start">
-          <div className="text-white/60 text-[13px] font-semibold tracking-tight mb-0.5 drop-shadow-sm">Good Afternoon, {userName || 'Admin'}</div>
-          <div className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 text-[20px] font-black tracking-tight drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]">Everything is running smoothly.</div>
+          <div className="text-white/60 text-[13px] font-semibold tracking-tight mb-0.5 drop-shadow-sm">{t('dashboard.welcome')} {userName || 'Admin'}</div>
+          <div className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500 text-[20px] font-black tracking-tight drop-shadow-[0_0_10px_rgba(34,211,238,0.4)]">Semuanya berjalan lancar.</div>
         </div>
 
         {/* Right Content */}
@@ -39,7 +41,7 @@ export default function HomeHero() {
             className="group px-4 py-2 rounded-xl bg-gradient-to-b from-cyan-400 to-cyan-500 text-[#05070b] font-bold text-[12px] flex items-center gap-2 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all duration-300"
           >
             <Upload size={14} strokeWidth={2.5} className="group-hover:-translate-y-0.5 transition-transform" />
-            Import Videos
+            Impor Video
           </button>
         </div>
       </div>

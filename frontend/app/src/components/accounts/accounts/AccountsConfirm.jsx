@@ -40,7 +40,7 @@ export default function AccountsConfirm() {
           try {
             window.close()
           } catch (e) {}
-          setStatus('Authentication successful! You can safely close this browser tab and return to AutoUploader.')
+          setStatus('Authentication successful! You can safely close this browser tab and return to Raynz PitStop.')
         }, 1500)
       } catch (err) {
         setStatus(`Failed to confirm channel: ${err.message}`)
@@ -62,14 +62,14 @@ export default function AccountsConfirm() {
         <h2 className="text-xl font-bold text-white mb-2">OAuth Authorization</h2>
         <p className="text-white/60 text-sm">{status}</p>
         
-        {status.includes('Failed') && (
+        {status.includes('Gagal') && (
           <button 
             onClick={() => {
               if (window.opener) {
                 window.close()
               } else {
                 window.history.replaceState({}, '', '/')
-                setActiveModule('Channels')
+                setActiveModule('Saluran')
               }
             }}
             className="mt-6 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white/70 transition-colors"

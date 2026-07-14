@@ -108,8 +108,8 @@ export default function UploadJournal({ sessionId }) {
             >
               <option value="ALL" className="bg-[#111824] text-white">All Status</option>
               <option value="UPLOADED" className="bg-[#111824] text-white">Uploaded</option>
-              <option value="FAILED" className="bg-[#111824] text-white">Failed</option>
-              <option value="CANCELLED" className="bg-[#111824] text-white">Cancelled</option>
+              <option value="FAILED" className="bg-[#111824] text-white">Gagal</option>
+              <option value="CANCELLED" className="bg-[#111824] text-white">Dibatalkan</option>
             </select>
           </div>
 

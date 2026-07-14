@@ -92,7 +92,7 @@ export default function SplashProvider({ children }) {
       } catch (err) {
         console.error("Startup Failed:", err)
         if (isMounted) {
-          setError(err.message || 'Unable to start AutoUploader')
+          setError(err.message || 'Unable to start Raynz PitStop')
         }
       }
     }

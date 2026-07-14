@@ -107,7 +107,7 @@ export default function UploadSettings() {
 
           }>
 
-            <Select value="Public" />
+            <Select value="Publik" />
 
           </Section>
 

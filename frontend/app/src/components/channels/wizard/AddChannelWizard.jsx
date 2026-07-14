@@ -124,7 +124,7 @@ export default function AddChannelWizard({ onClose }) {
             <div className="w-8 h-8 rounded-full bg-[var(--accent-500)]/10 flex items-center justify-center">
               <PlaySquare size={14} className="text-[var(--accent-400)]" />
             </div>
-            <span className="font-bold text-white text-[15px]">Add New Channel</span>
+            <span className="font-bold text-white text-[15px]">Tambah Saluran Baru</span>
           </div>
           <button 
             onClick={onClose}
@@ -145,7 +145,7 @@ export default function AddChannelWizard({ onClose }) {
           {step === 1 && (
             <div className="flex flex-col h-full animate-fade-in">
               <h2 className="text-[20px] font-bold text-white mb-2">Name your channel</h2>
-              <p className="text-[13px] text-white/50 mb-8">This is just for your reference inside AutoUploader.</p>
+              <p className="text-[13px] text-white/50 mb-8">This is just for your reference inside Raynz PitStop.</p>
               
               <div className="flex flex-col gap-2">
                 <label className="text-[11px] font-bold text-white/50 uppercase">Channel Alias</label>
@@ -232,7 +232,7 @@ export default function AddChannelWizard({ onClose }) {
           {step === 3 && (
             <div className="flex flex-col h-full animate-fade-in">
               <h2 className="text-[20px] font-bold text-white mb-2">Connect to YouTube</h2>
-              <p className="text-[13px] text-white/50 mb-8">Securely connect your YouTube channel using Google OAuth. AutoUploader will use API v3 for reliable uploads.</p>
+              <p className="text-[13px] text-white/50 mb-8">Securely connect your YouTube channel using Google OAuth. Raynz PitStop will use API v3 for reliable uploads.</p>
               
               <div className="flex flex-col items-center justify-center p-6 rounded-[16px] border border-white/[0.08] bg-white/[0.02] gap-4">
                 <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2">

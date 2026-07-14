@@ -76,9 +76,9 @@ export default function DetailPanel() {
 
               </Section>
 
-              <Section title="Visibility">
+              <Section title="Visibilitas">
 
-                <Select value="Public" />
+                <Select value="Publik" />
 
               </Section>
 

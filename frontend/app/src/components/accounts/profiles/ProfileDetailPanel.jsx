@@ -123,7 +123,7 @@ export default function ProfileDetailPanel() {
         <ConfirmModal
           title="Delete Profile"
           message={`Are you sure you want to delete profile "${localProfile.name}"? This action cannot be undone.`}
-          confirmText="Delete"
+          confirmText="Hapus"
           onConfirm={() => {
             deleteProfile(localProfile.id)
             setShowDeleteConfirm(false)
@@ -188,7 +188,7 @@ function TemplateItem({ text, onDelete }) {
     <div className="group flex items-center justify-between min-h-[34px] rounded-lg bg-white/[0.02] border border-white/5 px-3 py-1 hover:bg-white/[0.04] transition-colors">
       <div className="text-[11px] text-white/80 break-all pr-4">{text}</div>
       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={onDelete} className="text-[10px] font-bold text-red-400 hover:text-red-300">Delete</button>
+        <button onClick={onDelete} className="text-[10px] font-bold text-red-400 hover:text-red-300">Hapus</button>
       </div>
     </div>
   )

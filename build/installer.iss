@@ -1,29 +1,29 @@
 [Setup]
-AppName=AutoUploader
+AppName=Raynz PitStop
 AppVersion=1.0.0
 AppPublisher=Raynz Studio
-DefaultDirName={autopf}\AutoUploader
-DefaultGroupName=AutoUploader
+DefaultDirName={autopf}\Raynz PitStop
+DefaultGroupName=Raynz PitStop
 OutputDir=..\release
-OutputBaseFilename=AutoUploader_Setup
+OutputBaseFilename=RaynzPitStop_Setup
 Compression=lzma
 SolidCompression=yes
 SetupIconFile=..\assets\icon.ico
-UninstallDisplayIcon={app}\AutoUploader.exe
+UninstallDisplayIcon={app}\RaynzPitStop.exe
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
 
 [Files]
-Source: "..\backend\dist\AutoUploader\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\backend\dist\RaynzPitStop\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\Ryanz Pitstop"; Filename: "{app}\AutoUploader.exe"
-Name: "{group}\Uninstall Ryanz Pitstop"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\Ryanz Pitstop"; Filename: "{app}\AutoUploader.exe"; Tasks: desktopicon
+Name: "{group}\Raynz PitStop"; Filename: "{app}\RaynzPitStop.exe"
+Name: "{group}\Uninstall Raynz PitStop"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\Raynz PitStop"; Filename: "{app}\RaynzPitStop.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\AutoUploader.exe"; Description: "Launch AutoUploader"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\RaynzPitStop.exe"; Description: "Launch Raynz PitStop"; Flags: nowait postinstall skipifsilent
 
 [Code]
 procedure InitializeWizard;
@@ -38,7 +38,7 @@ begin
   if CurStep = ssPostInstall then
   begin
     // Explicitly create AppData folders
-    AppDataPath := ExpandConstant('{userappdata}\AutoUploader');
+    AppDataPath := ExpandConstant('{userappdata}\RaynzPitStop');
     ForceDirectories(AppDataPath + '\logs');
     ForceDirectories(AppDataPath + '\exports');
     ForceDirectories(AppDataPath + '\workspace');
@@ -55,7 +55,7 @@ begin
   begin
     if MsgBox('Delete all user data (Settings, Database, License)?', mbConfirmation, MB_YESNO) = idYes then
     begin
-      AppDataPath := ExpandConstant('{userappdata}\AutoUploader');
+      AppDataPath := ExpandConstant('{userappdata}\RaynzPitStop');
       DelTree(AppDataPath, True, True, True);
     end;
   end;

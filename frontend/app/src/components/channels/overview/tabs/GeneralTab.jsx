@@ -22,10 +22,10 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     if (!folderPath) return;
     setIsScanning(prev => ({ ...prev, [key]: true }));
     try {
-      const res = await apiClient.post('/api/v1/campaign-scan', { campaign_folder: folderPath });
+      const res = await apiClient.post('/campaign-scan', { campaign_folder: folderPath });
       if (res && res.data) {
         // Send scan result to review engine to create/update session
-        const reviewRes = await apiClient.post(`/api/v1/campaign-review?channel_id=${draft.id}&pipeline_type=${key}`, res.data);
+        const reviewRes = await apiClient.post(`/campaign-review?channel_id=${draft.id}&pipeline_type=${key}`, res.data);
         if (reviewRes && reviewRes.data) {
           setScanResults(prev => ({ ...prev, [key]: reviewRes.data }));
         }
@@ -39,7 +39,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
 
   const handleSelectAsset = async (key, assetId, selected) => {
     try {
-      const res = await apiClient.post('/api/v1/campaign-review/select', {
+      const res = await apiClient.post('/campaign-review/select', {
         channel_id: draft.id,
         pipeline_type: key,
         asset_id: assetId,
@@ -67,7 +67,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
         return current;
       });
 
-      const res = await apiClient.post(`/api/v1/campaign-review/update/${assetId}?channel_id=${draft.id}&pipeline_type=${key}`, {
+      const res = await apiClient.post(`/campaign-review/update/${assetId}?channel_id=${draft.id}&pipeline_type=${key}`, {
         [field]: value
       });
       if (res && res.data) {
@@ -80,7 +80,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
 
   const handleApproveCampaign = async (key) => {
     try {
-      const res = await apiClient.post('/api/v1/campaign-review/approve', { channel_id: draft.id, pipeline_type: key });
+      const res = await apiClient.post('/campaign-review/approve', { channel_id: draft.id, pipeline_type: key });
       if (res && res.data) {
         setScanResults(prev => ({ ...prev, [key]: res.data }));
       }
@@ -92,7 +92,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   const handleBuildQueue = async (key, sessionId) => {
     setIsBuildingQueue(prev => ({ ...prev, [key]: true }));
     try {
-      const res = await apiClient.post('/api/v1/campaign-queue/build', {
+      const res = await apiClient.post('/campaign-queue/build', {
         session_id: sessionId,
         channel_id: draft.id,
         pipeline_type: key
@@ -110,7 +110,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   const handleStartCampaign = async (key, sessionId) => {
     setIsBuildingQueue(prev => ({ ...prev, [key]: true }));
     try {
-      await apiClient.post('/api/v1/campaign-execution/start', {
+      await apiClient.post('/campaign-execution/start', {
         session_id: sessionId,
         channel_id: draft.id,
         pipeline_type: key
@@ -126,7 +126,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
 
   const handleRetryPlan = async (key, sessionId, planId) => {
     try {
-      await apiClient.post(`/api/v1/campaign-execution/retry/${planId}`);
+      await apiClient.post(`/campaign-execution/retry/${planId}`);
       loadQueuePlans(key, sessionId);
     } catch (e) {
       console.error("Retry failed", e);
@@ -135,7 +135,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
 
   const loadQueuePlans = async (key, sessionId) => {
     try {
-      const res = await apiClient.get(`/api/v1/campaign-queue/${sessionId}`);
+      const res = await apiClient.get(`/campaign-queue/${sessionId}`);
       if (res && res.data && res.data.length > 0) {
         setQueuePlans(prev => ({ ...prev, [key]: res.data }));
       }
@@ -150,7 +150,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       const p = draft[key] || {}
       if (p.automation_strategy === 'campaign' && p.campaign_folder && !scanResults[key] && !isScanning[key]) {
         try {
-          const res = await apiClient.get(`/api/v1/campaign-review/${draft.id}/${key}`);
+          const res = await apiClient.get(`/campaign-review/${draft.id}/${key}`);
           if (res && res.data) {
             setScanResults(prev => ({ ...prev, [key]: res.data }));
             if (res.data.status === 'LOCKED') {

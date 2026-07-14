@@ -36,8 +36,8 @@ export default function JournalFilterBar({
             >
               <option value="ALL">All Status</option>
               <option value="UPLOADED">Uploaded</option>
-              <option value="FAILED">Failed</option>
-              <option value="CANCELLED">Cancelled</option>
+              <option value="FAILED">Gagal</option>
+              <option value="CANCELLED">Dibatalkan</option>
               <option value="RUNNING">Running</option>
               <option value="READY">Ready</option>
             </select>
