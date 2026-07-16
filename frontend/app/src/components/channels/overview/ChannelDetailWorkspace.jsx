@@ -341,6 +341,7 @@ export default function ChannelDetailWorkspace({ channel }) {
               onChange={(val) => setDrafts({...drafts, pipelines: val})}
               states={realtimeStates}
               channelStatus={channel.status}
+              channelId={channel.id}
             />
           )}
           {activeTab === 'upload_defaults' && (

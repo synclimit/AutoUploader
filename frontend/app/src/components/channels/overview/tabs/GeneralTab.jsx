@@ -4,7 +4,7 @@ import apiClient from '../../../../api/client'
 import { useAppStore } from '../../../../store/app/appStore'
 import UploadJournal from './UploadJournal'
 
-export default function GeneralTab({ draft, original, onChange, states, channelStatus }) {
+export default function GeneralTab({ draft, original, onChange, states, channelStatus, channelId }) {
   
   const [scanResults, setScanResults] = useState({})
   const [isScanning, setIsScanning] = useState({})
@@ -25,7 +25,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       const res = await apiClient.post('/campaign-scan', { campaign_folder: folderPath });
       if (res && res.data) {
         // Send scan result to review engine to create/update session
-        const reviewRes = await apiClient.post(`/campaign-review?channel_id=${draft.id}&pipeline_type=${key}`, res.data);
+        const reviewRes = await apiClient.post(`/campaign-review?channel_id=${channelId}&pipeline_type=${key}`, res.data);
         if (reviewRes && reviewRes.data) {
           setScanResults(prev => ({ ...prev, [key]: reviewRes.data }));
         }
@@ -40,7 +40,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   const handleSelectAsset = async (key, assetId, selected) => {
     try {
       const res = await apiClient.post('/campaign-review/select', {
-        channel_id: draft.id,
+        channel_id: channelId,
         pipeline_type: key,
         asset_id: assetId,
         selected: selected
@@ -67,7 +67,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
         return current;
       });
 
-      const res = await apiClient.post(`/campaign-review/update/${assetId}?channel_id=${draft.id}&pipeline_type=${key}`, {
+      const res = await apiClient.post(`/campaign-review/update/${assetId}?channel_id=${channelId}&pipeline_type=${key}`, {
         [field]: value
       });
       if (res && res.data) {
@@ -80,7 +80,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
 
   const handleApproveCampaign = async (key) => {
     try {
-      const res = await apiClient.post('/campaign-review/approve', { channel_id: draft.id, pipeline_type: key });
+      const res = await apiClient.post('/campaign-review/approve', { channel_id: channelId, pipeline_type: key });
       if (res && res.data) {
         setScanResults(prev => ({ ...prev, [key]: res.data }));
       }
@@ -94,7 +94,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     try {
       const res = await apiClient.post('/campaign-queue/build', {
         session_id: sessionId,
-        channel_id: draft.id,
+        channel_id: channelId,
         pipeline_type: key
       });
       if (res && res.data) {
@@ -112,7 +112,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     try {
       await apiClient.post('/campaign-execution/start', {
         session_id: sessionId,
-        channel_id: draft.id,
+        channel_id: channelId,
         pipeline_type: key
       });
       // Refresh the queue plans to show READY status
@@ -150,7 +150,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       const p = draft[key] || {}
       if (p.automation_strategy === 'campaign' && p.campaign_folder && !scanResults[key] && !isScanning[key]) {
         try {
-          const res = await apiClient.get(`/campaign-review/${draft.id}/${key}`);
+          const res = await apiClient.get(`/campaign-review/${channelId}/${key}`);
           if (res && res.data) {
             setScanResults(prev => ({ ...prev, [key]: res.data }));
             if (res.data.status === 'LOCKED') {
@@ -1009,7 +1009,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   try {
                     const formData = new FormData();
                     formData.append('file', file);
-                    await apiClient.post(`/oauth/channels/${draft.id}/credential/upload`, formData);
+                    await apiClient.post(`/oauth/channels/${channelId}/credential/upload`, formData);
                     alert("Berhasil! File JSON berhasil diupdate. Silakan tekan Reconnect!");
                   } catch (err) {
                     alert("Gagal upload JSON: " + err.message);
