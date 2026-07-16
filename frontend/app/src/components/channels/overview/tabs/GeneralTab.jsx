@@ -1001,7 +1001,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
             <input 
               type="file" 
               accept=".json"
-              id="client-secret-upload"
+              id={`client-secret-upload-${channelId}`}
               className="hidden"
               onChange={async (e) => {
                 if (e.target.files && e.target.files.length > 0) {
@@ -1018,7 +1018,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
               }}
             />
             <label 
-              htmlFor="client-secret-upload"
+              htmlFor={`client-secret-upload-${channelId}`}
               className="px-4 py-2 rounded-[8px] bg-white/10 text-white hover:bg-white/20 text-[12px] font-bold transition-all cursor-pointer"
             >
               Upload JSON Baru
