@@ -118,9 +118,22 @@ import tempfile
 import subprocess
 import threading
 import shutil
+import time
+
+update_progress = {
+    "status": "idle",
+    "progress": 0,
+    "downloaded": 0,
+    "total": 0,
+    "message": ""
+}
+import os
+import tempfile
+import subprocess
+import threading
+import shutil
 
 def run_installer_async(exe_path: str):
-    import time
     # Wait a bit so the API response can be sent to the frontend
     time.sleep(2)
     # Launch a detached CMD script that kills AutoUploader and runs the installer
@@ -214,25 +227,66 @@ def check_update():
 class InstallUpdateRequest(BaseModel):
     download_url: str
 
+def download_and_install_async(download_url: str, installer_path: str):
+    global update_progress
+    update_progress["status"] = "downloading"
+    update_progress["progress"] = 0
+    update_progress["downloaded"] = 0
+    update_progress["total"] = 0
+    update_progress["message"] = "Starting download..."
+    
+    try:
+        req = urllib.request.Request(download_url)
+        req.add_header("User-Agent", "AutoUploader-App")
+        with urllib.request.urlopen(req) as response:
+            total_size = int(response.info().get('Content-Length', 0))
+            update_progress["total"] = total_size
+            downloaded = 0
+            chunk_size = 8192
+            
+            with open(installer_path, 'wb') as out_file:
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    out_file.write(chunk)
+                    downloaded += len(chunk)
+                    update_progress["downloaded"] = downloaded
+                    if total_size > 0:
+                        update_progress["progress"] = min(100, int((downloaded / total_size) * 100))
+        
+        update_progress["status"] = "installing"
+        update_progress["progress"] = 100
+        update_progress["message"] = "Download complete. Installing..."
+        run_installer_async(installer_path)
+    except Exception as e:
+        print("Download error:", e)
+        update_progress["status"] = "error"
+        update_progress["message"] = str(e)
+
+
 @router.post("/update/install")
 def install_update(req: InstallUpdateRequest):
     try:
+        # Check if already downloading
+        if update_progress["status"] == "downloading":
+            return {"success": True, "message": "Download already in progress."}
+            
         # Download the file to a temp location
         temp_dir = tempfile.gettempdir()
         installer_path = os.path.join(temp_dir, "AutoUploader_Update.exe")
         
-        request = urllib.request.Request(req.download_url)
-        request.add_header("User-Agent", "AutoUploader-App")
-        with urllib.request.urlopen(request) as response, open(installer_path, 'wb') as out_file:
-            shutil.copyfileobj(response, out_file)
-            
-        # Spawn thread to run installer after delay
-        threading.Thread(target=run_installer_async, args=(installer_path,), daemon=True).start()
+        # Spawn thread to download and run installer
+        threading.Thread(target=download_and_install_async, args=(req.download_url, installer_path), daemon=True).start()
         
-        return {"success": True, "message": "Update downloaded. Application will restart shortly."}
+        return {"success": True, "message": "Update download started. Application will restart shortly."}
     except Exception as e:
         print("Install update error:", e)
         return {"success": False, "error": str(e)}
+
+@router.get("/update/progress")
+def get_update_progress():
+    return {"success": True, "data": update_progress}
 
 @router.get("/app-logs")
 def get_app_logs(lines: int = 500):

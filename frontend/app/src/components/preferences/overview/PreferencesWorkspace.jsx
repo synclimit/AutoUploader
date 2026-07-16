@@ -95,6 +95,8 @@ export default function PreferencesWorkspace() {
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState(null)
   const [isInstalling, setIsInstalling] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(null)
+  const pollIntervalRef = useRef(null)
 
   const handleCheckUpdate = async () => {
     setIsCheckingUpdate(true)
@@ -119,6 +121,7 @@ export default function PreferencesWorkspace() {
   const handleInstallUpdate = async () => {
     if (!updateInfo?.download_url) return
     setIsInstalling(true)
+    setDownloadProgress({ progress: 0, downloaded: 0, total: 0, status: 'starting' })
     try {
       showToast('Downloading update... Please wait.', 'info', 5000)
       const res = await fetch('http://127.0.0.1:8000/api/v1/system/update/install', {
@@ -128,16 +131,42 @@ export default function PreferencesWorkspace() {
       })
       const data = await res.json()
       if (data.success) {
-        showToast('Update downloaded. Application will restart shortly...', 'success', 8000)
+        // Start polling for progress
+        pollIntervalRef.current = setInterval(async () => {
+          try {
+            const progRes = await fetch('http://127.0.0.1:8000/api/v1/system/update/progress')
+            const progData = await progRes.json()
+            if (progData.success && progData.data) {
+              setDownloadProgress(progData.data)
+              if (progData.data.status === 'installing') {
+                clearInterval(pollIntervalRef.current)
+                showToast('Update downloaded. Application will restart shortly...', 'success', 8000)
+              } else if (progData.data.status === 'error') {
+                clearInterval(pollIntervalRef.current)
+                showToast('Error during download: ' + progData.data.message, 'error')
+                setIsInstalling(false)
+              }
+            }
+          } catch (err) {
+            console.error('Failed to poll progress', err)
+          }
+        }, 1000)
       } else {
-        showToast('Failed to install update', 'error')
+        showToast('Failed to start update download', 'error')
         setIsInstalling(false)
       }
     } catch (e) {
-      showToast('Error installing update', 'error')
+      showToast('Error initiating update', 'error')
       setIsInstalling(false)
     }
   }
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+    }
+  }, [])
 
   const handleOpenLogs = async () => {
     try {
@@ -358,12 +387,30 @@ export default function PreferencesWorkspace() {
                   <div className="bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/20 rounded-xl p-4 mt-2">
                     <p className="text-[var(--accent-400)] font-bold text-sm mb-1">New Version Available: {updateInfo.latest_version}</p>
                     <p className="text-white/60 text-xs mb-4 whitespace-pre-line">{updateInfo.release_notes || 'Bug fixes and performance improvements.'}</p>
+                    
+                    {isInstalling && downloadProgress && downloadProgress.status === 'downloading' && (
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs text-white/60 mb-1">
+                          <span>Downloading...</span>
+                          <span>{downloadProgress.progress}% ({Math.round(downloadProgress.downloaded / 1024 / 1024)}MB / {Math.round(downloadProgress.total / 1024 / 1024)}MB)</span>
+                        </div>
+                        <div className="w-full bg-black/30 rounded-full h-2 overflow-hidden border border-white/5">
+                          <div 
+                            className="bg-[var(--accent-500)] h-full transition-all duration-300 relative"
+                            style={{ width: `${downloadProgress.progress}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <button 
                       onClick={handleInstallUpdate}
                       disabled={isInstalling}
                       className="px-4 py-2 bg-[var(--accent-500)] text-white text-xs font-bold rounded-lg hover:bg-[var(--accent-600)] transition-colors disabled:opacity-50"
                     >
-                      {isInstalling ? 'Downloading & Installing...' : 'Download & Install Update'}
+                      {isInstalling ? (downloadProgress?.status === 'installing' ? 'Restarting Application...' : 'Downloading & Installing...') : 'Download & Install Update'}
                     </button>
                   </div>
                 ) : (
