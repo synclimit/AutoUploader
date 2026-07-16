@@ -985,6 +985,48 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
         </div>
       </div>
 
+      {/* OAUTH CREDENTIALS */}
+      <div className="flex flex-col gap-0 p-6 rounded-[16px] bg-[#0a0f18]/80 backdrop-blur-xl border border-white/[0.04]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-[8px] bg-red-500/10 flex items-center justify-center">
+              <Settings2 size={14} className="text-red-400" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[14px] font-bold text-white tracking-wide">Google OAuth JSON</span>
+              <span className="text-[11px] text-white/50">Update file client_secret.json untuk channel ini khusus (Opsional)</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="file" 
+              accept=".json"
+              id="client-secret-upload"
+              className="hidden"
+              onChange={async (e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  const file = e.target.files[0];
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    await apiClient.post(`/oauth/channels/${draft.id}/credential/upload`, formData);
+                    alert("Berhasil! File JSON berhasil diupdate. Silakan tekan Reconnect!");
+                  } catch (err) {
+                    alert("Gagal upload JSON: " + err.message);
+                  }
+                }
+              }}
+            />
+            <label 
+              htmlFor="client-secret-upload"
+              className="px-4 py-2 rounded-[8px] bg-white/10 text-white hover:bg-white/20 text-[12px] font-bold transition-all cursor-pointer"
+            >
+              Upload JSON Baru
+            </label>
+          </div>
+        </div>
+      </div>
+
       {renderPipeline('long', 'Watch Long Videos')}
       {renderPipeline('shorts', 'Watch Short Videos')}
       

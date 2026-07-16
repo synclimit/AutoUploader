@@ -86,8 +86,7 @@ class OAuthController:
             if not current_token:
                 raise OAuthConnectionException("No token found for channel to refresh.")
                 
-            new_token = RefreshService.refresh(channel_id, current_token)
-            OAuthRepository.save_or_update_token(db, channel_id, new_token)
+            new_token = RefreshService.refresh(db, channel_id, current_token)
             
             exec_time = time.time() - start_time
             logger.info(f"[EXEC: {exec_time:.3f}s] Successfully refreshed token for channel: {channel_id}")

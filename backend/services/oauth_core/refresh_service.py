@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from sqlalchemy.orm import Session
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 
@@ -30,8 +31,22 @@ class RefreshService:
             return True
             
     @classmethod
-    def refresh(cls, channel_id: str, current_token: OAuthToken) -> OAuthToken:
+    def refresh(cls, db: Session, channel_id: str, current_token: OAuthToken = None) -> OAuthToken:
+        import logging
+        from sqlalchemy.orm import Session
+        from services.oauth_core.oauth_repository import OAuthRepository
+        
+        logger = logging.getLogger("RefreshService")
+        logger.info(f"Starting token refresh for channel {channel_id}")
+        
+        if not current_token:
+            current_token = OAuthRepository.load_token(db, channel_id)
+            if not current_token:
+                logger.error(f"Cannot refresh token for {channel_id}: No token found in DB.")
+                raise RefreshTokenException("No token available to perform refresh.")
+                
         if not current_token.refresh_token:
+            logger.error(f"Cannot refresh token for {channel_id}: No refresh token available.")
             raise RefreshTokenException("No refresh token available to perform refresh.")
             
         try:
@@ -47,10 +62,16 @@ class RefreshService:
             
             creds.refresh(Request())
             
-            return OAuthToken(
+            new_token = OAuthToken(
                 access_token=creds.token,
                 refresh_token=creds.refresh_token or current_token.refresh_token,
                 expires_at=creds.expiry.isoformat() if creds.expiry else None
             )
+            
+            OAuthRepository.save_or_update_token(db, channel_id, new_token)
+            logger.info(f"Successfully refreshed and saved token for channel {channel_id}")
+            return new_token
         except Exception as e:
+            logger.error(f"Failed to refresh token for {channel_id}: {e}")
+            OAuthRepository.increment_refresh_failure(db, channel_id, str(e))
             raise RefreshTokenException(f"Failed to refresh token: {e}")

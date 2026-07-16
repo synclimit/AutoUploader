@@ -201,7 +201,17 @@ export default function ChannelDetailWorkspace({ channel }) {
                   if (res && res.auth_url) await apiClient.post('/system/open-url', { url: res.auth_url })
                 } catch (err) {
                   console.error(err)
-                  toast.error(err?.response?.data?.detail || "Failed to get authentication URL. Check if client_secret.json is configured.", {
+                  let errorMsg = "Failed to get authentication URL.";
+                  if (err?.response?.data?.detail) {
+                    if (typeof err.response.data.detail === 'string') {
+                      errorMsg = err.response.data.detail;
+                    } else if (err.response.data.detail.reason) {
+                      errorMsg = err.response.data.detail.reason;
+                    }
+                  } else if (err?.response?.data?.message) {
+                    errorMsg = err.response.data.message;
+                  }
+                  toast.error(errorMsg, {
                     style: { background: '#0a0f18', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }
                   })
                 }
@@ -242,7 +252,17 @@ export default function ChannelDetailWorkspace({ channel }) {
                   if (res && res.auth_url) await apiClient.post('/system/open-url', { url: res.auth_url })
                 } catch (err) {
                   console.error(err)
-                  toast.error(err?.response?.data?.detail || "Failed to get authentication URL. Check if client_secret.json is configured.", {
+                  let errorMsg = "Failed to get authentication URL.";
+                  if (err?.response?.data?.detail) {
+                    if (typeof err.response.data.detail === 'string') {
+                      errorMsg = err.response.data.detail;
+                    } else if (err.response.data.detail.reason) {
+                      errorMsg = err.response.data.detail.reason;
+                    }
+                  } else if (err?.response?.data?.message) {
+                    errorMsg = err.response.data.message;
+                  }
+                  toast.error(errorMsg, {
                     style: { background: '#0a0f18', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }
                   })
                 }

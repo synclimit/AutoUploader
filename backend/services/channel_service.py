@@ -12,7 +12,6 @@ from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.readonly", "https://www.googleapis.com/auth/yt-analytics.readonly"]
 from services.system.path_service import PathService
-from core.config import get_client_secret_path
 
 TOKENS_DIR = os.path.join(PathService.get_appdata_dir(), "tokens")
 ACCOUNTS_TOKEN_DIR = os.path.join(TOKENS_DIR, "channels")
@@ -126,8 +125,7 @@ class ChannelService:
                     try:
                         from services.oauth_core.refresh_service import RefreshService
                         current_token = OAuthRepository.load_token(db, channel.id)
-                        new_token = RefreshService.refresh(channel.id, current_token)
-                        OAuthRepository.save_or_update_token(db, channel.id, new_token)
+                        new_token = RefreshService.refresh(db, channel.id, current_token)
                         channel.authentication_status = "Connected"
                         channel.status = "healthy"
                         channel.attention = "✓ Normal"
@@ -433,7 +431,7 @@ class ChannelService:
             from services.credential_engine.storage_manager import StorageManager
             secret_path = StorageManager._get_secret_file(channel_id)
             if not secret_path.exists():
-                secret_path = get_client_secret_path()
+                raise FileNotFoundError()
                 
             flow = Flow.from_client_secrets_file(
                 str(secret_path),
@@ -465,7 +463,7 @@ class ChannelService:
             from services.credential_engine.storage_manager import StorageManager
             secret_path = StorageManager._get_secret_file(channel_id)
             if not secret_path.exists():
-                secret_path = get_client_secret_path()
+                raise FileNotFoundError()
                 
             flow = Flow.from_client_secrets_file(
                 str(secret_path),
@@ -578,6 +576,13 @@ class ChannelService:
         if not channel:
             raise HTTPException(status_code=404, detail="Channel not found")
             
+        from services.oauth_core.oauth_repository import OAuthRepository
+        try:
+            OAuthRepository.delete_token(db, channel_id)
+        except Exception as e:
+            import logging
+            logging.getLogger("ChannelService").error(f"Failed to delete DB token: {e}")
+            
         token_path = os.path.join(ACCOUNTS_TOKEN_DIR, f"{channel_id}.pickle")
         if os.path.exists(token_path):
             os.remove(token_path)
@@ -595,32 +600,33 @@ class ChannelService:
         if not channel:
             raise HTTPException(status_code=404, detail="Channel not found")
             
-        token_path = os.path.join(ACCOUNTS_TOKEN_DIR, f"{channel_id}.pickle")
-        if not os.path.exists(token_path):
+        from services.oauth_core.oauth_repository import OAuthRepository
+        from services.oauth_core.refresh_service import RefreshService
+        from services.oauth_core.oauth_client import OAuthClient
+        
+        current_token = OAuthRepository.load_token(db, channel_id)
+        if not current_token:
             raise HTTPException(status_code=400, detail="Not connected")
             
-        with open(token_path, "rb") as token_file:
-            credentials = pickle.load(token_file)
+        try:
+            new_token = RefreshService.refresh(db, channel_id, current_token)
             
-        if credentials:
-            if credentials.expired and credentials.refresh_token:
-                credentials.refresh(Request())
-                with open(token_path, "wb") as token_file:
-                    pickle.dump(credentials, token_file)
-            
-            try:
-                from googleapiclient.discovery import build
-                youtube = build("youtube", "v3", credentials=credentials)
-                channels_response = youtube.channels().list(mine=True, part="id,snippet,statistics").execute()
-                if channels_response.get("items"):
-                    item = channels_response["items"][0]
-                    channel.subscribers = item.get("statistics", {}).get("subscriberCount", "0")
-                    avatar = item.get("snippet", {}).get("thumbnails", {}).get("default", {}).get("url")
-                    if avatar:
-                        channel.avatar_url = avatar
-                    db.commit()
-            except Exception as e:
-                print(f"Failed to refresh subscriber count: {e}")
+            # Update subscriber count
+            credentials = OAuthClient.build_credentials(new_token)
+            from googleapiclient.discovery import build
+            youtube = build("youtube", "v3", credentials=credentials)
+            channels_response = youtube.channels().list(mine=True, part="id,snippet,statistics").execute()
+            if channels_response.get("items"):
+                item = channels_response["items"][0]
+                channel.subscribers = item.get("statistics", {}).get("subscriberCount", "0")
+                avatar = item.get("snippet", {}).get("thumbnails", {}).get("default", {}).get("url")
+                if avatar:
+                    channel.avatar_url = avatar
+                db.commit()
+        except Exception as e:
+            import logging
+            logging.getLogger("ChannelService").error(f"Failed to refresh token: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to refresh token: {e}")
                 
         ChannelService._populate_profile_name(channel, db)
         ChannelService._populate_avatar_url(channel, db)
@@ -632,19 +638,20 @@ class ChannelService:
         if not channel:
             raise HTTPException(status_code=404, detail="Channel not found")
             
-        token_path = os.path.join(ACCOUNTS_TOKEN_DIR, f"{channel_id}.pickle")
-        if not os.path.exists(token_path):
+        from services.oauth_core.oauth_repository import OAuthRepository
+        from services.oauth_core.oauth_client import OAuthClient
+        from services.oauth_core.refresh_service import RefreshService
+        
+        current_token = OAuthRepository.load_token(db, channel_id)
+        if not current_token:
             raise HTTPException(status_code=400, detail="Not connected to YouTube")
             
-        with open(token_path, "rb") as token_file:
-            credentials = pickle.load(token_file)
-            
-        if credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-            with open(token_path, "wb") as token_file:
-                pickle.dump(credentials, token_file)
-                
         try:
+            # Auto-refresh if needed
+            if RefreshService.is_expired(current_token):
+                current_token = RefreshService.refresh(db, channel_id, current_token)
+                
+            credentials = OAuthClient.build_credentials(current_token)
             from googleapiclient.discovery import build
             youtube = build("youtube", "v3", credentials=credentials)
             result = []

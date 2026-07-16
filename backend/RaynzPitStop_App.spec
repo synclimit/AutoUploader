@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('frontend_dist', 'frontend_dist'), ('services\\license\\keys\\public.pem', 'services\\license\\keys'), ('..\\client_secret.json', '.')],
+    datas=[('../frontend_dist', 'frontend_dist'), ('services\\license\\keys\\public.pem', 'services\\license\\keys')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,5 +35,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['..\\logo_baru.ico'],
 )

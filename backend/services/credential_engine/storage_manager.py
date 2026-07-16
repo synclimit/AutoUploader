@@ -21,7 +21,20 @@ class StorageManager:
     
     @staticmethod
     def _get_secret_file(channel_id: str) -> Path:
-        return WorkspaceManager.get_channel_credential_dir(channel_id) / "client_secret.json"
+        cred_dir = WorkspaceManager.get_channel_credential_dir(channel_id)
+        if not cred_dir.exists():
+            return cred_dir / "client_secret.json"
+            
+        json_files = list(cred_dir.glob("*.json"))
+        valid_files = [f for f in json_files if not f.name.endswith(".backup.json")]
+        
+        if valid_files:
+            for f in valid_files:
+                if f.name == "client_secret.json":
+                    return f
+            return valid_files[0]
+            
+        return cred_dir / "client_secret.json"
         
     @staticmethod
     def _get_backup_file(channel_id: str) -> Path:
@@ -40,12 +53,7 @@ class StorageManager:
     def load_json(cls, channel_id: str) -> Dict[str, Any]:
         file_path = cls._get_secret_file(channel_id)
         if not file_path.exists():
-            from core.config import get_client_secret_path
-            fallback_path = get_client_secret_path()
-            if fallback_path and fallback_path.exists():
-                file_path = fallback_path
-            else:
-                raise MissingJsonException(f"Credential file not found for channel {channel_id}")
+            raise MissingJsonException(f"Credential file not found for channel {channel_id}")
             
         try:
             with open(file_path, "r", encoding="utf-8") as f:

@@ -70,6 +70,7 @@ function renderModule(activeModule) {
       )
 
     case 'Channels':
+    case 'Saluran':
       return (
         <ChannelsShell>
           <ChannelsWorkspace />
@@ -77,6 +78,7 @@ function renderModule(activeModule) {
       )
 
     case 'Analytics':
+    case 'Analitik':
       return (
         <AnalyticsShell>
           <AnalyticsWorkspace />
@@ -84,6 +86,7 @@ function renderModule(activeModule) {
       )
 
     case 'Settings':
+    case 'Pengaturan':
       return (
         <PreferencesShell>
           <PreferencesWorkspace />

@@ -2,7 +2,6 @@ import time
 import logging
 import threading
 import os
-import pickle
 from datetime import datetime
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload

@@ -1,5 +1,4 @@
 import os
-import pickle
 import time
 import datetime
 from googleapiclient.discovery import build
@@ -48,19 +47,23 @@ class APIUploader(BaseUploader):
                 )
                 
                 if credentials and credentials.expired and credentials.refresh_token:
-                    from google.auth.transport.requests import Request
                     try:
-                        context.logger.info(f"[APIUploader] Refreshing expired OAuth token for channel {task.channel_id}...")
-                        credentials.refresh(Request())
-                        # Save refreshed token back to DB
-                        from services.oauth_core.oauth_types import OAuthToken
-                        dt_str = credentials.expiry.isoformat() if credentials.expiry else None
-                        new_token = OAuthToken(
-                            access_token=credentials.token,
-                            refresh_token=credentials.refresh_token,
-                            expires_at=dt_str
+                        context.logger.info(f"[APIUploader] Refreshing expired OAuth token for channel {task.channel_id} via RefreshService...")
+                        from services.oauth_core.refresh_service import RefreshService
+                        new_token = RefreshService.refresh(db, task.channel_id, token)
+                        
+                        # Rebuild credentials from new token
+                        config = OAuthClient.load_configuration(task.channel_id)
+                        dt = datetime.datetime.fromisoformat(new_token.expires_at) if new_token.expires_at else None
+                        credentials = Credentials(
+                            token=new_token.access_token,
+                            refresh_token=new_token.refresh_token,
+                            token_uri=config.token_uri,
+                            client_id=config.client_id,
+                            client_secret=config.client_secret,
+                            scopes=config.scopes,
+                            expiry=dt
                         )
-                        OAuthRepository.save_or_update_token(db, task.channel_id, new_token)
                     except Exception as ref_err:
                         context.logger.error(f"[APIUploader] Token refresh failed: {ref_err}")
                         return UploadResult(
@@ -218,26 +221,31 @@ class APIUploader(BaseUploader):
             
             # 3.5 Force refresh token if expired during upload
             if credentials.expired or (credentials.expiry and credentials.expiry < datetime.datetime.utcnow() + datetime.timedelta(minutes=5)):
-                context.logger.info("[APIUploader] Token might be expired after long upload. Refreshing credentials...")
+                context.logger.info("[APIUploader] Token might be expired after long upload. Refreshing credentials via RefreshService...")
                 try:
-                    from google.auth.transport.requests import Request
-                    credentials.refresh(Request())
-                    from services.oauth_core.oauth_types import OAuthToken
-                    dt_str = credentials.expiry.isoformat() if credentials.expiry else None
-                    new_token = OAuthToken(
-                        access_token=credentials.token,
-                        refresh_token=credentials.refresh_token,
-                        expires_at=dt_str
-                    )
+                    from services.oauth_core.refresh_service import RefreshService
                     if not context.db_session:
                         from database.db import SessionLocal
                         db = SessionLocal()
                         try:
-                            OAuthRepository.save_or_update_token(db, task.channel_id, new_token)
+                            new_token = RefreshService.refresh(db, task.channel_id, token)
                         finally:
                             db.close()
                     else:
-                        OAuthRepository.save_or_update_token(context.db_session, task.channel_id, new_token)
+                        new_token = RefreshService.refresh(context.db_session, task.channel_id, token)
+                        
+                    # Rebuild credentials
+                    config = OAuthClient.load_configuration(task.channel_id)
+                    dt = datetime.datetime.fromisoformat(new_token.expires_at) if new_token.expires_at else None
+                    credentials = Credentials(
+                        token=new_token.access_token,
+                        refresh_token=new_token.refresh_token,
+                        token_uri=config.token_uri,
+                        client_id=config.client_id,
+                        client_secret=config.client_secret,
+                        scopes=config.scopes,
+                        expiry=dt
+                    )
                     youtube = build("youtube", "v3", credentials=credentials)
                 except Exception as ref_err:
                     context.logger.warning(f"[APIUploader] Token refresh failed: {ref_err}")

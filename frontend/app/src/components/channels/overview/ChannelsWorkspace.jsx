@@ -39,23 +39,26 @@ export default function ChannelsWorkspace() {
   }
 
   // To match the UI props, we map accounts
-  const mappedChannels = accounts.map(acc => ({
-    id: acc.id,
-    name: acc.channel_name,
-    avatar: acc.avatar_url || null,
-    initials: acc.channel_name.substring(0, 2).toUpperCase(),
-    color: 'bg-indigo-600',
-    status: acc.authentication_status,
-    watchFolder: '',
-    uploadPreset: acc.source_type,
-    subscribers: acc.subscribers,
-  }))
+  const mappedChannels = (accounts || []).filter(Boolean).map(acc => {
+    const nameStr = acc.channel_name || acc.name || 'Unnamed Channel';
+    return {
+      id: acc.id,
+      name: nameStr,
+      avatar: acc.avatar_url || null,
+      initials: nameStr.substring(0, 2).toUpperCase(),
+      color: 'bg-indigo-600',
+      status: acc.authentication_status,
+      watchFolder: '',
+      uploadPreset: acc.source_type,
+      subscribers: acc.subscribers,
+    }
+  })
 
   const selectedChannel = selectedAccount ? {
     id: selectedAccount.id,
-    name: selectedAccount.channel_name,
+    name: selectedAccount.channel_name || selectedAccount.name || 'Unnamed Channel',
     avatar: selectedAccount.avatar_url || null,
-    initials: selectedAccount.channel_name.substring(0, 2).toUpperCase(),
+    initials: (selectedAccount.channel_name || selectedAccount.name || 'UC').substring(0, 2).toUpperCase(),
     status: selectedAccount.authentication_status,
     watchFolder: selectedAccount.watch_folder || 'Not Configured',
     uploadPreset: selectedAccount.source_type,

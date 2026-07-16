@@ -295,13 +295,8 @@ def startup_event():
     except Exception as e:
         print(f"[DB Migration Error] {e}")
 
-    from core.config import get_client_secret_path
     print("[OAUTH]")
-    print("Client Secret:")
-    try:
-        print(str(get_client_secret_path()))
-    except Exception as e:
-        print(f"Error getting secret path: {e}")
+    print("Client Secret Architecture: Channel Specific Isolation (No Global Fallback)")
 
     wf_engine = get_wf_engine()
     wf_engine.start()

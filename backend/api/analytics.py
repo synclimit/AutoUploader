@@ -7,7 +7,7 @@ from models import UploadTask, UploadLog
 from services.channel_service import ChannelService
 from services.analytics.gateway import analytics_gateway
 import os
-import pickle
+import os
 from services.system.path_service import PathService
 
 router = APIRouter(
@@ -15,17 +15,16 @@ router = APIRouter(
     tags=["analytics"],
 )
 
-TOKENS_DIR = os.path.join(PathService.get_appdata_dir(), "tokens")
-ACCOUNTS_TOKEN_DIR = os.path.join(TOKENS_DIR, "channels")
-
-def get_credentials(channel_id: str):
-    token_path = os.path.join(ACCOUNTS_TOKEN_DIR, f"{channel_id}.pickle")
-    if not os.path.exists(token_path):
+def get_credentials(channel_id: str, db: Session):
+    from services.oauth_core.oauth_repository import OAuthRepository
+    from services.oauth_core.oauth_client import OAuthClient
+    
+    token = OAuthRepository.load_token(db, channel_id)
+    if not token:
         raise HTTPException(status_code=400, detail="OAuth credentials not found. Please re-authenticate.")
         
     try:
-        with open(token_path, "rb") as token_file:
-            credentials = pickle.load(token_file)
+        credentials = OAuthClient.build_credentials(token)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"OAuth credentials invalid or corrupted. Please re-authenticate. ({str(e)})")
     return credentials
@@ -34,7 +33,7 @@ def get_credentials(channel_id: str):
 async def get_dashboard(channel_id: str, force_refresh: bool = False, db: Session = Depends(get_db)):
     """Lightweight dashboard endpoint."""
     channel = ChannelService.get_by_id(db, channel_id)
-    credentials = get_credentials(channel_id)
+    credentials = get_credentials(channel_id, db)
     
     try:
         metrics = await analytics_gateway.get_dashboard(channel_id, "youtube", credentials, force_refresh)
@@ -46,7 +45,7 @@ async def get_dashboard(channel_id: str, force_refresh: bool = False, db: Sessio
 async def get_overview(channel_id: str, force_refresh: bool = False, db: Session = Depends(get_db)):
     """Heavy analytics workspace endpoint."""
     channel = ChannelService.get_by_id(db, channel_id)
-    credentials = get_credentials(channel_id)
+    credentials = get_credentials(channel_id, db)
     
     try:
         metrics = await analytics_gateway.get_overview(channel_id, "youtube", credentials, force_refresh)
@@ -58,7 +57,7 @@ async def get_overview(channel_id: str, force_refresh: bool = False, db: Session
 async def get_charts(channel_id: str, days: int = Query(28, ge=7, le=90), force_refresh: bool = False, db: Session = Depends(get_db)):
     """Time-series chart dataset."""
     channel = ChannelService.get_by_id(db, channel_id)
-    credentials = get_credentials(channel_id)
+    credentials = get_credentials(channel_id, db)
     
     try:
         metrics = await analytics_gateway.get_charts(channel_id, "youtube", days, credentials, force_refresh)
@@ -70,7 +69,7 @@ async def get_charts(channel_id: str, days: int = Query(28, ge=7, le=90), force_
 async def get_videos(channel_id: str, page_token: Optional[str] = None, limit: int = Query(50, ge=1, le=100), db: Session = Depends(get_db)):
     """Cursor paginated video list."""
     channel = ChannelService.get_by_id(db, channel_id)
-    credentials = get_credentials(channel_id)
+    credentials = get_credentials(channel_id, db)
     
     # We'll forward this to the Gateway when implemented, mock for now
     return {"status": "success", "data": {"items": [], "nextPageToken": None}}
