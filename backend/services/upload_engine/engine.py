@@ -40,6 +40,21 @@ class UploadEngine(EngineBase):
             logger.warning("[UPLOAD_ENGINE] Already running")
             return
 
+        # Reset any stuck UPLOADING tasks back to QUEUED
+        db = SessionLocal()
+        try:
+            stuck_tasks = db.query(UploadTask).filter(UploadTask.status == QueueStatusEnum.uploading).all()
+            for task in stuck_tasks:
+                task.status = QueueStatusEnum.queued
+                task.progress = 0
+            if stuck_tasks:
+                db.commit()
+                logger.info(f"[UPLOAD_ENGINE] Reset {len(stuck_tasks)} stuck tasks back to QUEUED")
+        except Exception as e:
+            logger.error(f"[UPLOAD_ENGINE] Failed to reset stuck tasks: {e}")
+        finally:
+            db.close()
+
         self._running = True
         self._thread = threading.Thread(
             target=self._run_loop,
