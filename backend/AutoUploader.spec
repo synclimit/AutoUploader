@@ -18,8 +18,7 @@ a = Analysis(
         ('services/license/keys', 'services/license/keys'),
         ('prompts', 'prompts'),
         ('../version.json', '.'),
-        ('tokens/client_secret.json', 'tokens'),
-        ('../client_secret.json', '.'),
+
     ] + datas_pyd + datas_core + datas_fa + datas_star + datas_uv,
     hiddenimports=[
         'fastapi',
