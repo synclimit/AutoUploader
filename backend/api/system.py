@@ -126,9 +126,10 @@ def run_installer_async(exe_path: str):
     # Launch a detached CMD script that kills AutoUploader and runs the installer
     # Use sys.executable if compiled, or default install path
     import sys
-    app_exe = sys.executable if sys.executable.endswith("AutoUploader.exe") else r"C:\Program Files (x86)\AutoUploader\AutoUploader.exe"
+    app_exe = sys.executable
     app_dir = os.path.dirname(app_exe)
-    script = f'ping 127.0.0.1 -n 3 > nul & taskkill /f /im AutoUploader.exe & start /wait "" "{exe_path}" /SILENT /VERYSILENT /SUPPRESSMSGBOXES /SP- & cd /d "{app_dir}" & start "" "{app_exe}"'
+    exe_name = os.path.basename(app_exe)
+    script = f'ping 127.0.0.1 -n 3 > nul & taskkill /f /im "{exe_name}" & start /wait "" "{exe_path}" /SILENT /VERYSILENT /SUPPRESSMSGBOXES /SP- & cd /d "{app_dir}" & start "" "{app_exe}"'
     subprocess.Popen(f'cmd.exe /c "{script}"', shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
