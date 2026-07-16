@@ -18,6 +18,7 @@ export default function AddChannelWizard({ onClose }) {
 
   const [isCreating, setIsCreating] = useState(false)
   const fetchAccounts = useAccountsStore(s => s.fetchAccounts)
+  const fileInputRef = useRef(null)
   
   // Status polling for OAuth completion
   const pollInterval = useRef(null)
@@ -59,10 +60,23 @@ export default function AddChannelWizard({ onClose }) {
   }
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0])
+    const files = e.target.files || (e.dataTransfer && e.dataTransfer.files)
+    if (files && files.length > 0) {
+      setSelectedFile(files[0])
       setUploadSuccess(false)
     }
+    if (e.target) e.target.value = null // reset so same file can be selected again
+  }
+  
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+  
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    handleFileChange(e)
   }
 
   const handleUploadCredential = async () => {
@@ -190,25 +204,29 @@ export default function AddChannelWizard({ onClose }) {
                   Open Console <ExternalLink size={12} />
                 </a>
               </p>
-              <div className="flex flex-col items-center justify-center p-6 rounded-[16px] border border-white/[0.08] bg-white/[0.02] gap-4">
-                <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2">
+              <div 
+                className="flex flex-col items-center justify-center p-6 rounded-[16px] border border-white/[0.08] bg-white/[0.02] gap-4 cursor-pointer hover:border-blue-500/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
+                <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 pointer-events-none">
                   <FileJson size={32} className="text-blue-400" />
                 </div>
                 
                 <input 
                   type="file" 
                   accept=".json"
-                  id="wizard-client-secret-upload"
                   className="hidden"
                   onChange={handleFileChange}
+                  ref={fileInputRef}
                 />
                 
-                <label 
-                  htmlFor="wizard-client-secret-upload"
-                  className="h-[44px] px-6 rounded-[10px] border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-[14px] hover:bg-blue-500/20 transition-colors flex items-center gap-2 cursor-pointer"
+                <div 
+                  className="h-[44px] px-6 rounded-[10px] border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-[14px] flex items-center gap-2 pointer-events-none"
                 >
                   <UploadCloud size={16} /> Browse JSON File
-                </label>
+                </div>
                 
                 {selectedFile && (
                   <div className="text-[13px] text-green-400 font-medium flex items-center gap-1">
