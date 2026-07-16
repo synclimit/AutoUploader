@@ -198,13 +198,13 @@ export default function AddChannelWizard({ onClose }) {
                 <input 
                   type="file" 
                   accept=".json"
-                  id="client-secret-upload"
+                  id="wizard-client-secret-upload"
                   className="hidden"
                   onChange={handleFileChange}
                 />
                 
                 <label 
-                  htmlFor="client-secret-upload"
+                  htmlFor="wizard-client-secret-upload"
                   className="h-[44px] px-6 rounded-[10px] border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-[14px] hover:bg-blue-500/20 transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <UploadCloud size={16} /> Browse JSON File
