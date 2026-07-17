@@ -309,6 +309,7 @@ class UploadTaskBase(BaseModel):
     pipeline_type: Optional[str] = None
     schedule_mode: Optional[str] = None
     schedule_time: Optional[str] = None
+    scheduled_at: Optional[datetime] = None
     
     youtube_video_id: Optional[str] = None
     youtube_url: Optional[str] = None
@@ -513,6 +514,7 @@ class CampaignAssetBase(BaseModel):
     channel_id: Optional[str] = None
     campaign_id: Optional[str] = None
     filename: str
+    filepath: Optional[str] = None
     filesize: int
     duration_seconds: float
     source_type: str = "LOCAL"
@@ -560,6 +562,7 @@ class CampaignScanSummary(BaseModel):
 class CampaignScanAsset(BaseModel):
     filename: str
     filepath: str
+    sha256: Optional[str] = None
     filesize: int
     duration_seconds: float
     fingerprint: str

@@ -23,7 +23,8 @@ class VisibilityStep(BaseStep):
                 pass
                 
         # Now set visibility
-        visibility = context.task.visibility.upper() if context.task.visibility else "PRIVATE"
+        vis_val = getattr(context.task, "privacy_status", None) or getattr(context.task, "visibility", None) or "PRIVATE"
+        visibility = vis_val.upper()
         context.logger.info(f"[VisibilityStep] Setting visibility to {visibility}...")
         
         try:
@@ -47,7 +48,8 @@ class VisibilityStep(BaseStep):
 
     def validate(self, page, context, shared_state) -> bool:
         try:
-            visibility = context.task.visibility.upper() if context.task.visibility else "PRIVATE"
+            vis_val = getattr(context.task, "privacy_status", None) or getattr(context.task, "visibility", None) or "PRIVATE"
+            visibility = vis_val.upper()
             vis_radio = LocatorResolver.resolve(page, [
                 {"type": "css", "selector": f'tp-yt-paper-radio-button[name="{visibility}"]'},
             ])

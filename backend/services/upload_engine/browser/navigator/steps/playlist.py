@@ -8,11 +8,12 @@ class PlaylistStep(BaseStep):
 
     def execute(self, page, context, shared_state) -> StepResult:
         task = context.task
-        if not task.playlist_title:
+        playlist_name = getattr(task, "playlist_title", None) or getattr(task, "playlist_id", None)
+        if not playlist_name:
             context.logger.info("[PlaylistStep] No playlist configured.")
             return StepResult(success=True)
 
-        context.logger.info(f"[PlaylistStep] Setting playlist to {task.playlist_title}...")
+        context.logger.info(f"[PlaylistStep] Setting playlist to {playlist_name}...")
         try:
             # 1. Open the dropdown
             dropdown = LocatorResolver.resolve(page, [
@@ -26,8 +27,8 @@ class PlaylistStep(BaseStep):
             page.wait_for_selector('tp-yt-paper-dialog', state="visible", timeout=10000)
             
             playlist_checkbox = LocatorResolver.resolve(page, [
-                {"type": "role", "role": "checkbox", "name": task.playlist_title},
-                {"type": "text", "text": task.playlist_title, "exact": False}
+                {"type": "role", "role": "checkbox", "name": playlist_name},
+                {"type": "text", "text": playlist_name, "exact": False}
             ])
             
             # Check it if not already checked

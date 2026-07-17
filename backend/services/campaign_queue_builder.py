@@ -57,6 +57,10 @@ class CampaignQueueBuilder:
             return existing_plans
             
         if existing_plans and rebuild:
+            from models import CampaignExecutionState
+            for plan in existing_plans:
+                if plan.execution_status not in [CampaignExecutionState.PLANNED, CampaignExecutionState.READY]:
+                    raise ValueError("Cannot rebuild queue because some plans have already been dispatched or processed.")
             for plan in existing_plans:
                 db.delete(plan)
             db.flush()
@@ -82,18 +86,17 @@ class CampaignQueueBuilder:
             raise ValueError("Invalid daily_limit configuration.")
         if not schedule:
             raise ValueError("Publish schedule is empty.")
+        if daily_limit > len(schedule):
+            raise ValueError(f"daily_limit ({daily_limit}) cannot be greater than the number of times in schedule ({len(schedule)}). Please provide more scheduled times to avoid simultaneous uploads.")
 
         try:
             tz = pytz.timezone(timezone_str)
         except pytz.UnknownTimeZoneError:
             tz = pytz.UTC
 
-        # We start scheduling from tomorrow relative to the configured timezone
+        # We start scheduling from today relative to the configured timezone
         now_utc = datetime.utcnow()
         now_tz = now_utc.replace(tzinfo=pytz.UTC).astimezone(tz)
-        
-        # Start Date
-        start_date = now_tz.date() + timedelta(days=1)
         
         plans_to_create = []
         
@@ -102,28 +105,59 @@ class CampaignQueueBuilder:
         physical_assets = db.query(CampaignAsset).filter(CampaignAsset.fingerprint.in_(fingerprints)).all()
         fingerprint_to_physical_id = {pa.fingerprint: pa.id for pa in physical_assets}
         
-        missing = [a.fingerprint for a in selected_assets if a.fingerprint not in fingerprint_to_physical_id]
+        missing = [a for a in selected_assets if a.fingerprint not in fingerprint_to_physical_id]
         if missing:
-            raise ValueError(f"Missing physical CampaignAsset records for fingerprints: {missing}")
+            from services.campaign_asset_service import CampaignAssetService
+            for review_asset in missing:
+                asset_data = {
+                    "channel_id": channel_id,
+                    "campaign_id": session_id,
+                    "fingerprint": review_asset.fingerprint,
+                    "sha256": review_asset.sha256,
+                    "filepath": review_asset.filepath,
+                    "filename": review_asset.filename,
+                    "filesize": review_asset.filesize,
+                    "duration_seconds": review_asset.duration_seconds,
+                    "source_type": "CAMPAIGN",
+                    "asset_origin": "CAMPAIGN_SCAN",
+                    "status": "NEW"
+                }
+                new_physical = CampaignAssetService.create_asset(db, asset_data)
+                fingerprint_to_physical_id[new_physical.fingerprint] = new_physical.id
+
+        # Generate valid slots in the future
+        slots = []
+        current_date = now_tz.date()
+        sorted_schedule = sorted(schedule)
+        
+        while len(slots) < len(selected_assets):
+            slots_added_today = 0
+            for time_str in sorted_schedule:
+                if slots_added_today >= daily_limit:
+                    break
+                if len(slots) >= len(selected_assets):
+                    break
+                    
+                try:
+                    hour, minute = map(int, time_str.split(':'))
+                except ValueError:
+                    raise ValueError(f"Invalid time format in schedule: {time_str}")
+                    
+                naive_dt = datetime.combine(current_date, datetime.min.time()) + timedelta(hours=hour, minutes=minute)
+                try:
+                    localized_dt = tz.localize(naive_dt, is_dst=None)
+                except (pytz.AmbiguousTimeError, pytz.NonExistentTimeError):
+                    localized_dt = tz.localize(naive_dt, is_dst=False)
+                
+                # Check if it's in the future (with a small 5 minute buffer)
+                if localized_dt > now_tz + timedelta(minutes=5):
+                    slots.append((current_date, time_str, localized_dt))
+                    slots_added_today += 1
+                    
+            current_date += timedelta(days=1)
 
         for order, asset in enumerate(selected_assets):
-            day_offset = order // daily_limit
-            slot_index = order % daily_limit
-            
-            # If daily_limit > length of schedule, loop schedule times
-            time_str = schedule[slot_index % len(schedule)]
-            
-            publish_date = start_date + timedelta(days=day_offset)
-            
-            # Parse time_str (HH:MM)
-            try:
-                hour, minute = map(int, time_str.split(':'))
-            except ValueError:
-                raise ValueError(f"Invalid time format in schedule: {time_str}")
-                
-            # Construct Base Datetime
-            naive_dt = datetime.combine(publish_date, datetime.min.time()) + timedelta(hours=hour, minutes=minute)
-            localized_dt = tz.localize(naive_dt)
+            publish_date, time_str, localized_dt = slots[order]
             utc_dt = localized_dt.astimezone(pytz.UTC).replace(tzinfo=None) # Store as naive UTC
             
             # Apply Humanize
@@ -134,6 +168,9 @@ class CampaignQueueBuilder:
                 if max_delay >= min_delay and max_delay > 0:
                     delay_minutes = random.randint(min_delay, max_delay)
                     humanized_utc_dt = utc_dt + timedelta(minutes=delay_minutes)
+                    
+                    # Humanized datetime handles random delay, do not overwrite utc_dt
+                    pass
             
             # Validate duplicate datetimes inside the same batch (unlikely but safe to check)
             # Or if humanized goes beyond the day boundary (e.g. into the next day), clamp it.

@@ -29,8 +29,10 @@ class CampaignScanService:
         available = 0
         duplicate = 0
         invalid = 0
-        
         assets: List[CampaignScanAsset] = []
+        
+        # Local deduplication set
+        seen_fingerprints = set()
 
         # 2. Recursively scan the folder
         for root, _, files in os.walk(folder_path):
@@ -65,9 +67,8 @@ class CampaignScanService:
                             filesize=filesize,
                             duration_seconds=duration_seconds
                         )
-                        
-                        # O(1) Cache lookup
-                        if fingerprint in existing_fingerprints:
+                        # O(1) Cache lookup + Local deduplication
+                        if fingerprint in existing_fingerprints or fingerprint in seen_fingerprints:
                             is_duplicate = True
                             status = "CONSUMED"
                             selectable = False
@@ -77,11 +78,13 @@ class CampaignScanService:
                             status = "NEW"
                             selectable = True
                             available += 1
+                            seen_fingerprints.add(fingerprint)
                             
                     # Append asset result
                     assets.append(CampaignScanAsset(
                         filename=file,
                         filepath=filepath,
+                        sha256=sha256_hash,
                         filesize=filesize,
                         duration_seconds=duration_seconds,
                         fingerprint=fingerprint,
@@ -96,6 +99,7 @@ class CampaignScanService:
                     assets.append(CampaignScanAsset(
                         filename=file,
                         filepath=filepath,
+                        sha256=None,
                         filesize=0,
                         duration_seconds=0.0,
                         fingerprint="ERROR",

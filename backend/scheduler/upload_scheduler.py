@@ -231,13 +231,12 @@ class SchedulerEngine(EngineBase):
                 
                 # Transition SCHEDULED -> QUEUED
                 task.status = QueueStatusEnum.queued
-                # We do NOT clear scheduled_at because if it is kept, api_provider will try to use it for publishAt
-                # But since it's already past, YouTube API will fail if it's private and past.
-                # However, we updated api_provider to ignore publishAt if it's in the past.
                 
-                if getattr(task, "schedule_mode", "application") == "application" and getattr(task, "privacy_status", "") != "public":
-                    task.privacy_status = "public"
-                    db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.queued.value, message="Scheduled time reached. Privacy set to PUBLIC. Task is now QUEUED."))
+                if getattr(task, "schedule_mode", "application") == "application":
+                    task.scheduled_at = None
+                    if getattr(task, "privacy_status", "") != "public":
+                        task.privacy_status = "public"
+                    db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.queued.value, message="Scheduled time reached. Privacy set to PUBLIC and scheduled_at cleared. Task is now QUEUED."))
                 else:
                     db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.queued.value, message="Scheduled time reached. Task is now QUEUED."))
                 db.commit()

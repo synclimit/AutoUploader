@@ -315,6 +315,7 @@ class CampaignAsset(Base):
     fingerprint = Column(String, unique=True, index=True, nullable=False)
     fingerprint_version = Column(Integer, default=1, nullable=False)
     sha256 = Column(String, nullable=False)
+    filepath = Column(String, nullable=True)
     filename = Column(String, nullable=False)
     filesize = Column(Integer, nullable=False)
     duration_seconds = Column(Float, nullable=False)
@@ -364,7 +365,8 @@ class CampaignReviewAsset(Base):
     session_id = Column(String, ForeignKey("campaign_review_sessions.id", ondelete="CASCADE"), nullable=False)
     
     # Core reference to the raw file
-    fingerprint = Column(String, nullable=False, index=True)
+    fingerprint = Column(String, index=True, nullable=False)
+    sha256 = Column(String, nullable=True)
     filepath = Column(String, nullable=False)
     filename = Column(String, nullable=False)
     filesize = Column(Integer, nullable=False)

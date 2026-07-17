@@ -137,7 +137,7 @@ class APIUploader(BaseUploader):
                 recording_details["recordingDate"] = dt.isoformat()
             
             # PRIORITY 1: Scheduling Support
-            if getattr(task, "scheduled_at", None):
+            if getattr(task, "scheduled_at", None) and getattr(task, "schedule_mode", "") == "youtube":
                 status["privacyStatus"] = "private"
                 dt = task.scheduled_at
                 import datetime as dt_module

@@ -5,6 +5,7 @@ import uuid
 
 from models import CampaignReviewSession, CampaignReviewAsset
 from schemas import CampaignScanResponse, CampaignReviewAssetUpdate
+from services.campaign_asset_service import CampaignAssetService
 
 class CampaignReviewService:
     @staticmethod
@@ -59,6 +60,7 @@ class CampaignReviewService:
                     id=str(uuid.uuid4()),
                     session_id=session.id,
                     fingerprint=fp,
+                    sha256=scan_asset.sha256,
                     filepath=scan_asset.filepath,
                     filename=scan_asset.filename,
                     filesize=scan_asset.filesize,
@@ -70,10 +72,12 @@ class CampaignReviewService:
                 )
                 db.add(new_asset)
                 
-        # Remove assets that are no longer present in the physical scan
+        # Update assets that are no longer present in the physical scan
         for fp, asset in existing_assets.items():
             if fp not in seen_fingerprints:
-                db.delete(asset)
+                asset.status = "MISSING"
+                asset.editable = False
+                asset.selected = False
                 
         db.commit()
         db.refresh(session)
@@ -146,6 +150,26 @@ class CampaignReviewService:
             return session
             
         session.status = "LOCKED"
+        
+        # Promote selected CampaignReviewAssets into physical CampaignAssets if they don't exist
+        for review_asset in session.assets:
+            if review_asset.selected and review_asset.sha256:
+                if not CampaignAssetService.exists(db, review_asset.fingerprint):
+                    asset_data = {
+                        "channel_id": channel_id,
+                        "campaign_id": session.id,
+                        "fingerprint": review_asset.fingerprint,
+                        "sha256": review_asset.sha256,
+                        "filepath": review_asset.filepath,
+                        "filename": review_asset.filename,
+                        "filesize": review_asset.filesize,
+                        "duration_seconds": review_asset.duration_seconds,
+                        "source_type": "CAMPAIGN",
+                        "asset_origin": "CAMPAIGN_SCAN",
+                        "status": "NEW"
+                    }
+                    CampaignAssetService.create_asset(db, asset_data)
+        
         db.commit()
         db.refresh(session)
         return session

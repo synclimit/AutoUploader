@@ -49,7 +49,7 @@ def test_create_review_session(db_session):
         ]
     )
 
-    session = CampaignReviewService.create_or_update_session(db_session, channel_id, scan_response)
+    session = CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
     
     assert session is not None
     assert session.status == "DRAFT"
@@ -93,12 +93,12 @@ def test_select_asset(db_session):
         ]
     )
 
-    session = CampaignReviewService.create_or_update_session(db_session, channel_id, scan_response)
+    session = CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
     valid_asset = next(a for a in session.assets if a.status == "NEW")
     dup_asset = next(a for a in session.assets if a.status == "CONSUMED")
 
     # Select valid asset
-    session = CampaignReviewService.select_asset(db_session, channel_id, valid_asset.id, True)
+    session = CampaignReviewService.select_asset(db_session, channel_id, "long", valid_asset.id, True)
     assert session.selected == 1
     assert session.selected_file_size == 1000
     assert session.selected_duration == 10.0
@@ -106,7 +106,7 @@ def test_select_asset(db_session):
 
     # Cannot select CONSUMED asset
     with pytest.raises(ValueError):
-        CampaignReviewService.select_asset(db_session, channel_id, dup_asset.id, True)
+        CampaignReviewService.select_asset(db_session, channel_id, "long", dup_asset.id, True)
 
 def test_update_metadata_and_persistence(db_session):
     channel_id = str(uuid.uuid4())
@@ -126,7 +126,7 @@ def test_update_metadata_and_persistence(db_session):
         ]
     )
 
-    session = CampaignReviewService.create_or_update_session(db_session, channel_id, scan_response)
+    session = CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
     asset = session.assets[0]
 
     updates = CampaignReviewAssetUpdate(
@@ -135,10 +135,10 @@ def test_update_metadata_and_persistence(db_session):
         tags="game, fun"
     )
 
-    session = CampaignReviewService.update_asset_metadata(db_session, channel_id, asset.id, updates)
+    session = CampaignReviewService.update_asset_metadata(db_session, channel_id, "long", asset.id, updates)
     
     # Reload session from DB to verify persistence
-    reloaded_session = CampaignReviewService.get_session(db_session, channel_id)
+    reloaded_session = CampaignReviewService.get_session(db_session, channel_id, "long")
     reloaded_asset = reloaded_session.assets[0]
     
     assert reloaded_asset.title == "My Custom Title"
@@ -163,23 +163,23 @@ def test_approve_session_locks_it(db_session):
         ]
     )
 
-    session = CampaignReviewService.create_or_update_session(db_session, channel_id, scan_response)
+    session = CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
     asset = session.assets[0]
 
     # Select and edit
-    CampaignReviewService.select_asset(db_session, channel_id, asset.id, True)
-    CampaignReviewService.update_asset_metadata(db_session, channel_id, asset.id, CampaignReviewAssetUpdate(title="Locked Title"))
+    CampaignReviewService.select_asset(db_session, channel_id, "long", asset.id, True)
+    CampaignReviewService.update_asset_metadata(db_session, channel_id, "long", asset.id, CampaignReviewAssetUpdate(title="Locked Title"))
 
     # Approve
-    session = CampaignReviewService.approve_session(db_session, channel_id)
+    session = CampaignReviewService.approve_session(db_session, channel_id, "long")
     assert session.status == "LOCKED"
 
     # Further edits should fail
     with pytest.raises(ValueError):
-        CampaignReviewService.update_asset_metadata(db_session, channel_id, asset.id, CampaignReviewAssetUpdate(title="New Title"))
+        CampaignReviewService.update_asset_metadata(db_session, channel_id, "long", asset.id, CampaignReviewAssetUpdate(title="New Title"))
         
     with pytest.raises(ValueError):
-        CampaignReviewService.select_asset(db_session, channel_id, asset.id, False)
+        CampaignReviewService.select_asset(db_session, channel_id, "long", asset.id, False)
 
 def test_database_isolation(db_session):
     # Verify no CampaignAsset or UploadTask records are created during Review process
@@ -200,7 +200,7 @@ def test_database_isolation(db_session):
         ]
     )
 
-    CampaignReviewService.create_or_update_session(db_session, channel_id, scan_response)
+    CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
     
     assert db_session.query(CampaignAsset).count() == 0
     assert db_session.query(UploadTask).count() == 0

@@ -3,7 +3,7 @@ import logging
 import threading
 import uuid
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 from database.db import SessionLocal
@@ -75,56 +75,61 @@ class CampaignExecutionEngine:
             ).all()
 
             for plan in ready_plans:
-                asset = db.query(CampaignAsset).filter(CampaignAsset.id == plan.campaign_asset_id).first()
-                if not asset:
-                    self.handle_task_failed(db, plan, None, "Physical CampaignAsset not found.", FailureCategory.VALIDATION)
-                    continue
+                try:
+                    asset = db.query(CampaignAsset).filter(CampaignAsset.id == plan.campaign_asset_id).first()
+                    if not asset:
+                        self.handle_task_failed(db, plan, None, "Physical CampaignAsset not found.", FailureCategory.VALIDATION)
+                        continue
 
-                import os
-                package_folder = os.path.dirname(asset.filename) if "/" in asset.filename or "\\" in asset.filename else ""
-                
-                cat_map = {
-                    "film & animation": 1, "autos & vehicles": 2, "music": 10, "pets & animals": 15,
-                    "sports": 17, "short movies": 18, "travel & events": 19, "gaming": 20,
-                    "videoblogging": 21, "people & blogs": 22, "comedy": 23, "entertainment": 24,
-                    "news & politics": 25, "howto & style": 26, "education": 27, "science & technology": 28,
-                    "nonprofits & activism": 29
-                }
-                resolved_cat = int(plan.category) if plan.category and str(plan.category).isdigit() else cat_map.get(str(plan.category or "").strip().lower(), None)
-
-                task_data = UploadTaskCreate(
-                    channel_id=plan.channel_id,
-                    metadata_source="CAMPAIGN",
-                    source_type="CAMPAIGN_EXECUTION",
-                    source_id=plan.id,
-                    execution_source="CAMPAIGN",
-                    correlation_id=plan.correlation_id,
-                    execution_no=plan.execution_no,
-                    package_folder=package_folder,
-                    video_path=asset.filename,
-                    title=plan.title,
-                    description=plan.description,
-                    tags=plan.tags,
-                    privacy_status=plan.visibility or "private",
-                    made_for_kids=False,
-                    video_id=asset.fingerprint, # duplicate detection key
-                    playlist_id=plan.playlist,
-                    category_id=resolved_cat,
-                    default_language=plan.language,
-                    audience=plan.audience,
-                    pipeline_type=plan.pipeline_type,
-                    scheduled_at=plan.publish_datetime,
-                    schedule_mode="youtube" if plan.publish_datetime else "application",
-                    status=QueueStatusEnum.queued # Dispatched immediately to UploadEngine
-                )
-                
-                if plan.thumbnail:
-                    task_data.thumbnail_path = plan.thumbnail
+                    import os
+                    package_folder = os.path.dirname(asset.filepath) if asset.filepath else ""
                     
-                # Create Task using Dispatcher abstraction
-                new_task = ExecutionDispatcher.dispatch(db, task_data)
-                
-                self.handle_task_created(db, plan, new_task)
+                    cat_map = {
+                        "film & animation": 1, "autos & vehicles": 2, "music": 10, "pets & animals": 15,
+                        "sports": 17, "short movies": 18, "travel & events": 19, "gaming": 20,
+                        "videoblogging": 21, "people & blogs": 22, "comedy": 23, "entertainment": 24,
+                        "news & politics": 25, "howto & style": 26, "education": 27, "science & technology": 28,
+                        "nonprofits & activism": 29
+                    }
+                    resolved_cat = int(plan.category) if plan.category and str(plan.category).isdigit() else cat_map.get(str(plan.category or "").strip().lower(), None)
+
+                    task_data = UploadTaskCreate(
+                        channel_id=plan.channel_id,
+                        metadata_source="CAMPAIGN",
+                        source_type="CAMPAIGN_EXECUTION",
+                        source_id=plan.id,
+                        execution_source="CAMPAIGN",
+                        correlation_id=plan.correlation_id,
+                        execution_no=plan.execution_no,
+                        package_folder=package_folder,
+                        video_path=asset.filepath or asset.filename,
+                        title=plan.title,
+                        description=plan.description,
+                        tags=plan.tags,
+                        privacy_status=plan.visibility or "private",
+                        made_for_kids=False,
+                        video_id=asset.fingerprint, # duplicate detection key
+                        playlist_id=plan.playlist,
+                        category_id=resolved_cat,
+                        default_language=plan.language,
+                        audience=plan.audience,
+                        pipeline_type=plan.pipeline_type,
+                        scheduled_at=None,
+                        schedule_mode="application",
+                        status=QueueStatusEnum.queued # Dispatched immediately to UploadEngine
+                    )
+                    
+                    if plan.thumbnail:
+                        task_data.thumbnail_path = plan.thumbnail
+                        
+                    # Create Task using Dispatcher abstraction
+                    new_task = ExecutionDispatcher.dispatch(db, task_data)
+                    
+                    self.handle_task_created(db, plan, new_task)
+                except Exception as loop_err:
+                    db.rollback()
+                    logger.error(f"[CAMPAIGN_EXECUTION] Plan {plan.id} failed during dispatch: {loop_err}")
+                    self.handle_task_failed(db, plan, None, f"Dispatch Error: {str(loop_err)}", FailureCategory.UNKNOWN)
                 
         except Exception as e:
             logger.error(f"[CAMPAIGN_EXECUTION] Error processing READY plans: {e}")
@@ -139,26 +144,31 @@ class CampaignExecutionEngine:
             ).all()
 
             for plan in uploading_plans:
-                if not plan.upload_task_id:
-                    self.handle_task_failed(db, plan, None, "Lost reference to UploadTask.", FailureCategory.UNKNOWN)
-                    continue
+                try:
+                    if not plan.upload_task_id:
+                        self.handle_task_failed(db, plan, None, "Lost reference to UploadTask.", FailureCategory.UNKNOWN)
+                        continue
 
-                task = db.query(UploadTask).filter(UploadTask.id == plan.upload_task_id).first()
-                if not task:
-                    self.handle_task_failed(db, plan, None, "UploadTask deleted externally.", FailureCategory.UNKNOWN)
-                    continue
+                    task = db.query(UploadTask).filter(UploadTask.id == plan.upload_task_id).first()
+                    if not task:
+                        self.handle_task_failed(db, plan, None, "UploadTask deleted externally.", FailureCategory.UNKNOWN)
+                        continue
 
-                if task.status == QueueStatusEnum.processing.value and not plan.execution_started_at:
-                    self.handle_task_started(db, plan, task)
-                    
-                elif task.status == QueueStatusEnum.completed.value:
-                    self.handle_task_completed(db, plan, task)
-                    
-                elif task.status == QueueStatusEnum.failed.value:
-                    self.handle_task_failed(db, plan, task, task.failure_reason or "Unknown Error", FailureCategory.YOUTUBE)
-                    
-                elif task.status == QueueStatusEnum.cancelled.value:
-                    self.handle_task_cancelled(db, plan, task)
+                    if task.status == QueueStatusEnum.processing.value and not plan.execution_started_at:
+                        self.handle_task_started(db, plan, task)
+                        
+                    elif task.status == QueueStatusEnum.completed.value:
+                        self.handle_task_completed(db, plan, task)
+                        
+                    elif task.status == QueueStatusEnum.failed.value:
+                        self.handle_task_failed(db, plan, task, task.failure_reason or "Unknown Error", FailureCategory.YOUTUBE)
+                        
+                    elif task.status == QueueStatusEnum.cancelled.value:
+                        self.handle_task_cancelled(db, plan, task)
+                except Exception as loop_err:
+                    db.rollback()
+                    logger.error(f"[CAMPAIGN_EXECUTION] Plan {plan.id} failed during monitor loop: {loop_err}")
+                    self.handle_task_failed(db, plan, None, f"Monitor Error: {str(loop_err)}", FailureCategory.UNKNOWN)
                     
         except Exception as e:
             logger.error(f"[CAMPAIGN_EXECUTION] Error monitoring UPLOADING plans: {e}")
@@ -194,6 +204,7 @@ class CampaignExecutionEngine:
     def handle_task_created(self, db: Session, plan: CampaignUploadPlan, task: UploadTask):
         plan.upload_task_id = task.id
         plan.execution_status = CampaignExecutionState.UPLOADING
+        plan.status = plan.execution_status.value
         db.commit()
         
         self._log_summary("CREATED", plan, task)
@@ -208,9 +219,18 @@ class CampaignExecutionEngine:
 
     def handle_task_completed(self, db: Session, plan: CampaignUploadPlan, task: UploadTask):
         plan.execution_status = CampaignExecutionState.UPLOADED
+        plan.status = plan.execution_status.value
         plan.youtube_video_id = task.youtube_video_id
         plan.youtube_publish_at = plan.publish_datetime
         plan.execution_finished_at = datetime.utcnow()
+        
+        # Consume the physical asset so it doesn't appear as NEW anymore
+        from models import CampaignAssetState
+        asset = db.query(CampaignAsset).filter(CampaignAsset.id == plan.campaign_asset_id).first()
+        if asset:
+            asset.status = CampaignAssetState.CONSUMED
+            asset.updated_at = datetime.utcnow()
+            
         db.commit()
         
         self._record_journal(db, plan, task, "UPLOADED")
@@ -220,6 +240,7 @@ class CampaignExecutionEngine:
 
     def handle_task_failed(self, db: Session, plan: CampaignUploadPlan, task: UploadTask, error: str, category: FailureCategory):
         plan.execution_status = CampaignExecutionState.FAILED
+        plan.status = plan.execution_status.value
         plan.last_error = error
         plan.failure_category = category
         plan.execution_finished_at = datetime.utcnow()
@@ -232,6 +253,7 @@ class CampaignExecutionEngine:
 
     def handle_task_cancelled(self, db: Session, plan: CampaignUploadPlan, task: UploadTask):
         plan.execution_status = CampaignExecutionState.CANCELLED
+        plan.status = plan.execution_status.value
         plan.last_error = "UploadTask cancelled externally."
         plan.failure_category = FailureCategory.UNKNOWN
         plan.execution_finished_at = datetime.utcnow()
@@ -314,6 +336,7 @@ class CampaignExecutionService:
 
         for plan in plans:
             plan.execution_status = CampaignExecutionState.READY
+            plan.status = plan.execution_status.value
             plan.correlation_id = f"{correlation_base}-{uuid.uuid4().hex[:8].upper()}"
             plan.execution_no = execution_no
             plan.attempt = 1
@@ -330,16 +353,32 @@ class CampaignExecutionService:
         if plan.execution_status != CampaignExecutionState.FAILED:
             raise ValueError("Only FAILED plans can be retried.")
 
+        now_utc = datetime.utcnow()
+        if plan.publish_datetime and plan.publish_datetime < now_utc:
+            # Shift the schedule to the future to prevent YouTube HTTP 400 Bad Request
+            # Add 2 minutes buffer for immediate dispatch
+            new_publish_time = now_utc + timedelta(minutes=2)
+            plan.publish_datetime = new_publish_time
+            plan.humanized_datetime = new_publish_time
+            plan.publish_date = new_publish_time.strftime("%Y-%m-%d")
+            plan.publish_time = new_publish_time.strftime("%H:%M")
+
         plan.retry_count += 1
         plan.attempt += 1 # Attempt increments, correlation_id stays the same
         
         plan.execution_status = CampaignExecutionState.READY
+        plan.status = plan.execution_status.value
         plan.last_error = None
         plan.failure_category = None
         plan.execution_started_at = None
         plan.execution_finished_at = None
         plan.upload_task_id = None
         
+        # Reset Session Status if it was FINISHED
+        session = db.query(CampaignReviewSession).filter(CampaignReviewSession.id == plan.review_session_id).first()
+        if session and session.status == "FINISHED":
+            session.status = "LOCKED"
+            
         db.commit()
         db.refresh(plan)
         return plan

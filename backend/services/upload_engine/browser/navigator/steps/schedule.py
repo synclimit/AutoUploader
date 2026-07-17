@@ -8,11 +8,12 @@ class ScheduleStep(BaseStep):
 
     def execute(self, page, context, shared_state) -> StepResult:
         task = context.task
-        if not task.scheduled_time:
+        scheduled_at = getattr(task, "scheduled_at", None)
+        if not scheduled_at or not hasattr(scheduled_at, "strftime"):
             context.logger.info("[ScheduleStep] No schedule configured.")
             return StepResult(success=True)
 
-        context.logger.info(f"[ScheduleStep] Setting schedule to {task.scheduled_time}...")
+        context.logger.info(f"[ScheduleStep] Setting schedule to {scheduled_at}...")
         try:
             # Click Schedule radio button
             schedule_radio = LocatorResolver.resolve(page, [
@@ -33,8 +34,8 @@ class ScheduleStep(BaseStep):
             page.keyboard.press("Control+A")
             page.keyboard.press("Backspace")
             
-            # Convert scheduled_time (datetime object) to youtube's expected string "Jan 1, 2026"
-            date_str = task.scheduled_time.strftime("%b %d, %Y")
+            # Convert scheduled_at (datetime object) to youtube's expected string "Jan 1, 2026"
+            date_str = scheduled_at.strftime("%b %d, %Y")
             datepicker.type(date_str)
             page.keyboard.press("Enter")
             
@@ -47,7 +48,7 @@ class ScheduleStep(BaseStep):
             page.keyboard.press("Control+A")
             page.keyboard.press("Backspace")
             
-            time_str = task.scheduled_time.strftime("%I:%M %p") # e.g. "05:00 PM"
+            time_str = scheduled_at.strftime("%I:%M %p") # e.g. "05:00 PM"
             timepicker.type(time_str)
             page.keyboard.press("Enter")
             

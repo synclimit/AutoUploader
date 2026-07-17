@@ -16,7 +16,10 @@ class CampaignAssetService:
     @staticmethod
     def load_existing_fingerprints(db: Session) -> Set[str]:
         """Loads all existing fingerprints into a set for O(1) lookups."""
-        records = db.query(CampaignAsset.fingerprint).all()
+        from models import CampaignAssetState
+        records = db.query(CampaignAsset.fingerprint).filter(
+            CampaignAsset.allow_reupload == False
+        ).all()
         return {r[0] for r in records}
 
     @staticmethod
@@ -47,15 +50,18 @@ class CampaignAssetService:
                 file_path
             ]
             # Use subprocess to run ffprobe, this mimics the implementation in VideoMetadataService
-            # to directly get the float duration.
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            # to directly get the float duration. Add timeout to prevent hang.
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15)
             if result.returncode == 0:
                 probe_data = json.loads(result.stdout)
                 duration_sec = 0.0
-                if 'format' in probe_data and 'duration' in probe_data['format']:
-                    duration_sec = float(probe_data['format']['duration'])
-                elif 'streams' in probe_data and len(probe_data['streams']) > 0 and 'duration' in probe_data['streams'][0]:
-                    duration_sec = float(probe_data['streams'][0]['duration'])
+                try:
+                    if 'format' in probe_data and 'duration' in probe_data['format']:
+                        duration_sec = float(probe_data['format']['duration'])
+                    elif 'streams' in probe_data and len(probe_data['streams']) > 0 and 'duration' in probe_data['streams'][0]:
+                        duration_sec = float(probe_data['streams'][0]['duration'])
+                except (ValueError, TypeError):
+                    pass
                 return {"duration_seconds": duration_sec, "filesize": os.path.getsize(file_path)}
         except Exception as e:
             logger.error(f"Failed to read metadata for {file_path}: {e}")

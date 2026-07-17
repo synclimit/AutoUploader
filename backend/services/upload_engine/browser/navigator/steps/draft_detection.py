@@ -14,7 +14,7 @@ class DraftDetectionStep(BaseStep):
             page.wait_for_selector('ytcp-video-row', state="visible", timeout=15000)
             
             # Find the row for our extracted video id
-            video_id = getattr(context, "extracted_video_id", None)
+            video_id = shared_state.get("extracted_video_id") or getattr(context, "extracted_video_id", None)
             if not video_id or video_id == "UNKNOWN_ID":
                 # If we don't know the ID, just check the first row
                 row = page.locator('ytcp-video-row').first
