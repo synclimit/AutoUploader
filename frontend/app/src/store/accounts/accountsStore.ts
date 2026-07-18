@@ -126,7 +126,12 @@ export const useAccountsStore = create<AccountsState>((set, get) => ({
   },
 
   fetchAccount: async (id: string) => {
-    set({ isLoading: true, error: null })
+    const cached = get().accounts.find(a => a.id === id)
+    if (cached) {
+      set({ selectedAccount: cached as unknown as AccountDetail, isLoading: true, error: null })
+    } else {
+      set({ isLoading: true, error: null })
+    }
     try {
       const data = await apiClient.get(`/channels/${id}`)
       set({ selectedAccount: data, isLoading: false })

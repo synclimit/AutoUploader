@@ -46,7 +46,7 @@ class UploadEngine(EngineBase):
             stuck_tasks = db.query(UploadTask).filter(UploadTask.status == QueueStatusEnum.uploading).all()
             for task in stuck_tasks:
                 task.status = QueueStatusEnum.queued
-                task.progress = 0
+                task.upload_progress = 0
             if stuck_tasks:
                 db.commit()
                 logger.info(f"[UPLOAD_ENGINE] Reset {len(stuck_tasks)} stuck tasks back to QUEUED")

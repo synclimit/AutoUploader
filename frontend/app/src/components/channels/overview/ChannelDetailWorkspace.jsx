@@ -32,7 +32,7 @@ export default function ChannelDetailWorkspace({ channel }) {
 
   // Initialize state
   useEffect(() => {
-    if (channel && channel.id !== currentChannelId) {
+    if (channel && channel.id !== currentChannelId && 'schema_version' in channel) {
       const parseJSON = (str, fallback) => {
         try { return typeof str === 'string' ? JSON.parse(str) : (str || fallback) }
         catch { return fallback }
@@ -49,7 +49,7 @@ export default function ChannelDetailWorkspace({ channel }) {
       if (channel.authentication_status === 'Connected') {
         const fetchPlaylists = async () => {
           try {
-            const res = await apiClient.get(`/accounts/${channel.id}/playlists`)
+            const res = await apiClient.get(`/channels/${channel.id}/playlists`)
             if (res && Array.isArray(res)) {
               setPlaylists(res.map(p => ({ label: p.title, value: p.id })))
             }
