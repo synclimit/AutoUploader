@@ -34,13 +34,17 @@ export default function Sidebar() {
   const [tempName, setTempName] = useState(userName)
 
   return (
-    <nav 
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`h-full bg-gradient-to-br from-[var(--bg-sidebar-from)] via-[var(--bg-sidebar-via)] to-[var(--bg-sidebar-to)] border-r border-white/[0.04] flex flex-col shrink-0 relative z-50 overflow-hidden shadow-[12px_0_40px_rgba(0,0,0,0.5)] transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] will-change-[width] group/sidebar ${
-        isCompactMode ? 'w-[72px] hover:w-[280px]' : 'w-[280px]'
-      }`}
-    >
+    <>
+      {/* Spacer to maintain 72px width for the main layout */}
+      <div className={`shrink-0 h-full hidden sm:block ${isCompactMode ? 'w-[72px]' : 'w-[280px]'}`}></div>
+      
+      <nav 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`absolute top-0 left-0 h-full bg-gradient-to-br from-[var(--bg-sidebar-from)] via-[var(--bg-sidebar-via)] to-[var(--bg-sidebar-to)] border-r border-white/[0.04] flex flex-col shrink-0 z-50 overflow-hidden shadow-[12px_0_40px_rgba(0,0,0,0.5)] transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] will-change-[width] group/sidebar ${
+          isCompactMode ? 'w-[72px] hover:w-[280px]' : 'w-[280px]'
+        }`}
+      >
       
       {/* Subtle Background Effects */}
       <div className="absolute top-0 left-[-40px] w-[150px] h-full bg-[var(--accent-500)]/5 blur-[80px] pointer-events-none"></div>
@@ -142,5 +146,6 @@ export default function Sidebar() {
       </div>
 
     </nav>
+    </>
   )
 }
