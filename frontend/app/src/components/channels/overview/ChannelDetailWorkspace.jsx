@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Globe, RefreshCw, XCircle, Save, ShieldCheck, HardDrive, Settings, Activity, Server, AlertCircle } from 'lucide-react'
+import { Globe, RefreshCw, XCircle, Save, ShieldCheck, HardDrive, Settings, Activity, Server, AlertCircle, Edit2, Check } from 'lucide-react'
 import ChannelHeroArtwork from './ChannelHeroArtwork'
 import { useAccountsStore } from '../../../store/accounts/accountsStore'
 import apiClient from '../../../api/client'
@@ -12,6 +12,8 @@ import AIIdentityTab from './tabs/AIIdentityTab'
 export default function ChannelDetailWorkspace({ channel }) {
   const { deleteAccount, updateAccount } = useAccountsStore()
   const [activeTab, setActiveTab] = useState('general')
+  const [isEditingAlias, setIsEditingAlias] = useState(false)
+  const [aliasDraft, setAliasDraft] = useState('')
 
   const [drafts, setDrafts] = useState({
     pipelines: {},
@@ -45,6 +47,8 @@ export default function ChannelDetailWorkspace({ channel }) {
       setOriginal(initial)
       setDrafts(JSON.parse(JSON.stringify(initial))) // deep copy
       setCurrentChannelId(channel.id)
+      setAliasDraft(channel.alias || '')
+      setIsEditingAlias(false)
 
       if (channel.authentication_status === 'Connected') {
         const fetchPlaylists = async () => {
@@ -119,6 +123,19 @@ export default function ChannelDetailWorkspace({ channel }) {
     }
   }
 
+  const handleSaveAlias = async () => {
+    if (aliasDraft.trim() && aliasDraft !== channel.alias) {
+      try {
+        await updateAccount(channel.id, { channel_name: aliasDraft.trim() })
+        setIsEditingAlias(false)
+      } catch (e) {
+        console.error(e)
+      }
+    } else {
+      setIsEditingAlias(false)
+    }
+  }
+
   const tabs = [
     { id: 'general', label: 'General', isDirty: isDirty('pipelines'), helpText: 'Atur koneksi watch folder, sumber video, dan integrasi pipeline.' },
     { id: 'upload_defaults', label: 'Upload Defaults', isDirty: isDirty('upload_defaults'), helpText: 'Seting bawaan (default) untuk pengaturan dasar, visibilitas, bahasa, dan tag.' },
@@ -182,9 +199,31 @@ export default function ChannelDetailWorkspace({ channel }) {
                 )}
               </div>
               <div className="flex items-center gap-3 mt-2">
-                <span className="text-[13px] font-semibold text-[var(--accent-400)]/80 drop-shadow-md">
-                  @{channel.name.toLowerCase().replace(/\s+/g, '')}
-                </span>
+                {isEditingAlias ? (
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      value={aliasDraft}
+                      onChange={(e) => setAliasDraft(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveAlias()}
+                      autoFocus
+                      className="h-[24px] px-2 rounded-[4px] bg-white/10 border border-[var(--accent-400)]/50 text-[13px] text-white outline-none focus:border-[var(--accent-400)]"
+                    />
+                    <button onClick={handleSaveAlias} className="text-green-400 hover:text-green-300">
+                      <Check size={14} />
+                    </button>
+                    <button onClick={() => { setIsEditingAlias(false); setAliasDraft(channel.alias || ''); }} className="text-white/50 hover:text-white">
+                      <XCircle size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditingAlias(true)}>
+                    <span className="text-[13px] font-semibold text-[var(--accent-400)]/80 drop-shadow-md transition-colors group-hover:text-[var(--accent-300)]">
+                      Alias: {channel.alias}
+                    </span>
+                    <Edit2 size={12} className="text-white/20 group-hover:text-white/80 transition-colors" />
+                  </div>
+                )}
                 <span className="w-1.5 h-1.5 rounded-full bg-white/15"></span>
                 <span className="text-[13px] font-medium text-white/50">
                   {channel.subscribers || '0'} Subscribers

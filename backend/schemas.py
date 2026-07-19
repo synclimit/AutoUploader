@@ -165,6 +165,7 @@ class ConfirmChannelRequest(BaseModel):
 class AccountListResponse(BaseModel):
     id: str
     channel_name: str
+    youtube_name: Optional[str] = None
     channel_id: Optional[str] = None
     subscribers: Optional[str] = None
     avatar_url: Optional[str] = None
@@ -195,6 +196,7 @@ class AccountListResponse(BaseModel):
 class AccountDetailResponse(BaseModel):
     id: str
     channel_name: str
+    youtube_name: Optional[str] = None
     channel_id: Optional[str] = None
     subscribers: Optional[str] = None
     avatar_url: Optional[str] = None

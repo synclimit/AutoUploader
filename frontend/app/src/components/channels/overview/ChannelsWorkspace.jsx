@@ -40,12 +40,14 @@ export default function ChannelsWorkspace() {
 
   // To match the UI props, we map accounts
   const mappedChannels = (accounts || []).filter(Boolean).map(acc => {
-    const nameStr = acc.channel_name || acc.name || 'Unnamed Channel';
+    const aliasStr = acc.channel_name || acc.name || 'Unnamed Channel';
+    const originalName = acc.youtube_name || aliasStr;
     return {
       id: acc.id,
-      name: nameStr,
+      name: originalName,
+      alias: aliasStr,
       avatar: acc.avatar_url || null,
-      initials: nameStr.substring(0, 2).toUpperCase(),
+      initials: originalName.substring(0, 2).toUpperCase(),
       color: 'bg-indigo-600',
       status: acc.authentication_status,
       watchFolder: '',
@@ -56,9 +58,10 @@ export default function ChannelsWorkspace() {
 
   const selectedChannel = selectedAccount ? {
     id: selectedAccount.id,
-    name: selectedAccount.channel_name || selectedAccount.name || 'Unnamed Channel',
+    name: selectedAccount.youtube_name || selectedAccount.channel_name || selectedAccount.name || 'Unnamed Channel',
+    alias: selectedAccount.channel_name || selectedAccount.name || 'Unnamed Channel',
     avatar: selectedAccount.avatar_url || null,
-    initials: (selectedAccount.channel_name || selectedAccount.name || 'UC').substring(0, 2).toUpperCase(),
+    initials: (selectedAccount.youtube_name || selectedAccount.channel_name || selectedAccount.name || 'UC').substring(0, 2).toUpperCase(),
     status: selectedAccount.authentication_status,
     watchFolder: selectedAccount.watch_folder || 'Not Configured',
     uploadPreset: selectedAccount.source_type,

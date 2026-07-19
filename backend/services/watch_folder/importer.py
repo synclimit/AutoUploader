@@ -198,7 +198,11 @@ def create_task(
         humanize_max=int(p_config.get("humanize", {}).get("max_delay_minutes", 0)),
         
         # Sprint 10.5 Metadata Automation
-        upload_mode="Auto Upload" if p_config.get("require_approval") is False else p_config.get("upload_mode", "Waiting For Approval"),
+        upload_mode="Auto Upload" if (
+            p_config.get("require_approval") is False 
+            or str(p_config.get("require_approval")).strip().lower() == "false" 
+            or str(p_config.get("upload_mode", "")).strip().lower() in ["auto upload", "auto_upload", "auto"]
+        ) else p_config.get("upload_mode", "Waiting For Approval"),
         ai_metadata_generated=False if p_config.get("ai_metadata_enabled", False) else True,
     )
 

@@ -67,7 +67,7 @@ export default function ChannelListPanel({ channels, selectedChannelId, onSelect
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-[12px] font-medium truncate transition-colors ${isSelected ? 'text-cyan-200/70' : 'text-white/40'}`}>
-                    @{channel.name.toLowerCase().replace(/\s+/g, '')}
+                    {channel.alias ? `Alias: ${channel.alias}` : `@${channel.name.toLowerCase().replace(/\s+/g, '')}`}
                   </span>
                   <span className="w-1 h-1 rounded-full bg-white/20"></span>
                   <span className={`text-[11px] font-bold transition-colors ${isSelected ? 'text-white/70' : 'text-white/30'}`}>

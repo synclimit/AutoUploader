@@ -402,6 +402,8 @@ class ChannelService:
 
         if data.pipeline_states is not None: channel.pipeline_states = data.pipeline_states
 
+        channel.schema_version = (getattr(channel, "schema_version", 1) or 1) + 1
+
         try:
             db.commit()
             db.refresh(channel)
@@ -543,10 +545,8 @@ class ChannelService:
         channel.channel_id = request.channel_id
         
         yt_name = temp_data.get("channel_name") or getattr(request, "channel_name", None)
-        if yt_name and channel.alias_name != yt_name:
-            existing = db.query(Channel).filter(Channel.alias_name == yt_name, Channel.id != channel_id).first()
-            if not existing:
-                channel.alias_name = yt_name
+        if yt_name:
+            channel.youtube_name = yt_name
                 
         channel.subscribers = subscribers
         if avatar_url:

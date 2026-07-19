@@ -39,6 +39,7 @@ export interface WatchFolderHealth {
 export interface AccountList {
   id: string
   channel_name: string
+  youtube_name: string | null
   avatar_url?: string | null
   profile_name: string | null
   source_type: string
@@ -49,6 +50,7 @@ export interface AccountList {
 export interface AccountDetail {
   id: string
   channel_name: string
+  youtube_name: string | null
   avatar_url?: string | null
   profile_id: string | null
   profile_name: string | null

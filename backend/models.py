@@ -29,6 +29,7 @@ class Channel(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     alias_name = Column(String, unique=True, nullable=False)
+    youtube_name = Column(String, nullable=True)
     channel_id = Column(String, nullable=True)
     subscribers = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)

@@ -12,7 +12,7 @@ from core.engine_base import EngineBase
 
 logger = logging.getLogger("upload_scheduler")
 
-POLL_INTERVAL_SECONDS = 60
+POLL_INTERVAL_SECONDS = 15
 
 class SchedulerEngine(EngineBase):
     def __init__(self):
@@ -189,7 +189,13 @@ class SchedulerEngine(EngineBase):
                         
                 task.scheduled_at = chosen_dt
                 
-                if task.status == QueueStatusEnum.watched and getattr(task, "upload_mode", "") != "Auto Upload":
+                is_auto = (
+                    str(getattr(task, "upload_mode", "")).strip().lower() in ["auto upload", "auto_upload", "auto"]
+                    or p_config.get("require_approval") is False
+                    or str(p_config.get("require_approval", "")).strip().lower() == "false"
+                )
+
+                if task.status == QueueStatusEnum.watched and not is_auto:
                     msg = f"Assigned draft publish time {chosen_dt} for Review."
                     db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.watched.value, message=msg))
                 elif getattr(task, "schedule_mode", "application") == "youtube":

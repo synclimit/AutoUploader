@@ -124,20 +124,23 @@ class WatchFolderEngine(EngineBase):
         db = SessionLocal()
         try:
             enabled_accounts = db.query(Channel).all()
+            account_ids = [acc.id for acc in enabled_accounts]
         except Exception as e:
             db.close()
             return
         db.close()
 
-        if not enabled_accounts:
+        if not account_ids:
             return
 
-        for channel in enabled_accounts:
+        for acc_id in account_ids:
             if not self._running:
                 break
             db = SessionLocal()
             try:
-                self._scan_account(channel, db)
+                channel = db.query(Channel).filter(Channel.id == acc_id).first()
+                if channel:
+                    self._scan_account(channel, db)
             finally:
                 db.close()
 
