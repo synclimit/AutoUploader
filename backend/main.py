@@ -132,6 +132,7 @@ def startup_event():
         
         migrations = {
             "channels": [
+                ("youtube_name", "VARCHAR"),
                 ("channel_id", "VARCHAR"),
                 ("subscribers", "VARCHAR"),
                 ("avatar_url", "VARCHAR"),
@@ -315,7 +316,10 @@ def startup_event():
     import asyncio
     db = SessionLocal()
     try:
-        asyncio.create_task(AIEngineManager.health_check(db))
+        try:
+            asyncio.create_task(AIEngineManager.health_check(db))
+        except RuntimeError:
+            pass
     finally:
         db.close()
 
