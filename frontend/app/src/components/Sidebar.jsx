@@ -37,7 +37,7 @@ export default function Sidebar() {
     <nav 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`h-full bg-gradient-to-br from-[var(--bg-sidebar-from)] via-[var(--bg-sidebar-via)] to-[var(--bg-sidebar-to)] border-r border-white/[0.04] flex flex-col shrink-0 relative z-50 overflow-hidden shadow-[12px_0_40px_rgba(0,0,0,0.5)] transition-[width] duration-200 group/sidebar ${
+      className={`h-full bg-gradient-to-br from-[var(--bg-sidebar-from)] via-[var(--bg-sidebar-via)] to-[var(--bg-sidebar-to)] border-r border-white/[0.04] flex flex-col shrink-0 relative z-50 overflow-hidden shadow-[12px_0_40px_rgba(0,0,0,0.5)] transition-[width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] will-change-[width] group/sidebar ${
         isCompactMode ? 'w-[72px] hover:w-[280px]' : 'w-[280px]'
       }`}
     >
@@ -78,8 +78,8 @@ export default function Sidebar() {
               <div className={`shrink-0 flex items-center justify-center transition-all duration-200 ${isActive ? 'text-[var(--accent-400)] drop-shadow-[0_0_8px_var(--color-primary-cyan)]' : 'text-white/40 group-hover:text-cyan-200/60'}`}>
                 <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
               </div>
-              <span className={`text-left text-[14px] tracking-wide transition-all duration-200 ${
-                isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100 w-0 group-hover/sidebar:w-auto' : 'opacity-100'
+              <span className={`text-left text-[14px] tracking-wide transition-opacity duration-300 whitespace-nowrap min-w-[150px] ${
+                isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100' : 'opacity-100'
               } ${isActive ? 'font-bold text-white' : 'font-medium text-white/50 group-hover:text-white/90'}`}>
                 {t(item.transKey)}
               </span>
@@ -90,7 +90,7 @@ export default function Sidebar() {
 
       {/* Upload Progress Indicator */}
       {isUploading && (
-        <div className={`px-4 mb-3 shrink-0 transition-all duration-300 ${isCompactMode ? 'opacity-0 h-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:h-auto group-hover/sidebar:mb-3' : 'opacity-100 h-auto'}`}>
+        <div className={`px-4 mb-3 shrink-0 transition-opacity duration-300 ${isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100' : 'opacity-100'}`}>
           <div className="bg-[#05080e]/80 border border-[var(--accent-500)]/20 p-3 rounded-[12px] flex flex-col gap-2.5 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
             <div className="flex items-center justify-between text-[11px] font-bold">
               <span className="text-[var(--accent-400)] flex items-center gap-1.5"><UploadCloud size={12} className="animate-bounce" /> Importing...</span>
@@ -109,8 +109,8 @@ export default function Sidebar() {
           <div className="w-[34px] h-[34px] rounded-[10px] bg-[#071320] border border-[var(--accent-500)]/20 text-[var(--accent-400)] font-bold text-[12px] flex items-center justify-center shrink-0 shadow-[inset_0_1px_4px_rgba(255,255,255,0.05)]">
             {userName.substring(0, 2).toUpperCase()}
           </div>
-          <div className={`flex flex-col min-w-0 justify-center transition-all duration-200 ${
-            isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100 w-0 group-hover/sidebar:w-auto' : 'opacity-100'
+          <div className={`flex flex-col min-w-[120px] justify-center transition-opacity duration-300 ${
+            isCompactMode ? 'opacity-0 group-hover/sidebar:opacity-100' : 'opacity-100'
           }`}>
             <span className="text-white/90 font-semibold text-[13px] truncate leading-tight group-hover:text-white transition-colors duration-200">{userName}</span>
             <span className="text-[var(--accent-400)]/50 font-bold text-[9px] uppercase tracking-wider truncate mt-0.5">Creator Plan</span>
