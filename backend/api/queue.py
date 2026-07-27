@@ -50,7 +50,7 @@ UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, "uploads"))
 THUMBNAIL_DIR = os.path.abspath(os.path.join(BASE_DIR, "thumbnails"))
 
 @router.get("/serve")
-def serve_file(path: str):
+def serve_file(path: str, db: Session = Depends(get_db)):
     # Reject path traversal
     if ".." in path or path.startswith("/"):
         raise HTTPException(status_code=400, detail="Invalid path")
@@ -62,7 +62,14 @@ def serve_file(path: str):
     is_thumbnail = abs_path.startswith(THUMBNAIL_DIR)
     is_test = "test_assets" in abs_path
     
-    if not (is_upload or is_thumbnail or is_test):
+    # NEW ZERO COPY SUPPORT: Allow if the exact path is registered in the DB
+    from models import UploadTask
+    task_exists = db.query(UploadTask).filter(
+        (UploadTask.video_path == abs_path) | 
+        (UploadTask.thumbnail_path == abs_path)
+    ).first()
+    
+    if not (is_upload or is_thumbnail or is_test or task_exists):
         raise HTTPException(status_code=403, detail="Access denied")
         
     if not os.path.exists(abs_path):

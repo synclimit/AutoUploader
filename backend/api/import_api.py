@@ -1,9 +1,9 @@
 import os
 import uuid
-import shutil
 import logging
 from typing import List
-from fastapi import APIRouter, File, UploadFile, Form, Depends, HTTPException
+from fastapi import APIRouter, Form, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database.db import get_db
 from models import Channel
@@ -12,92 +12,73 @@ from services.watch_folder.engine import get_engine
 logger = logging.getLogger("import_api")
 router = APIRouter(prefix="/api/v1/import", tags=["Import"])
 
-from services.system.path_service import PathService
-UPLOAD_DIR = os.path.join(PathService.get_temp_dir(), "uploads")
+class ImportPathsRequest(BaseModel):
+    channel_id: str
+    paths: List[str]
 
-@router.post("/upload")
-async def upload_files(
-    channel_id: str = Form(...),
-    files: List[UploadFile] = File(...),
+@router.post("/upload", deprecated=True)
+async def upload_files_deprecated():
+    raise HTTPException(status_code=400, detail="HTML5 binary upload is deprecated in Zero Copy Architecture. Please use native PyWebView file picker and POST /paths.")
+
+@router.post("/paths")
+def import_from_paths(
+    data: ImportPathsRequest,
     db: Session = Depends(get_db)
 ):
-    channel = db.query(Channel).filter(Channel.id == channel_id).first()
+    channel = db.query(Channel).filter(Channel.id == data.channel_id).first()
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
 
-    import_batch_id = f"import_{uuid.uuid4().hex[:8]}"
-    batch_dir = os.path.join(UPLOAD_DIR, import_batch_id)
-    os.makedirs(batch_dir, exist_ok=True)
+    logger.info(f"Received {len(data.paths)} paths for import")
 
-    logger.info(f"Received {len(files)} files for import batch {import_batch_id}")
-
-    paths = []
-    # If the user drags a folder, filename might be "FolderName/video.mp4".
-    # In FastAPI, we can access filename. We need to preserve the relative structure.
-    for file in files:
-        # Prevent path traversal
-        safe_name = file.filename.replace("..", "").lstrip("/")
-        
-        # If it's just files at the root (no folder), create a separate package for each video
-        if "/" not in safe_name and "\\" not in safe_name:
-            ext = os.path.splitext(safe_name)[1].lower()
-            if ext in [".mp4", ".mov", ".mkv"]:
-                basename = os.path.splitext(safe_name)[0]
-                safe_name = os.path.join(basename, f"video{ext}")
-            else:
-                safe_name = os.path.join("package", safe_name)
-            
-        file_path = os.path.join(batch_dir, safe_name)
-        
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            
     from services.watch_folder import validator, duplicate_checker, importer
-    
-    # We find all immediate subdirectories in the batch directory
-    # and process them directly using validator and importer
+
     imported_count = 0
     duplicate_count = 0
     error_count = 0
-    
-    folders_to_process = [f.path for f in os.scandir(batch_dir) if f.is_dir()]
-    
-    import json
-    for folder_path in folders_to_process:
-        metadata_path = os.path.join(folder_path, "metadata.json")
-        if not os.path.exists(metadata_path):
-            videos = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".mov", ".mkv"))]
-            if videos:
-                title = os.path.basename(folder_path)
-                video_id = f"RAW_{uuid.uuid4().hex[:12]}"
-                with open(metadata_path, "w") as f:
-                    json.dump({
-                        "title_final": title, 
-                        "video_id": video_id,
-                        "description": "", 
-                        "tags": []
-                    }, f)
-                    
-        result = validator.validate(folder_path)
+
+    # Expand directories into video files or package folders
+    paths_to_process = []
+    for path in data.paths:
+        if os.path.isdir(path):
+            # Check if this is a Package Folder (e.g. from MediaFactory)
+            if os.path.exists(os.path.join(path, "metadata.json")):
+                paths_to_process.append(path)
+            else:
+                # Scan as a Batch Folder for videos
+                try:
+                    for f in os.listdir(path):
+                        if f.lower().endswith((".mp4", ".mov", ".mkv", ".avi")):
+                            paths_to_process.append(os.path.join(path, f))
+                except OSError as e:
+                    logger.error(f"[IMPORT_API] Error scanning directory {path}: {e}")
+                    error_count += 1
+        elif os.path.isfile(path):
+            if path.lower().endswith((".mp4", ".mov", ".mkv", ".avi")):
+                paths_to_process.append(path)
+        else:
+            logger.warning(f"[IMPORT_API] Path not found: {path}")
+            error_count += 1
+
+    for file_path in paths_to_process:
+        result = validator.validate(file_path)
         if not result.success:
+            logger.warning(f"[IMPORT_API] Validation failed for {file_path}: {result.error_message}")
             error_count += 1
             continue
-            
+
         dup_result = duplicate_checker.check(
             video_id=result.video_id,
-            package_folder=folder_path,
+            package_folder=result.package_folder,
             db=db,
         )
         
         if dup_result.is_duplicate:
+            logger.info(f"[IMPORT_API] Duplicate skipped: {file_path}")
             duplicate_count += 1
             continue
             
         try:
-            # Note: For drag & drop import, we use a generic 'import' pipeline key and config
-            # since it is not coming from a configured watch folder pipeline.
             p_config = {
                 "processing_order": "oldest_first",
                 "schedule_mode": "manual",
@@ -107,7 +88,7 @@ async def upload_files(
             task = importer.create_task(result, channel, db, "manual_import", p_config)
             imported_count += 1
         except Exception as e:
-            logger.error(f"[IMPORT_API] Import failed | folder={folder_path!r} | error={e}")
+            logger.error(f"[IMPORT_API] Import failed | file={file_path!r} | error={e}")
             error_count += 1
             
     return {
@@ -115,5 +96,5 @@ async def upload_files(
         "imported": imported_count,
         "duplicates": duplicate_count,
         "errors": error_count,
-        "batch_dir": batch_dir
     }
+

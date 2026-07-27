@@ -121,6 +121,45 @@ class UploadEngine(EngineBase):
             logger.info(f"[UPLOAD_ENGINE] Picked up task {task.id} for processing")
             db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.queued.value, message="Picked up task for processing"))
             
+            # Pre-upload Validation
+            if not os.path.exists(task.video_path):
+                task.status = QueueStatusEnum.failed
+                task.failure_reason = "SOURCE FILE NOT FOUND"
+                task.completed_at = datetime.utcnow()
+                db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.failed.value, message=task.failure_reason))
+                db.commit()
+                logger.error(f"[UPLOAD_ENGINE] Task {task.id} failed: SOURCE FILE NOT FOUND ({task.video_path})")
+                return
+
+            if not os.access(task.video_path, os.R_OK):
+                task.status = QueueStatusEnum.failed
+                task.failure_reason = "SOURCE FILE NOT READABLE"
+                task.completed_at = datetime.utcnow()
+                db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.failed.value, message=task.failure_reason))
+                db.commit()
+                logger.error(f"[UPLOAD_ENGINE] Task {task.id} failed: SOURCE FILE NOT READABLE ({task.video_path})")
+                return
+
+            if task.file_size is not None and task.file_size > 0:
+                try:
+                    current_size = os.path.getsize(task.video_path)
+                    if current_size != task.file_size:
+                        task.status = QueueStatusEnum.failed
+                        task.failure_reason = "FILE MODIFIED"
+                        task.completed_at = datetime.utcnow()
+                        db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.failed.value, message=task.failure_reason))
+                        db.commit()
+                        logger.error(f"[UPLOAD_ENGINE] Task {task.id} failed: FILE MODIFIED (expected {task.file_size}, got {current_size})")
+                        return
+                except OSError as e:
+                    task.status = QueueStatusEnum.failed
+                    task.failure_reason = "SOURCE FILE NOT READABLE"
+                    task.completed_at = datetime.utcnow()
+                    db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.failed.value, message=task.failure_reason))
+                    db.commit()
+                    logger.error(f"[UPLOAD_ENGINE] Task {task.id} failed: Could not get file size ({e})")
+                    return
+
             # Transition QUEUED -> UPLOADING
             task.status = QueueStatusEnum.uploading
             task.started_at = datetime.utcnow()

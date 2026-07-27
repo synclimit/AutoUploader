@@ -56,7 +56,7 @@ export interface QueueStoreState {
   // Global Upload State
   isUploading: boolean
   uploadProgress: number
-  uploadFiles: (account_id: string, files: File[]) => Promise<void>
+  uploadFiles: (account_id: string, paths: string[]) => Promise<void>
 }
 
 export const useQueueStore = create<QueueStoreState>((set, get) => ({
@@ -232,20 +232,17 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
     }
   },
   
-  uploadFiles: async (account_id, files) => {
+  uploadFiles: async (account_id, paths) => {
     set({ isUploading: true, uploadProgress: 0 });
     try {
-      const formData = new FormData();
-      formData.append('channel_id', account_id);
+      const payload = {
+        channel_id: account_id,
+        paths: paths
+      };
 
-      Array.from(files).forEach(file => {
-        // @ts-ignore - customPath added by directory reader
-        const path = file.customPath || file.webkitRelativePath || file.name;
-        formData.append('files', file, path);
-      });
-
-      const response = await apiClient.post('/import/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      // Since it's a fast local JSON post, progress isn't as relevant for the transfer,
+      // but we keep the structure in case backend processes it slowly.
+      const response = await apiClient.post('/import/paths', payload, {
         timeout: 0,
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {

@@ -145,6 +145,14 @@ def create_task(
     final_public_stats = result.public_stats_viewable if result.public_stats_viewable is not None else True
     if p_advanced.get("public_stats_viewable") is not None: final_public_stats = p_advanced.get("public_stats_viewable")
 
+    import os
+    try:
+        file_size = os.path.getsize(result.video_path) if result.video_path else 0
+        file_name = os.path.basename(result.video_path) if result.video_path else ""
+    except Exception:
+        file_size = 0
+        file_name = ""
+
     task = UploadTask(
         id=str(uuid.uuid4()),
 
@@ -159,6 +167,8 @@ def create_task(
         # Package paths
         package_folder=result.package_folder,
         video_path=result.video_path,
+        file_name=file_name,
+        file_size=file_size,
         thumbnail_path=result.thumbnail_path,     # None if thumbnail.jpg absent
         metadata_path=result.metadata_path,
         timestamps_path=result.timestamps_path,   # None if timestamps.txt absent

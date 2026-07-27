@@ -163,7 +163,15 @@ class SchedulerEngine(EngineBase):
                             t_dt_utc = t_dt_local.astimezone().astimezone(timezone.utc).replace(tzinfo=None)
                             
                             # Check if this exact slot is already taken for this channel
-                            if task.channel_id in assigned_times and t_dt_utc in assigned_times[task.channel_id]:
+                            slot_taken = False
+                            if task.channel_id in assigned_times:
+                                for at in assigned_times[task.channel_id]:
+                                    delta = (at - t_dt_utc).total_seconds()
+                                    if 0 <= delta <= 3600: # 1 hour tolerance for humanize delays
+                                        slot_taken = True
+                                        break
+                                        
+                            if slot_taken:
                                 continue # Slot taken, try next
                                 
                             chosen_dt = t_dt_utc

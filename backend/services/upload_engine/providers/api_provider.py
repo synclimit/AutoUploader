@@ -106,9 +106,19 @@ class APIUploader(BaseUploader):
                 return cat_map.get(s_val, "22")
             
             # 2. Prepare Video Metadata
+            desc = task.description or "Uploaded via AutoUploader"
+            if task.timestamps_path and os.path.exists(task.timestamps_path):
+                try:
+                    with open(task.timestamps_path, "r", encoding="utf-8") as f:
+                        ts_content = f.read().strip()
+                    if ts_content:
+                        desc = desc + "\n\n" + ts_content
+                except Exception as ts_err:
+                    context.logger.warning(f"[APIUploader] Could not read timestamps.txt: {ts_err}")
+
             snippet = {
                 "title": task.title or "Untitled Upload",
-                "description": task.description or "Uploaded via AutoUploader",
+                "description": desc,
                 "categoryId": _resolve_category_id(getattr(task, "category_id", None))
             }
             if task.tags:
@@ -175,7 +185,12 @@ class APIUploader(BaseUploader):
                     error_message=f"Video file not found: {task.video_path}"
                 )
 
-            media_file = MediaFileUpload(task.video_path, chunksize=10485760, resumable=True)
+            import mimetypes
+            guessed_type, _ = mimetypes.guess_type(task.video_path)
+            if not guessed_type:
+                guessed_type = 'video/*'
+
+            media_file = MediaFileUpload(task.video_path, mimetype=guessed_type, chunksize=10485760, resumable=True)
             is_private = status.get("privacyStatus") == "private"
             notify = False if is_private else getattr(task, "notify_subscribers", True)
 
@@ -255,9 +270,14 @@ class APIUploader(BaseUploader):
             if task.thumbnail_path and os.path.exists(task.thumbnail_path):
                 context.logger.info(f"[APIUploader] Uploading thumbnail...")
                 try:
+                    import mimetypes
+                    thumb_mimetype, _ = mimetypes.guess_type(task.thumbnail_path)
+                    if not thumb_mimetype:
+                        thumb_mimetype = 'image/*'
+                        
                     youtube.thumbnails().set(
                         videoId=video_id,
-                        media_body=MediaFileUpload(task.thumbnail_path)
+                        media_body=MediaFileUpload(task.thumbnail_path, mimetype=thumb_mimetype)
                     ).execute()
                     thumbnail_uploaded = True
                     context.logger.info(f"[APIUploader] Thumbnail uploaded.")

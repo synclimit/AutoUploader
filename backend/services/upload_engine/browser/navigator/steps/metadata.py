@@ -25,6 +25,17 @@ class MetadataStep(BaseStep):
             
             # Description
             desc = task.description or "Uploaded via AutoUploader"
+            
+            import os
+            if task.timestamps_path and os.path.exists(task.timestamps_path):
+                try:
+                    with open(task.timestamps_path, "r", encoding="utf-8") as f:
+                        ts_content = f.read().strip()
+                    if ts_content:
+                        desc = desc + "\n\n" + ts_content
+                except Exception as ts_err:
+                    context.logger.warning(f"[MetadataStep] Could not read timestamps.txt: {ts_err}")
+
             desc_box = LocatorResolver.resolve(page, [
                 {"type": "aria", "label": "Tell viewers about your video (type @ to mention a channel)"},
                 {"type": "css", "selector": '#textbox[aria-label*="Tell viewers"]'},

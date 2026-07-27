@@ -474,6 +474,20 @@ if __name__ == "__main__":
         def maximize(self):
             if webview.windows:
                 webview.windows[0].toggle_fullscreen()
+        def select_files(self):
+            if webview.windows:
+                result = webview.windows[0].create_file_dialog(
+                    webview.OPEN_DIALOG, 
+                    allow_multiple=True, 
+                    file_types=("Video files (*.mp4;*.mkv;*.mov;*.avi)", "All files (*.*)")
+                )
+                return result if result else []
+            return []
+        def select_folder(self):
+            if webview.windows:
+                result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
+                return result if result else []
+            return []
 
     api = Api()
     import time

@@ -98,18 +98,25 @@ def check(video_id: str, package_folder: str, db: Session) -> DuplicateCheckResu
     existing_by_path = (
         db.query(UploadTask)
         .filter(UploadTask.package_folder == package_folder)
-        .first()
+        .all()
     )
 
     if existing_by_path:
-        logger.debug(
-            f"[DUPLICATE] Folder already in DB (rescan guard) | "
-            f"folder={package_folder!r} | task={existing_by_path.id}"
-        )
-        return DuplicateCheckResult(
-            is_duplicate=True,
-            reason="package_folder already imported",
-            existing_task_id=existing_by_path.id,
+        for existing in existing_by_path:
+            if existing.status in ACTIVE_STATUSES:
+                logger.debug(
+                    f"[DUPLICATE] Folder already in DB (rescan guard) | "
+                    f"folder={package_folder!r} | task={existing.id}"
+                )
+                return DuplicateCheckResult(
+                    is_duplicate=True,
+                    reason="package_folder already imported",
+                    existing_task_id=existing.id,
+                )
+        
+        logger.info(
+            f"[DUPLICATE] Previous folder imports FAILED/CANCELLED — re-import allowed | "
+            f"folder={package_folder!r}"
         )
 
     # -----------------------------------------------------------------------

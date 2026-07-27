@@ -131,6 +131,8 @@ class UploadTask(Base):
     # Folder-Based Package Pointers
     package_folder = Column(String, nullable=False) # Base folder path
     video_path = Column(String, nullable=False)
+    file_name = Column(String, nullable=True)
+    file_size = Column(Integer, nullable=True)
     thumbnail_path = Column(String, nullable=True)
     metadata_path = Column(String, nullable=True)
     timestamps_path = Column(String, nullable=True)
