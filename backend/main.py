@@ -70,6 +70,7 @@ from services.watch_folder.engine import get_engine as get_wf_engine
 from services.upload_engine.engine import get_engine as get_upload_engine
 from services.campaign_execution_service import get_campaign_execution_engine
 from scheduler.upload_scheduler import get_scheduler_engine
+from scheduler.metadata_sync_scheduler import get_metadata_sync_engine
 from services.ai.automation import get_ai_automation_engine
 
 # Configure logging so Watch Folder Engine output is visible and logs are saved to a file
@@ -308,6 +309,9 @@ def startup_event():
     scheduler_engine = get_scheduler_engine()
     scheduler_engine.start()
     
+    metadata_sync_engine = get_metadata_sync_engine()
+    metadata_sync_engine.start()
+    
     ai_auto_engine = get_ai_automation_engine()
     ai_auto_engine.start()
 
@@ -329,6 +333,9 @@ def shutdown_event():
     """Stop the background threads cleanly."""
     scheduler_engine = get_scheduler_engine()
     scheduler_engine.stop()
+    
+    metadata_sync_engine = get_metadata_sync_engine()
+    metadata_sync_engine.stop()
 
     wf_engine = get_wf_engine()
     wf_engine.stop()
