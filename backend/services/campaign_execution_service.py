@@ -63,8 +63,11 @@ class CampaignExecutionEngine:
                 time.sleep(0.5)
         logger.info("[CAMPAIGN_EXECUTION] Background orchestrator stopped")
 
-    def _process_ready_plans(self):
-        db = SessionLocal()
+    def _process_ready_plans(self, db: Session = None):
+        should_close = False
+        if db is None:
+            db = SessionLocal()
+            should_close = True
         try:
             now_utc = datetime.utcnow()
             
@@ -134,10 +137,14 @@ class CampaignExecutionEngine:
         except Exception as e:
             logger.error(f"[CAMPAIGN_EXECUTION] Error processing READY plans: {e}")
         finally:
-            db.close()
+            if should_close:
+                db.close()
 
-    def _monitor_uploading_plans(self):
-        db = SessionLocal()
+    def _monitor_uploading_plans(self, db: Session = None):
+        should_close = False
+        if db is None:
+            db = SessionLocal()
+            should_close = True
         try:
             uploading_plans = db.query(CampaignUploadPlan).filter(
                 CampaignUploadPlan.execution_status == CampaignExecutionState.UPLOADING
@@ -154,7 +161,7 @@ class CampaignExecutionEngine:
                         self.handle_task_failed(db, plan, None, "UploadTask deleted externally.", FailureCategory.UNKNOWN)
                         continue
 
-                    if task.status == QueueStatusEnum.processing.value and not plan.execution_started_at:
+                    if task.status in (QueueStatusEnum.uploading.value, "PROCESSING") and not plan.execution_started_at:
                         self.handle_task_started(db, plan, task)
                         
                     elif task.status == QueueStatusEnum.completed.value:
@@ -173,7 +180,8 @@ class CampaignExecutionEngine:
         except Exception as e:
             logger.error(f"[CAMPAIGN_EXECUTION] Error monitoring UPLOADING plans: {e}")
         finally:
-            db.close()
+            if should_close:
+                db.close()
 
     # --- HANDLERS ---
     

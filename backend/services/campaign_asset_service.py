@@ -17,8 +17,9 @@ class CampaignAssetService:
     def load_existing_fingerprints(db: Session) -> Set[str]:
         """Loads all existing fingerprints into a set for O(1) lookups."""
         from models import CampaignAssetState
+        from sqlalchemy import or_
         records = db.query(CampaignAsset.fingerprint).filter(
-            CampaignAsset.allow_reupload == False
+            or_(CampaignAsset.allow_reupload == False, CampaignAsset.allow_reupload.is_(None))
         ).all()
         return {r[0] for r in records}
 

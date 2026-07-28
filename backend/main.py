@@ -189,6 +189,8 @@ def startup_event():
                 ("execution_no", "INTEGER"),
                 ("package_folder", "VARCHAR"),
                 ("video_path", "VARCHAR"),
+                ("file_name", "VARCHAR"),
+                ("file_size", "INTEGER"),
                 ("thumbnail_path", "VARCHAR"),
                 ("metadata_path", "VARCHAR"),
                 ("timestamps_path", "VARCHAR"),
