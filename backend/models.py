@@ -51,7 +51,7 @@ class Channel(Base):
     # Publishing Schedule / Rules
     publish_enabled = Column(Boolean, default=False)
     preferred_publish_time = Column(String, nullable=True)
-    publish_timezone = Column(String, default="UTC")
+    publish_timezone = Column(String, default="Asia/Jakarta")
     publish_variance = Column(Integer, default=0)
     publish_mode = Column(String, default="exact")
     publish_days = Column(String, default="Mon,Tue,Wed,Thu,Fri,Sat,Sun")

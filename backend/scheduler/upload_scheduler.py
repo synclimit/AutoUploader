@@ -159,8 +159,20 @@ class SchedulerEngine(EngineBase):
                         
                         # Allow 30 minutes grace period if the schedule was missed while AI or video processing was running
                         if t_dt_local > now_local - timedelta(minutes=30):
-                            # Convert to UTC for DB storage
-                            t_dt_utc = t_dt_local.astimezone().astimezone(timezone.utc).replace(tzinfo=None)
+                            # Convert to UTC using configured channel timezone
+                            import pytz
+                            tz_str = (channel.publish_timezone if channel and channel.publish_timezone else "Asia/Jakarta")
+                            try:
+                                tz = pytz.timezone(tz_str)
+                            except Exception:
+                                tz = pytz.timezone("Asia/Jakarta")
+                            
+                            try:
+                                localized_dt = tz.localize(t_dt_local, is_dst=None)
+                            except Exception:
+                                localized_dt = tz.localize(t_dt_local, is_dst=False)
+                                
+                            t_dt_utc = localized_dt.astimezone(pytz.UTC).replace(tzinfo=None)
                             
                             # Check if this exact slot is already taken for this channel
                             slot_taken = False

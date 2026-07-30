@@ -23,11 +23,13 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     setIsScanning(prev => ({ ...prev, [key]: true }));
     try {
       const res = await apiClient.post('/campaign-scan', { campaign_folder: folderPath });
-      if (res && res.data) {
+      const scanPayload = (res && res.summary) ? res : (res?.data ?? res);
+      if (scanPayload) {
         // Send scan result to review engine to create/update session
-        const reviewRes = await apiClient.post(`/campaign-review?channel_id=${channelId}&pipeline_type=${key}`, res.data);
-        if (reviewRes && reviewRes.data) {
-          setScanResults(prev => ({ ...prev, [key]: reviewRes.data }));
+        const reviewRes = await apiClient.post(`/campaign-review?channel_id=${channelId}&pipeline_type=${key}`, scanPayload);
+        const sessionPayload = (reviewRes && reviewRes.id) ? reviewRes : (reviewRes?.data ?? reviewRes);
+        if (sessionPayload) {
+          setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
         }
       }
     } catch (e) {
@@ -45,8 +47,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
         asset_id: assetId,
         selected: selected
       });
-      if (res && res.data) {
-        setScanResults(prev => ({ ...prev, [key]: res.data }));
+      const sessionPayload = (res && res.id) ? res : (res?.data ?? res);
+      if (sessionPayload) {
+        setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
       }
     } catch (e) {
       console.error("Selection failed", e);
@@ -70,8 +73,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       const res = await apiClient.post(`/campaign-review/update/${assetId}?channel_id=${channelId}&pipeline_type=${key}`, {
         [field]: value
       });
-      if (res && res.data) {
-        setScanResults(prev => ({ ...prev, [key]: res.data }));
+      const sessionPayload = (res && res.id) ? res : (res?.data ?? res);
+      if (sessionPayload) {
+        setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
       }
     } catch (e) {
       console.error("Update failed", e);
@@ -81,8 +85,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   const handleApproveCampaign = async (key) => {
     try {
       const res = await apiClient.post('/campaign-review/approve', { channel_id: channelId, pipeline_type: key });
-      if (res && res.data) {
-        setScanResults(prev => ({ ...prev, [key]: res.data }));
+      const sessionPayload = (res && res.id) ? res : (res?.data ?? res);
+      if (sessionPayload) {
+        setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
       }
     } catch (e) {
       console.error("Approve failed", e);
@@ -97,8 +102,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
         channel_id: channelId,
         pipeline_type: key
       });
-      if (res && res.data) {
-        setQueuePlans(prev => ({ ...prev, [key]: res.data }));
+      const plansPayload = Array.isArray(res) ? res : (res?.data ?? res);
+      if (plansPayload) {
+        setQueuePlans(prev => ({ ...prev, [key]: plansPayload }));
       }
     } catch (e) {
       console.error("Build queue failed", e);
@@ -136,8 +142,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   const loadQueuePlans = async (key, sessionId) => {
     try {
       const res = await apiClient.get(`/campaign-queue/${sessionId}`);
-      if (res && res.data && res.data.length > 0) {
-        setQueuePlans(prev => ({ ...prev, [key]: res.data }));
+      const plansPayload = Array.isArray(res) ? res : (res?.data ?? res);
+      if (plansPayload && plansPayload.length > 0) {
+        setQueuePlans(prev => ({ ...prev, [key]: plansPayload }));
       }
     } catch (e) {
       // Ignore if none exist
@@ -151,10 +158,11 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       if (p.automation_strategy === 'campaign' && p.campaign_folder && !scanResults[key] && !isScanning[key]) {
         try {
           const res = await apiClient.get(`/campaign-review/${channelId}/${key}`);
-          if (res && res.data) {
-            setScanResults(prev => ({ ...prev, [key]: res.data }));
-            if (res.data.status === 'LOCKED') {
-              loadQueuePlans(key, res.data.id);
+          const sessionPayload = (res && res.id) ? res : (res?.data ?? res);
+          if (sessionPayload) {
+            setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
+            if (sessionPayload.status === 'LOCKED') {
+              loadQueuePlans(key, sessionPayload.id);
             }
           } else {
             triggerScan(key, p.campaign_folder);
@@ -926,7 +934,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
             
             <button 
               onClick={() => {
-                useAppStore.getState().setJournalContext({ channelId: scanData.id });
+                useAppStore.getState().setJournalContext({ channelId: channelId || scanData.channel_id });
                 useAppStore.getState().setActiveModule('Journal');
               }}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-[13px] font-medium text-white hover:bg-white/10 hover:border-white/20 transition-all shadow-sm"

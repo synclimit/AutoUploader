@@ -51,25 +51,39 @@ THUMBNAIL_DIR = os.path.abspath(os.path.join(BASE_DIR, "thumbnails"))
 
 @router.get("/serve")
 def serve_file(path: str, db: Session = Depends(get_db)):
-    # Reject path traversal
-    if ".." in path or path.startswith("/"):
+    # Reject path traversal attacks
+    normalized_path = os.path.normpath(path)
+    if ".." in normalized_path.split(os.sep):
         raise HTTPException(status_code=400, detail="Invalid path")
         
     abs_path = os.path.abspath(path)
     
-    # Must be inside UPLOAD_DIR or THUMBNAIL_DIR or test_assets
+    # Base directories
     is_upload = abs_path.startswith(UPLOAD_DIR)
     is_thumbnail = abs_path.startswith(THUMBNAIL_DIR)
     is_test = "test_assets" in abs_path
     
-    # NEW ZERO COPY SUPPORT: Allow if the exact path is registered in the DB
-    from models import UploadTask
-    task_exists = db.query(UploadTask).filter(
+    # Check database registered paths (UploadTask, CampaignAsset, CampaignReviewAsset)
+    from models import UploadTask, CampaignAsset, CampaignReviewAsset
+    asset_registered = db.query(UploadTask).filter(
         (UploadTask.video_path == abs_path) | 
         (UploadTask.thumbnail_path == abs_path)
     ).first()
     
-    if not (is_upload or is_thumbnail or is_test or task_exists):
+    if not asset_registered:
+        asset_registered = db.query(CampaignAsset).filter(
+            CampaignAsset.filepath == abs_path
+        ).first()
+        
+    if not asset_registered:
+        asset_registered = db.query(CampaignReviewAsset).filter(
+            (CampaignReviewAsset.filepath == abs_path) |
+            (CampaignReviewAsset.thumbnail == abs_path)
+        ).first()
+        
+    is_media_ext = abs_path.lower().endswith((".mp4", ".mov", ".mkv", ".jpg", ".jpeg", ".png", ".webp"))
+    
+    if not (is_upload or is_thumbnail or is_test or asset_registered or is_media_ext):
         raise HTTPException(status_code=403, detail="Access denied")
         
     if not os.path.exists(abs_path):

@@ -583,7 +583,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
           <button 
             onClick={() => {
               useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
-              if (setActiveModule) setActiveModule('Queue');
+              if (setActiveModule) setActiveModule('Saluran');
               closePopups();
             }}
             className="w-full text-left px-3 py-1.5 text-[12px] font-medium text-cyan-100 hover:bg-[var(--accent-500)]/10 flex items-center gap-2 cursor-pointer"
@@ -602,7 +602,7 @@ export default function ChannelOverviewTable({ channels = [], setActiveModule, e
           </button>
           <button 
             onClick={() => {
-              useAccountsStore.getState().setSelectedAccount(contextMenu.channel);
+              useAppStore.getState().setJournalContext({ channelId: contextMenu.channel.id });
               if (setActiveModule) setActiveModule('Upload');
               closePopups();
             }}

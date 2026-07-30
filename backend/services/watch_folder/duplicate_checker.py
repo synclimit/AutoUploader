@@ -46,7 +46,7 @@ class DuplicateCheckResult:
     existing_task_id: str | None = None
 
 
-def check(video_id: str, package_folder: str, db: Session) -> DuplicateCheckResult:
+def check(video_id: str, package_folder: str, db: Session, channel_id: str = None) -> DuplicateCheckResult:
     """
     Run the two-stage duplicate check.
 
@@ -54,6 +54,7 @@ def check(video_id: str, package_folder: str, db: Session) -> DuplicateCheckResu
         video_id:       From validated metadata.json (or auto-generated RAW_id).
         package_folder: Absolute folder path of the candidate package.
         db:             Active SQLAlchemy session (read-only).
+        channel_id:     Optional Channel ID to scope duplicate check per-channel.
 
     Returns:
         DuplicateCheckResult with is_duplicate=True → caller must skip import.
@@ -62,11 +63,10 @@ def check(video_id: str, package_folder: str, db: Session) -> DuplicateCheckResu
     # -----------------------------------------------------------------------
     # Step 1 — Primary: video_id lookup
     # -----------------------------------------------------------------------
-    existing_tasks = (
-        db.query(UploadTask)
-        .filter(UploadTask.video_id == video_id)
-        .all()
-    )
+    query_vid = db.query(UploadTask).filter(UploadTask.video_id == video_id)
+    if channel_id:
+        query_vid = query_vid.filter(UploadTask.channel_id == channel_id)
+    existing_tasks = query_vid.all()
 
     if existing_tasks:
         # Check if ANY of the tasks are in an active status (including COMPLETED)
@@ -95,11 +95,10 @@ def check(video_id: str, package_folder: str, db: Session) -> DuplicateCheckResu
     # -----------------------------------------------------------------------
     # Step 2 — Secondary: package_folder rescan guard
     # -----------------------------------------------------------------------
-    existing_by_path = (
-        db.query(UploadTask)
-        .filter(UploadTask.package_folder == package_folder)
-        .all()
-    )
+    query_path = db.query(UploadTask).filter(UploadTask.package_folder == package_folder)
+    if channel_id:
+        query_path = query_path.filter(UploadTask.channel_id == channel_id)
+    existing_by_path = query_path.all()
 
     if existing_by_path:
         for existing in existing_by_path:

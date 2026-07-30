@@ -154,7 +154,7 @@ class CampaignReviewService:
         # Promote selected CampaignReviewAssets into physical CampaignAssets if they don't exist
         for review_asset in session.assets:
             if review_asset.selected and review_asset.sha256:
-                if not CampaignAssetService.exists(db, review_asset.fingerprint):
+                if not CampaignAssetService.exists(db, review_asset.fingerprint, channel_id=channel_id):
                     asset_data = {
                         "channel_id": channel_id,
                         "campaign_id": session.id,

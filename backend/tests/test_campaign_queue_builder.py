@@ -102,8 +102,16 @@ def test_build_queue_success(db_session):
     
     db_session.commit()
     
-    # 5. Build Queue
-    plans = CampaignQueueBuilder.build_queue(db_session, session_id, channel_id, "long")
+    # 5. Build Queue with fixed mock datetime (00:00 UTC) to avoid time-of-day slot skip sensitivity
+    from unittest.mock import patch, MagicMock
+    from datetime import datetime as real_datetime
+    import pytz
+    
+    mock_datetime = MagicMock(wraps=real_datetime)
+    mock_datetime.now.return_value = pytz.UTC.localize(real_datetime(2026, 1, 1, 0, 0, 0))
+
+    with patch("services.campaign_queue_builder.datetime", mock_datetime):
+        plans = CampaignQueueBuilder.build_queue(db_session, session_id, channel_id, "long")
     
     assert len(plans) == 3
     assert plans[0].publish_time == "09:00"

@@ -15,7 +15,7 @@ def scan_campaign_folder(request: CampaignScanRequest, db: Session = Depends(get
     does not insert CampaignAssets into the database.
     """
     try:
-        scan_result = CampaignScanService.scan_folder(db, request.campaign_folder)
+        scan_result = CampaignScanService.scan_folder(db, request.campaign_folder, channel_id=request.channel_id)
         return APIResponse(success=True, data=scan_result)
     except Exception as e:
         raise HTTPException(

@@ -440,10 +440,10 @@ export default function ReviewWorkspace() {
                buttonClass = "bg-[var(--accent-400)] text-black cursor-not-allowed";
                disabled = true;
              } else if (status === 'SCHEDULED') {
-                buttonText = "✓ Scheduled";
+                buttonText = "Publish Now";
                 icon = <Clock size={16} strokeWidth={2.5} />;
-                buttonClass = "bg-purple-500/20 text-purple-400 cursor-not-allowed border border-purple-500/30";
-                disabled = true;
+                buttonClass = "bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.2)]";
+                disabled = false;
               } else if (status === 'COMPLETED') {
                buttonText = "✓ Uploaded";
                icon = null;

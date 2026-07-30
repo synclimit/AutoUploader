@@ -14,13 +14,16 @@ logger = logging.getLogger("CampaignAssetService")
 class CampaignAssetService:
     
     @staticmethod
-    def load_existing_fingerprints(db: Session) -> Set[str]:
-        """Loads all existing fingerprints into a set for O(1) lookups."""
-        from models import CampaignAssetState
+    def load_existing_fingerprints(db: Session, channel_id: Optional[str] = None) -> Set[str]:
+        """Loads existing fingerprints into a set for O(1) lookups."""
+        from models import CampaignAsset
         from sqlalchemy import or_
-        records = db.query(CampaignAsset.fingerprint).filter(
+        query = db.query(CampaignAsset.fingerprint).filter(
             or_(CampaignAsset.allow_reupload == False, CampaignAsset.allow_reupload.is_(None))
-        ).all()
+        )
+        if channel_id:
+            query = query.filter(CampaignAsset.channel_id == channel_id)
+        records = query.all()
         return {r[0] for r in records}
 
     @staticmethod
@@ -103,12 +106,15 @@ class CampaignAssetService:
         }
 
     @staticmethod
-    def find_by_fingerprint(db: Session, fingerprint: str) -> Optional[CampaignAsset]:
-        return db.query(CampaignAsset).filter(CampaignAsset.fingerprint == fingerprint).first()
+    def find_by_fingerprint(db: Session, fingerprint: str, channel_id: Optional[str] = None) -> Optional[CampaignAsset]:
+        query = db.query(CampaignAsset).filter(CampaignAsset.fingerprint == fingerprint)
+        if channel_id:
+            query = query.filter(CampaignAsset.channel_id == channel_id)
+        return query.first()
 
     @staticmethod
-    def exists(db: Session, fingerprint: str) -> bool:
-        return db.query(CampaignAsset).filter(CampaignAsset.fingerprint == fingerprint).first() is not None
+    def exists(db: Session, fingerprint: str, channel_id: Optional[str] = None) -> bool:
+        return CampaignAssetService.find_by_fingerprint(db, fingerprint, channel_id=channel_id) is not None
 
     @staticmethod
     def create_asset(db: Session, asset_data: dict) -> CampaignAsset:

@@ -42,3 +42,20 @@ class OAuthClient:
             raise OAuthConfigurationException(f"Invalid credential format: {e}")
         except Exception as e:
             raise OAuthConfigurationException(f"Failed to load OAuth configuration: {e}")
+
+    @staticmethod
+    def build_credentials(token):
+        from google.oauth2.credentials import Credentials
+        import datetime
+        config = OAuthClient.load_configuration(token.channel_id)
+        dt = datetime.datetime.fromisoformat(token.expires_at) if getattr(token, 'expires_at', None) else None
+        return Credentials(
+            token=token.access_token,
+            refresh_token=token.refresh_token,
+            token_uri=config.token_uri,
+            client_id=config.client_id,
+            client_secret=config.client_secret,
+            scopes=config.scopes,
+            expiry=dt
+        )
+

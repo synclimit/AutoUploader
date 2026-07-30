@@ -180,7 +180,17 @@ class WatchFolderEngine(EngineBase):
                 return summary
 
         state_modified = False
-        today_str = datetime.utcnow().strftime("%Y-%m-%d")
+        import pytz
+        tz_str = channel.publish_timezone if channel and channel.publish_timezone else "Asia/Jakarta"
+        try:
+            tz = pytz.timezone(tz_str)
+        except Exception:
+            tz = pytz.timezone("Asia/Jakarta")
+
+        now_tz = datetime.now(tz)
+        today_str = now_tz.strftime("%Y-%m-%d")
+        today_start_tz = now_tz.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start = today_start_tz.astimezone(pytz.UTC).replace(tzinfo=None)
 
         for p_key, p_config in pipelines.items():
             if not self._running:
@@ -203,8 +213,7 @@ class WatchFolderEngine(EngineBase):
 
             daily_limit = int(p_config.get("daily_limit", 2))
             
-            # Ground truth: Calculate today_intake directly from DB
-            today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            # Ground truth: Calculate today_intake directly from DB for channel local calendar day
             today_intake = db.query(UploadTask).filter(
                 UploadTask.channel_id == channel_id,
                 UploadTask.created_at >= today_start,
@@ -294,6 +303,7 @@ class WatchFolderEngine(EngineBase):
                     video_id=result.video_id,
                     package_folder=folder_path,
                     db=db,
+                    channel_id=channel_id,
                 )
 
                 if dup_result.is_duplicate:

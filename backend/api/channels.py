@@ -52,17 +52,18 @@ def get_accounts(db: Session = Depends(get_db)):
 
 @router.get("/oauth-callback", include_in_schema=False)
 def oauth_callback(code: str, state: str, db: Session = Depends(get_db)):
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     try:
         result = ChannelService.oauth_callback(db, code, state, _temp_credentials)
         account_id = result["account_id"]
         yt_channel_id = result["channel_id"]
         channel_name = urllib.parse.quote(result["channel_name"])
         avatar_url = urllib.parse.quote(result.get("avatar_url") or "")
-        redirect_url = f"http://127.0.0.1:8000/accounts/confirm?accountId={account_id}&channelId={yt_channel_id}&channelName={channel_name}&avatarUrl={avatar_url}"
+        redirect_url = f"{frontend_url}/accounts/confirm?accountId={account_id}&channelId={yt_channel_id}&channelName={channel_name}&avatarUrl={avatar_url}"
         return RedirectResponse(redirect_url)
     except Exception as e:
         print(f"OAuth Error: {e}")
-        return RedirectResponse("http://127.0.0.1:8000/channels?error=oauth_failed")
+        return RedirectResponse(f"{frontend_url}/channels?error=oauth_failed")
 
 @router.get("/{channel_id}", response_model=AccountDetailResponse)
 def get_account(channel_id: str, db: Session = Depends(get_db)):

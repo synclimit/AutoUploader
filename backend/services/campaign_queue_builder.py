@@ -24,7 +24,7 @@ class CampaignQueueBuilder:
         daily_limit = pipeline_config.get("daily_limit", 1)
         schedule = pipeline_config.get("schedule", ["09:00"])
         humanize = pipeline_config.get("humanize", {"enabled": False, "min_delay_minutes": 0, "max_delay_minutes": 0})
-        timezone_str = channel.publish_timezone or "UTC"
+        timezone_str = channel.publish_timezone or "Asia/Jakarta"
         
         return {
             "daily_limit": daily_limit,
@@ -95,8 +95,7 @@ class CampaignQueueBuilder:
             tz = pytz.UTC
 
         # We start scheduling from today relative to the configured timezone
-        now_utc = datetime.utcnow()
-        now_tz = now_utc.replace(tzinfo=pytz.UTC).astimezone(tz)
+        now_tz = datetime.now(tz)
         
         plans_to_create = []
         

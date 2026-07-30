@@ -16,9 +16,10 @@ export default function UploadJournal({ sessionId }) {
     
     const fetchJournals = async () => {
       try {
-        const res = await apiClient.get(`/api/v1/campaign-execution/journal/${sessionId}`);
+        const res = await apiClient.get(`/campaign-execution/journal?review_session_id=${sessionId}`);
         if (mounted && res && res.data) {
-          setJournals(res.data);
+          const list = Array.isArray(res.data) ? res.data : (res.data.items || []);
+          setJournals(list);
         }
       } catch (e) {
         console.error("Failed to load upload journal", e);

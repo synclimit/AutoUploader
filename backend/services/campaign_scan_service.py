@@ -8,7 +8,7 @@ class CampaignScanService:
     SUPPORTED_EXTENSIONS = {'.mp4', '.mov', '.mkv', '.avi', '.webm'}
 
     @staticmethod
-    def scan_folder(db: Session, folder_path: str) -> CampaignScanResponse:
+    def scan_folder(db: Session, folder_path: str, channel_id: str = None) -> CampaignScanResponse:
         """
         Scans a given folder recursively for supported video files,
         generates fingerprints using streaming 64KB chunks,
@@ -22,8 +22,8 @@ class CampaignScanService:
                 assets=[]
             )
 
-        # 1. Preload existing fingerprints into O(1) Set cache
-        existing_fingerprints = CampaignAssetService.load_existing_fingerprints(db)
+        # 1. Preload existing fingerprints into O(1) Set cache for channel
+        existing_fingerprints = CampaignAssetService.load_existing_fingerprints(db, channel_id=channel_id)
         
         detected = 0
         available = 0
