@@ -171,7 +171,7 @@ export default function Topbar() {
             <button aria-label="Maximize" onClick={() => window.pywebview?.api?.maximize()} className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 rounded-md transition-colors cursor-pointer">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="8" height="8" strokeWidth="1.5" rx="1"/></svg>
             </button>
-            <button aria-label="Tutup" onClick={() => window.pywebview?.api?.close()} className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-red-500 rounded-md transition-colors cursor-pointer">
+            <button aria-label="Tutup" onClick={() => window.pywebview?.api?.close()} title="Minimize to System Tray (Berjalan di Background)" className="w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-red-500 rounded-md transition-colors cursor-pointer">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3 3L9 9M9 3L3 9" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </button>
           </div>

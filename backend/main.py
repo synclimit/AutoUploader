@@ -473,16 +473,51 @@ if __name__ == "__main__":
     if not server_ready:
         print("Failed to start backend server in time.")
         
+    from services.system.tray_service import TrayService
+
+    tray_service_instance = None
+
+    def show_window():
+        if webview.windows:
+            try:
+                window = webview.windows[0]
+                window.show()
+                window.restore()
+            except Exception as err:
+                print(f"[Tray] Error showing window: {err}")
+
+    def exit_application():
+        nonlocal tray_service_instance
+        if tray_service_instance:
+            try:
+                tray_service_instance.stop()
+            except Exception:
+                pass
+        if webview.windows:
+            try:
+                webview.windows[0].destroy()
+            except Exception:
+                pass
+        sys.exit(0)
+
     class Api:
         def close(self):
             if webview.windows:
-                webview.windows[0].destroy()
+                try:
+                    webview.windows[0].hide()
+                    if tray_service_instance:
+                        tray_service_instance.notify_hidden()
+                except Exception as err:
+                    print(f"[Tray] Error hiding window: {err}")
+                    webview.windows[0].destroy()
         def minimize(self):
             if webview.windows:
                 webview.windows[0].minimize()
         def maximize(self):
             if webview.windows:
                 webview.windows[0].toggle_fullscreen()
+        def exit_app(self):
+            exit_application()
         def select_files(self):
             if webview.windows:
                 result = webview.windows[0].create_file_dialog(
@@ -499,6 +534,14 @@ if __name__ == "__main__":
             return []
 
     api = Api()
+    
+    # Initialize and start System Tray icon
+    tray_service_instance = TrayService(
+        on_show_callback=show_window,
+        on_exit_callback=exit_application
+    )
+    tray_service_instance.start()
+
     import time
     url = f"http://127.0.0.1:8000/?_cb={int(time.time())}"
     webview.create_window(
