@@ -186,6 +186,7 @@ def check_update():
         download_url = ""
         latest_version = ""
         release_notes = ""
+        remote_build = 0
         
         req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases")
         req.add_header("User-Agent", "AutoUploader-App")
@@ -195,13 +196,26 @@ def check_update():
             with urllib.request.urlopen(req, timeout=10) as response:
                 releases = json.loads(response.read().decode())
                 if isinstance(releases, list) and len(releases) > 0:
-                    latest_version = releases[0].get("tag_name", "")
-                    release_notes = releases[0].get("body", "")
-                    
+                    import re
                     for rel in releases:
                         for asset in rel.get("assets", []):
                             if asset.get("name", "").endswith(".exe"):
                                 download_url = asset.get("browser_download_url", "")
+                                rel_name = rel.get("name", "")
+                                rel_body = rel.get("body", "")
+                                release_notes = rel_body
+                                
+                                # Extract build number from release title or body (e.g. "Build 122")
+                                m = re.search(r'Build\s+(\d+)', rel_name + " " + rel_body, re.IGNORECASE)
+                                if m:
+                                    remote_build = int(m.group(1))
+                                
+                                # Extract version
+                                v_m = re.search(r'v?(\d+\.\d+\.\d+)', rel_name, re.IGNORECASE)
+                                if v_m:
+                                    latest_version = "v" + v_m.group(1)
+                                else:
+                                    latest_version = rel.get("tag_name", "")
                                 break
                         if download_url:
                             break
@@ -212,18 +226,18 @@ def check_update():
         if not download_url:
             download_url = "https://github.com/synclimit/AutoUploader/releases/download/latest/RaynzPitStop_Setup.exe"
             
-        # 3. Fetch remote version.json to compare build numbers
-        remote_build = 0
-        try:
-            v_req = urllib.request.Request("https://raw.githubusercontent.com/synclimit/AutoUploader/master/version.json")
-            v_req.add_header("User-Agent", "AutoUploader-App")
-            with urllib.request.urlopen(v_req, timeout=5) as v_res:
-                remote_ver_data = json.loads(v_res.read().decode())
-                remote_build = remote_ver_data.get("build", 0)
-                if remote_ver_data.get("version"):
-                    latest_version = "v" + remote_ver_data.get("version")
-        except Exception as e:
-            print("Remote version.json check error:", e)
+        # 3. If remote_build was not found in release title, fetch remote version.json
+        if not remote_build:
+            try:
+                v_req = urllib.request.Request("https://raw.githubusercontent.com/synclimit/AutoUploader/master/version.json")
+                v_req.add_header("User-Agent", "AutoUploader-App")
+                with urllib.request.urlopen(v_req, timeout=5) as v_res:
+                    remote_ver_data = json.loads(v_res.read().decode())
+                    remote_build = remote_ver_data.get("build", 0)
+                    if remote_ver_data.get("version"):
+                        latest_version = "v" + remote_ver_data.get("version")
+            except Exception as e:
+                print("Remote version.json check error:", e)
         
         # 4. Compare builds
         update_available = False

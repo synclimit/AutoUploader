@@ -63,12 +63,20 @@ jobs:
         run: |
           gh release delete-asset latest RaynzPitStop_Setup.exe -y || true
 
+      - name: Read Version Info
+        id: ver
+        shell: pwsh
+        run: |
+          $json = Get-Content version.json | ConvertFrom-Json
+          echo "version=$($json.version)" >> $env:GITHUB_OUTPUT
+          echo "build=$($json.build)" >> $env:GITHUB_OUTPUT
+
       - name: Create / Update Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Latest Ryanz Pitstop Build
-          body: "Automatically compiled latest build from master."
+          name: Ryanz Pitstop v${{ steps.ver.outputs.version }} (Build ${{ steps.ver.outputs.build }})
+          body: "Ryanz Pitstop v${{ steps.ver.outputs.version }} (Build ${{ steps.ver.outputs.build }})"
           files: release/RaynzPitStop_Setup.exe
           make_latest: true
 
