@@ -159,13 +159,24 @@ class WatchFolderEngine(EngineBase):
         except:
             pipeline_states = {}
 
-        # Legacy fallback
-        if not pipelines and channel.watch_folder_enabled and channel.watch_folder:
+        # Fallback to channel.watch_folder if pipelines is empty or missing watch_folder
+        if not pipelines and channel.watch_folder:
             pipelines = {
                 "long": {
                     "enabled": True,
                     "watch_folder": channel.watch_folder,
-                    "daily_limit": 2,
+                    "daily_limit": 100,
+                    "processing_order": "oldest_first",
+                    "schedule_mode": "application",
+                    "schedule": ["09:00", "18:00"],
+                    "publish_mode": channel.publish_visibility or "private",
+                    "retry_failed": True,
+                    "duplicate_policy": "skip"
+                },
+                "shorts": {
+                    "enabled": True,
+                    "watch_folder": channel.watch_folder,
+                    "daily_limit": 100,
                     "processing_order": "oldest_first",
                     "schedule_mode": "application",
                     "schedule": ["09:00", "18:00"],
@@ -177,8 +188,16 @@ class WatchFolderEngine(EngineBase):
             channel.pipelines = json.dumps(pipelines)
             db.commit()
 
+        if isinstance(pipelines, dict):
+            for p_k in ["long", "shorts"]:
+                if p_k in pipelines and isinstance(pipelines[p_k], dict):
+                    if not pipelines[p_k].get("watch_folder") and not pipelines[p_k].get("campaign_folder") and channel.watch_folder:
+                        pipelines[p_k]["watch_folder"] = channel.watch_folder
+                    if pipelines[p_k].get("enabled") is False and (pipelines[p_k].get("watch_folder") or pipelines[p_k].get("campaign_folder") or channel.watch_folder):
+                        pipelines[p_k]["enabled"] = True
+
         if not pipelines:
-                return summary
+            return summary
 
         state_modified = False
         import pytz
