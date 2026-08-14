@@ -183,19 +183,27 @@ def check_update():
                 local_version = "v" + ver_data.get("version", "1.0.0")
                 local_build = ver_data.get("build", 0)
 
-        req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases/latest")
+        download_url = ""
+        latest_version = ""
+        release_notes = ""
+        
+        req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases")
         req.add_header("User-Agent", "AutoUploader-App")
         
         try:
             with urllib.request.urlopen(req) as response:
-                data = json.loads(response.read().decode())
-                
-                latest_version = data.get("tag_name", "")
-                download_url = ""
-                for asset in data.get("assets", []):
-                    if asset.get("name", "").endswith(".exe"):
-                        download_url = asset.get("browser_download_url", "")
-                        break
+                releases = json.loads(response.read().decode())
+                if isinstance(releases, list) and len(releases) > 0:
+                    latest_version = releases[0].get("tag_name", "")
+                    release_notes = releases[0].get("body", "")
+                    
+                    for rel in releases:
+                        for asset in rel.get("assets", []):
+                            if asset.get("name", "").endswith(".exe"):
+                                download_url = asset.get("browser_download_url", "")
+                                break
+                        if download_url:
+                            break
                 
                 # Fetch remote version.json to compare build numbers
                 remote_build = 0
@@ -210,19 +218,20 @@ def check_update():
                 except Exception:
                     pass
                 
-                # Compare builds if available
+                # Compare builds if available and download_url exists
                 update_available = False
-                if remote_build > local_build:
-                    update_available = True
-                elif not remote_build and latest_version and latest_version != "latest" and latest_version != local_version:
-                    update_available = True
+                if download_url:
+                    if remote_build > local_build:
+                        update_available = True
+                    elif not remote_build and latest_version and latest_version != "latest" and latest_version != local_version:
+                        update_available = True
                     
                 return {
                     "success": True,
                     "update_available": update_available,
                     "local_version": f"{local_version} (Build {local_build})",
                     "latest_version": f"{latest_version} (Build {remote_build})" if remote_build else latest_version,
-                    "release_notes": data.get("body", ""),
+                    "release_notes": release_notes,
                     "download_url": download_url,
                     "install_path": os.path.dirname(sys.executable)
                 }
