@@ -14,12 +14,12 @@ export default function WatchFolderDiagnosticModal({ channelId, isOpen, onClose,
     setIsDiagnosing(true)
     try {
       const res = await apiClient.post('/watch-folder/diagnose', { channel_id: channelId || null })
-      const data = res?.data ?? res
-      if (data && data.success) {
-        setDiagnosticData(data)
+      const payload = res?.reports ? res : (res?.data ?? res)
+      if (payload && (payload.reports || payload.success)) {
+        setDiagnosticData(payload)
         showToast('Diagnostic completed successfully', 'success')
       } else {
-        showToast(data?.message || 'Failed to run diagnosis', 'error')
+        showToast(payload?.message || 'Failed to run diagnosis', 'error')
       }
     } catch (e) {
       console.error('Diagnosis failed:', e)
@@ -33,9 +33,9 @@ export default function WatchFolderDiagnosticModal({ channelId, isOpen, onClose,
     setIsForceIngesting(true)
     try {
       const res = await apiClient.post('/watch-folder/force-ingest', { channel_id: channelId || null })
-      const data = res?.data ?? res
-      if (data && data.success) {
-        showToast(data.message || 'Force ingest completed!', 'success', 6000)
+      const payload = res?.message ? res : (res?.data ?? res)
+      if (payload) {
+        showToast(payload.message || 'Force ingest completed!', 'success', 6000)
         if (onRefreshQueue) onRefreshQueue()
         runDiagnosis()
       } else {

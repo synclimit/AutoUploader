@@ -199,7 +199,7 @@ class WatchFolderService:
 
             reports.append(ch_report)
 
-        return {"success": True, "reports": reports}
+        return {"success": True, "data": {"reports": reports}}
 
     @staticmethod
     def force_ingest(db: Session, channel_id: Optional[str] = None):
@@ -234,8 +234,10 @@ class WatchFolderService:
         summary = engine.scan_now(channel_id=channel_id)
 
         return {
-            "success": summary.success,
-            "tasks_created": summary.tasks_created,
-            "packages_found": summary.packages_found,
-            "message": f"Force ingest completed! {summary.tasks_created} videos created into Review Workspace."
+            "success": True,
+            "data": {
+                "tasks_created": summary.tasks_created,
+                "packages_found": summary.packages_found,
+                "message": f"Force ingest completed! {summary.tasks_created} videos created into Review Workspace."
+            }
         }

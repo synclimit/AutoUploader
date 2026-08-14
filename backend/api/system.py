@@ -155,7 +155,7 @@ def run_installer_async(exe_path: str):
         exe_name = "RaynzPitStop.exe"
         app_exe = os.path.join(app_dir, exe_name)
 
-    clean_app_dir = os.path.normpath(app_dir)
+    clean_app_dir = os.path.normpath(app_dir).rstrip('\\/')
     clean_exe_path = os.path.normpath(exe_path)
     clean_app_exe = os.path.normpath(app_exe)
     
@@ -167,11 +167,11 @@ def run_installer_async(exe_path: str):
     ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
 "[{datetime.now()}] Starting updater script for {clean_app_dir}" | Out-File -FilePath "{log_path}" -Encoding utf8
 Start-Sleep -Seconds 1
-Get-Process -Name "{os.path.splitext(exe_name)[0]}" -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name "RaynzPitStop", "RaynzPitStop_App", "AutoUploader" -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 1
 $installerArgs = @('/DIR="{clean_app_dir}"', '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
-"[{datetime.now()}] Running installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -PassThru -Wait
+"[{datetime.now()}] Running elevated installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
+$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
 "[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 Start-Sleep -Seconds 1
 if (Test-Path "{clean_app_exe}") {{
@@ -186,7 +186,9 @@ if (Test-Path "{clean_app_exe}") {{
     bat_content = f'''@echo off
 setlocal
 timeout /t 1 /nobreak > nul
-taskkill /f /im "{exe_name}" > nul 2>&1
+taskkill /f /im "RaynzPitStop.exe" > nul 2>&1
+taskkill /f /im "RaynzPitStop_App.exe" > nul 2>&1
+taskkill /f /im "AutoUploader.exe" > nul 2>&1
 timeout /t 1 /nobreak > nul
 powershell -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"
 exit
@@ -271,7 +273,7 @@ def check_update():
 
         # 2. Direct Fallback URL if API response had no executable asset
         if not download_url:
-            download_url = "https://github.com/synclimit/AutoUploader/releases/download/latest/RaynzPitStop_Setup.exe"
+            download_url = "https://github.com/synclimit/AutoUploader/releases/latest/download/RaynzPitStop_Setup.exe"
             
         # 3. If remote_build was not found in release title, fetch remote version.json
         if not remote_build:
