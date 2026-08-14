@@ -58,6 +58,7 @@ python-dotenv==1.2.2
 python-multipart==0.0.29
 pythonnet==3.1.0
 pywebview==6.2.1
+pywin32>=306
 pywin32-ctypes==0.2.3
 redis==7.4.0
 requests==2.34.2
