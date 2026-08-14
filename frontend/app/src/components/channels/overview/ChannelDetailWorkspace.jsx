@@ -108,11 +108,15 @@ export default function ChannelDetailWorkspace({ channel }) {
     try {
       if (Object.keys(patch).length > 0) {
         await updateAccount(channel.id, patch)
-        toast.success('Channel configuration updated successfully', {
+        toast.success('Configuration saved. Redirecting to Review Module...', {
           style: { background: '#0a0f18', color: '#22d3ee', border: '1px solid rgba(34, 211, 238, 0.2)' },
           iconTheme: { primary: '#22d3ee', secondary: '#0a0f18' }
         })
         setOriginal(JSON.parse(JSON.stringify(drafts)))
+
+        // Redirect directly to Review Module for video review & approval
+        const { useAppStore } = await import('../../../store/app/appStore')
+        useAppStore.getState().setActiveModule('Review')
       }
     } catch (e) {
       toast.error('Failed to save channel configuration', {
