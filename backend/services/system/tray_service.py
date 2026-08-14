@@ -3,8 +3,16 @@ import sys
 import logging
 import threading
 from typing import Callable, Optional
-from PIL import Image, ImageDraw
-import pystray
+
+try:
+    from PIL import Image, ImageDraw
+    import pystray
+    HAS_TRAY_DEPS = True
+except Exception as _e:
+    HAS_TRAY_DEPS = False
+    Image = None
+    ImageDraw = None
+    pystray = None
 
 logger = logging.getLogger("TrayService")
 
@@ -44,7 +52,9 @@ class TrayService:
 
     def start(self):
         """Start the system tray icon in detached background mode."""
-        if self._is_running:
+        if self._is_running or not HAS_TRAY_DEPS:
+            if not HAS_TRAY_DEPS:
+                logger.warning("System Tray service skipped: PIL or pystray not available.")
             return
 
         try:
