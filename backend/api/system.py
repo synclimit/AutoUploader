@@ -137,9 +137,18 @@ def run_installer_async(exe_path: str):
     # Wait a bit so the API response can be sent to the frontend
     time.sleep(2)
     import sys
-    app_exe = sys.executable
-    app_dir = os.path.dirname(app_exe)
-    exe_name = os.path.basename(app_exe)
+    
+    # Dynamically detect installation path of the running application on any machine
+    if getattr(sys, 'frozen', False):
+        app_exe = sys.executable
+        app_dir = os.path.dirname(app_exe)
+        exe_name = os.path.basename(app_exe)
+    else:
+        # Dev mode fallback
+        app_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        exe_name = "RaynzPitStop.exe"
+        app_exe = os.path.join(app_dir, exe_name)
+
     clean_app_dir = os.path.normpath(app_dir)
     clean_exe_path = os.path.normpath(exe_path)
     clean_app_exe = os.path.normpath(app_exe)
