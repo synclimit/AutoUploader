@@ -483,7 +483,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                     </div>
                     <input 
                       type="number" min="0" max="10000" 
-                      value={p.videos_to_upload !== undefined ? p.videos_to_upload : scanData.summary.available || 0} 
+                      value={p.videos_to_upload !== undefined ? p.videos_to_upload : (scanData?.available ?? scanData?.summary?.available ?? 0)} 
                       onChange={(e) => updatePipeline(key, 'videos_to_upload', parseInt(e.target.value) || 0)}
                       className="w-full h-[40px] rounded-[10px] bg-[#05080e] border border-white/[0.08] px-3 text-[14px] text-white outline-none focus:border-[var(--accent-500)] transition-colors"
                     />
