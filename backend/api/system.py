@@ -140,23 +140,38 @@ def run_installer_async(exe_path: str):
     app_exe = sys.executable
     app_dir = os.path.dirname(app_exe)
     exe_name = os.path.basename(app_exe)
-    clean_app_dir = app_dir.replace('/', '\\')
-    clean_exe_path = exe_path.replace('/', '\\')
-    clean_app_exe = app_exe.replace('/', '\\')
+    clean_app_dir = os.path.normpath(app_dir)
+    clean_exe_path = os.path.normpath(exe_path)
+    clean_app_exe = os.path.normpath(app_exe)
     
     bat_path = os.path.join(tempfile.gettempdir(), "run_update.bat")
+    ps_path = os.path.join(tempfile.gettempdir(), "run_update.ps1")
+    
+    ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
+Start-Sleep -Seconds 2
+Get-Process -Name "{os.path.splitext(exe_name)[0]}" -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 1
+$installerArgs = @('/DIR="{clean_app_dir}"', '/SILENT', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
+$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
+Start-Sleep -Seconds 1
+Set-Location -Path "{clean_app_dir}"
+Start-Process -FilePath "{clean_app_exe}"
+'''
+
     bat_content = f'''@echo off
+setlocal
 timeout /t 2 /nobreak > nul
-taskkill /f /t /im "{exe_name}"
-timeout /t 2 /nobreak > nul
-powershell -Command "Start-Process -FilePath '{clean_exe_path}' -ArgumentList '/DIR=\"{clean_app_dir}\" /SP-' -Verb RunAs -Wait"
-cd /d "{clean_app_dir}"
-start "" "{clean_app_exe}"
+taskkill /f /t /im "{exe_name}" > nul 2>&1
+timeout /t 1 /nobreak > nul
+powershell -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"
+exit
 '''
     try:
-        with open(bat_path, "w", encoding="utf-8") as f:
-            f.write(bat_content)
-        subprocess.Popen(['cmd.exe', '/c', bat_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+        with open(ps_path, "w", encoding="utf-8") as f_ps:
+            f_ps.write(ps_content)
+        with open(bat_path, "w", encoding="utf-8") as f_bat:
+            f_bat.write(bat_content)
+        subprocess.Popen(['cmd.exe', '/c', bat_path], creationflags=subprocess.CREATE_NO_WINDOW)
     except Exception as e:
         print("Failed to execute update script:", e)
 
