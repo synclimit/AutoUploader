@@ -827,7 +827,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                 <thead className="sticky top-0 bg-[#111824] z-10 shadow-md">
                   <tr className="text-[10px] font-bold text-white/40 uppercase tracking-wider border-b border-white/[0.04]">
                     <th className="px-4 py-3 w-[40px]">Select</th>
-                    <th className="px-4 py-3">Filename / Metadata</th>
+                    <th className="px-4 py-3">Filename</th>
                     <th className="px-4 py-3 w-[100px]">Size</th>
                     <th className="px-4 py-3 w-[120px]">Status</th>
                   </tr>
@@ -844,31 +844,8 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                           className={scanData.status === 'LOCKED' || asset.status !== 'NEW' ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} 
                         />
                       </td>
-                      <td className="px-4 py-3 flex flex-col gap-2">
-                        <div className="text-[12px] font-mono text-white/80 truncate max-w-[300px]" title={asset.filepath}>{asset.filename}</div>
-                        {asset.editable && scanData.status !== 'LOCKED' ? (
-                          <div className="flex flex-col gap-1 mt-1">
-                            <input 
-                              type="text" 
-                              value={asset.title || ''} 
-                              onChange={(e) => handleUpdateMetadata(key, asset.id, 'title', e.target.value)}
-                              placeholder="Video Title" 
-                              className="bg-black/30 border border-white/10 rounded px-2 py-1 text-[11px] text-white w-full focus:outline-none focus:border-cyan-500/50"
-                            />
-                            <input 
-                              type="text" 
-                              value={asset.tags || ''} 
-                              onChange={(e) => handleUpdateMetadata(key, asset.id, 'tags', e.target.value)}
-                              placeholder="Tags (comma separated)" 
-                              className="bg-black/30 border border-white/10 rounded px-2 py-1 text-[11px] text-white w-full focus:outline-none focus:border-cyan-500/50"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-1 mt-1">
-                            <div className="text-[11px] text-white/60">Title: {asset.title || 'N/A'}</div>
-                            <div className="text-[10px] text-white/40">Tags: {asset.tags || 'N/A'}</div>
-                          </div>
-                        )}
+                      <td className="px-4 py-3 align-middle">
+                        <div className="text-[12px] font-mono text-white/80 truncate max-w-[400px]" title={asset.filepath}>{asset.filename}</div>
                       </td>
                       <td className="px-4 py-3 text-[11px] font-mono text-white/50 align-top">{(asset.filesize / 1024 / 1024).toFixed(1)} MB</td>
                       <td className="px-4 py-3 align-top">
