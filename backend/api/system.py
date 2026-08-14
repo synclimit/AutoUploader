@@ -149,7 +149,7 @@ def run_installer_async(exe_path: str):
 timeout /t 2 /nobreak > nul
 taskkill /f /t /im "{exe_name}"
 timeout /t 2 /nobreak > nul
-powershell -Command "Start-Process -FilePath '{clean_exe_path}' -ArgumentList '/DIR=\"{clean_app_dir}\" /SP- /SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS' -Verb RunAs -Wait"
+powershell -Command "Start-Process -FilePath '{clean_exe_path}' -ArgumentList '/DIR=\"{clean_app_dir}\" /SP-' -Verb RunAs -Wait"
 cd /d "{clean_app_dir}"
 start "" "{clean_app_exe}"
 '''
@@ -168,6 +168,9 @@ def check_update():
         import sys
         if getattr(sys, 'frozen', False):
             base_dir = sys._MEIPASS
+            exe_dir = os.path.dirname(sys.executable)
+            if os.path.exists(os.path.join(exe_dir, "version.json")):
+                base_dir = exe_dir
         else:
             base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
             
