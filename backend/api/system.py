@@ -142,7 +142,8 @@ def run_installer_async(exe_path: str):
     app_exe = sys.executable
     app_dir = os.path.dirname(app_exe)
     exe_name = os.path.basename(app_exe)
-    script = f'ping 127.0.0.1 -n 2 > nul & taskkill /f /im "{exe_name}" & ping 127.0.0.1 -n 3 > nul & powershell -Command "Start-Process \'{exe_path}\' -ArgumentList \'/SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS\' -Verb RunAs -Wait" & cd /d "{app_dir}" & start "" "{app_exe}"'
+    clean_app_dir = app_dir.replace('/', '\\')
+    script = f'ping 127.0.0.1 -n 2 > nul & taskkill /f /t /im "{exe_name}" & ping 127.0.0.1 -n 3 > nul & powershell -Command "Start-Process \'{exe_path}\' -ArgumentList \'/DIR=\"{clean_app_dir}\" /SP- /SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS\' -Verb RunAs -Wait" & cd /d "{clean_app_dir}" & start "" "{app_exe}"'
     subprocess.Popen(f'cmd.exe /c "{script}"', shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
