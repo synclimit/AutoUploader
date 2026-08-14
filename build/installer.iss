@@ -2,6 +2,8 @@
 AppName=Raynz PitStop
 AppVersion=1.0.0
 AppPublisher=Raynz Studio
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 DefaultDirName={autopf}\Raynz PitStop
 DefaultGroupName=Raynz PitStop
 DisableDirPage=no

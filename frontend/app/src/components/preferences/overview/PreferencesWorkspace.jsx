@@ -389,6 +389,11 @@ export default function PreferencesWorkspace() {
                         {updateInfo ? updateInfo.local_version : 'Loading version...'}
                       </span>
                     </p>
+                    {updateInfo?.install_path && (
+                      <p className="text-white/60 font-mono text-[11px] mt-1.5 flex items-center gap-1.5">
+                        📁 Folder Aplikasi: <span className="text-white/90 bg-black/40 px-2 py-0.5 rounded border border-white/10 font-mono truncate max-w-[450px]" title={updateInfo.install_path}>{updateInfo.install_path}</span>
+                      </p>
+                    )}
                   </div>
                   <button 
                     onClick={handleCheckUpdate}

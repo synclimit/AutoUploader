@@ -206,7 +206,8 @@ def check_update():
                     "local_version": f"{local_version} (Build {local_build})",
                     "latest_version": f"{latest_version} (Build {remote_build})" if remote_build else latest_version,
                     "release_notes": data.get("body", ""),
-                    "download_url": download_url
+                    "download_url": download_url,
+                    "install_path": os.path.dirname(sys.executable)
                 }
         except urllib.error.HTTPError as e:
             if e.code == 404:
