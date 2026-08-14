@@ -61,6 +61,26 @@ def check(video_id: str, package_folder: str, db: Session, channel_id: str = Non
     """
 
     # -----------------------------------------------------------------------
+    # Step 0 — Ignored / User-Deleted Tombstone Guard
+    # -----------------------------------------------------------------------
+    try:
+        from models import IgnoredVideo
+        query_ignored = db.query(IgnoredVideo).filter(
+            (IgnoredVideo.video_id == video_id) | (IgnoredVideo.video_path == package_folder)
+        )
+        if channel_id:
+            query_ignored = query_ignored.filter(IgnoredVideo.channel_id == channel_id)
+        if query_ignored.first():
+            logger.info(f"[IGNORED] Skipping re-import of user-deleted video: video_id={video_id!r}, path={package_folder!r}")
+            return DuplicateCheckResult(
+                is_duplicate=True,
+                reason="video explicitly deleted by user",
+                existing_task_id=None
+            )
+    except Exception as e:
+        logger.warning(f"[DUPLICATE] IgnoredVideo check failed: {e}")
+
+    # -----------------------------------------------------------------------
     # Step 1 — Primary: video_id lookup
     # -----------------------------------------------------------------------
     query_vid = db.query(UploadTask).filter(UploadTask.video_id == video_id)

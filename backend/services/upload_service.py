@@ -155,6 +155,17 @@ class UploadService:
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
             
+        try:
+            from models import IgnoredVideo
+            ignored = IgnoredVideo(
+                channel_id=task.channel_id,
+                video_id=task.video_id,
+                video_path=task.video_path
+            )
+            db.add(ignored)
+        except Exception as e:
+            pass
+
         db.delete(task)
         db.commit()
 

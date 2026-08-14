@@ -43,6 +43,7 @@ if "--health-check" in sys.argv:
 from database.db import engine
 from database.db import SessionLocal
 from models import Base
+Base.metadata.create_all(bind=engine)
 from models import UploadTask
 from fastapi.middleware.cors import CORSMiddleware
 from api.profiles import router as profiles_router

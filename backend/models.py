@@ -470,6 +470,15 @@ class CampaignUploadPlan(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class IgnoredVideo(Base):
+    __tablename__ = "ignored_videos"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id = Column(String, nullable=True, index=True)
+    video_id = Column(String, nullable=True, index=True)
+    video_path = Column(String, nullable=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class CampaignUploadJournal(Base):
     __tablename__ = "campaign_upload_journal"
     
