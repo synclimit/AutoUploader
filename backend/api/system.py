@@ -136,15 +136,29 @@ import shutil
 def run_installer_async(exe_path: str):
     # Wait a bit so the API response can be sent to the frontend
     time.sleep(2)
-    # Launch a detached CMD script that kills AutoUploader and runs the installer
-    # Use sys.executable if compiled, or default install path
     import sys
     app_exe = sys.executable
     app_dir = os.path.dirname(app_exe)
     exe_name = os.path.basename(app_exe)
     clean_app_dir = app_dir.replace('/', '\\')
-    script = f'ping 127.0.0.1 -n 2 > nul & taskkill /f /t /im "{exe_name}" & ping 127.0.0.1 -n 3 > nul & powershell -Command "Start-Process \'{exe_path}\' -ArgumentList \'/DIR=\"{clean_app_dir}\" /SP- /SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS\' -Verb RunAs -Wait" & cd /d "{clean_app_dir}" & start "" "{app_exe}"'
-    subprocess.Popen(f'cmd.exe /c "{script}"', shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    clean_exe_path = exe_path.replace('/', '\\')
+    clean_app_exe = app_exe.replace('/', '\\')
+    
+    bat_path = os.path.join(tempfile.gettempdir(), "run_update.bat")
+    bat_content = f'''@echo off
+timeout /t 2 /nobreak > nul
+taskkill /f /t /im "{exe_name}"
+timeout /t 2 /nobreak > nul
+powershell -Command "Start-Process -FilePath '{clean_exe_path}' -ArgumentList '/DIR=\"{clean_app_dir}\" /SP- /SILENT /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS' -Verb RunAs -Wait"
+cd /d "{clean_app_dir}"
+start "" "{clean_app_exe}"
+'''
+    try:
+        with open(bat_path, "w", encoding="utf-8") as f:
+            f.write(bat_content)
+        subprocess.Popen(['cmd.exe', '/c', bat_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+    except Exception as e:
+        print("Failed to execute update script:", e)
 
 
 @router.get("/update/check")
