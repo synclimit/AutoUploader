@@ -101,7 +101,7 @@ export default function PreferencesWorkspace() {
   const handleCheckUpdate = async () => {
     setIsCheckingUpdate(true)
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/system/update/check')
+      const res = await fetch('/api/v1/system/update/check')
       const data = await res.json()
       if (data.success) {
         setUpdateInfo(data)
@@ -124,7 +124,7 @@ export default function PreferencesWorkspace() {
     setDownloadProgress({ progress: 0, downloaded: 0, total: 0, status: 'starting' })
     try {
       showToast('Downloading update... Please wait.', 'info', 5000)
-      const res = await fetch('http://127.0.0.1:8000/api/v1/system/update/install', {
+      const res = await fetch('/api/v1/system/update/install', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ download_url: updateInfo.download_url })
@@ -134,7 +134,7 @@ export default function PreferencesWorkspace() {
         // Start polling for progress
         pollIntervalRef.current = setInterval(async () => {
           try {
-            const progRes = await fetch('http://127.0.0.1:8000/api/v1/system/update/progress')
+            const progRes = await fetch('/api/v1/system/update/progress')
             const progData = await progRes.json()
             if (progData.success && progData.data) {
               setDownloadProgress(progData.data)
@@ -170,7 +170,7 @@ export default function PreferencesWorkspace() {
 
   const handleOpenLogs = async () => {
     try {
-      await fetch('http://127.0.0.1:8000/api/v1/system/logs/open-folder', { method: 'POST' })
+      await fetch('/api/v1/system/logs/open-folder', { method: 'POST' })
       showToast('Opened logs folder', 'success')
     } catch (e) {
       showToast('Failed to open logs folder', 'error')

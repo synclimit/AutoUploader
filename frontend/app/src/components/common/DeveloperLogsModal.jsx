@@ -15,7 +15,7 @@ export default function DeveloperLogsModal({ isOpen, onClose }) {
   const fetchLogs = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/system/app-logs?lines=500');
+      const res = await fetch('/api/v1/system/app-logs?lines=500');
       const data = await res.json();
       if (data && data.success) {
         setLogs(data.logs || "No logs available.");
