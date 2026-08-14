@@ -59,7 +59,6 @@ a = Analysis(
         'PIL.Image',
         'PIL.ImageDraw',
         'pystray',
-        'pystray._win32',
     ] + hiddenimports_pyd + hiddenimports_core + hiddenimports_fa + hiddenimports_star + hiddenimports_uv,
     hookspath=[],
     hooksconfig={},
