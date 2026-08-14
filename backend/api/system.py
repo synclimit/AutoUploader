@@ -156,22 +156,26 @@ def run_installer_async(exe_path: str):
     
     ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
 "[{datetime.now()}] Starting updater script for {clean_app_dir}" | Out-File -FilePath "{log_path}" -Encoding utf8
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 1
 Get-Process -Name "{os.path.splitext(exe_name)[0]}" -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 1
-$installerArgs = @('/DIR="{clean_app_dir}"', '/SILENT', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
+$installerArgs = @('/DIR="{clean_app_dir}"', '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
 "[{datetime.now()}] Running installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
+$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -PassThru -Wait
 "[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 Start-Sleep -Seconds 1
-Set-Location -Path "{clean_app_dir}"
-"[{datetime.now()}] Launching updated app: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-Start-Process -FilePath "{clean_app_exe}"
+if (Test-Path "{clean_app_exe}") {{
+    Set-Location -Path "{clean_app_dir}"
+    "[{datetime.now()}] Launching updated app: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
+    Start-Process -FilePath "{clean_app_exe}"
+}} else {{
+    "[{datetime.now()}] App exe not found: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
+}}
 '''
 
     bat_content = f'''@echo off
 setlocal
-timeout /t 2 /nobreak > nul
+timeout /t 1 /nobreak > nul
 taskkill /f /im "{exe_name}" > nul 2>&1
 timeout /t 1 /nobreak > nul
 powershell -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"

@@ -100,16 +100,15 @@ export default function ChannelDetailWorkspace({ channel }) {
 
   const handleSave = async () => {
     setIsSaving(true)
-    const patch = {}
-    if (isDirty('pipelines')) patch.pipelines = JSON.stringify(drafts.pipelines)
-    if (isDirty('upload_defaults')) patch.upload_defaults = JSON.stringify(drafts.upload_defaults)
-    if (isDirty('ai_identity')) patch.ai_identity = JSON.stringify(drafts.ai_identity)
+    const patch = {
+      pipelines: JSON.stringify(drafts.pipelines),
+      upload_defaults: JSON.stringify(drafts.upload_defaults),
+      ai_identity: JSON.stringify(drafts.ai_identity)
+    }
 
     try {
-      if (Object.keys(patch).length > 0) {
-        await updateAccount(channel.id, patch)
-        setOriginal(JSON.parse(JSON.stringify(drafts)))
-      }
+      await updateAccount(channel.id, patch)
+      setOriginal(JSON.parse(JSON.stringify(drafts)))
 
       // Immediately trigger scan on watch/campaign folder to ingest all videos
       try {
