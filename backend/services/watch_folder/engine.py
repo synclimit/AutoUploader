@@ -101,7 +101,7 @@ class WatchFolderEngine(EngineBase):
         summary.accounts_scanned = len(enabled_accounts)
 
         for channel in enabled_accounts:
-            acc_summary = self._scan_account(channel, db, target_pipeline=pipeline_type)
+            acc_summary = self._scan_account(channel, db, target_pipeline=pipeline_type, is_manual=True)
             summary.packages_found += acc_summary.packages_found
             summary.tasks_created += acc_summary.tasks_created
             summary.duplicates_skipped += acc_summary.duplicates_skipped
@@ -140,11 +140,11 @@ class WatchFolderEngine(EngineBase):
             try:
                 channel = db.query(Channel).filter(Channel.id == acc_id).first()
                 if channel:
-                    self._scan_account(channel, db)
+                    self._scan_account(channel, db, is_manual=False)
             finally:
                 db.close()
 
-    def _scan_account(self, channel: Channel, db: Session, target_pipeline: str = None) -> ScanSummary:
+    def _scan_account(self, channel: Channel, db: Session, target_pipeline: str = None, is_manual: bool = False) -> ScanSummary:
         summary = ScanSummary()
         channel_id = channel.id
 
@@ -193,7 +193,7 @@ class WatchFolderEngine(EngineBase):
         today_start = today_start_tz.astimezone(pytz.UTC).replace(tzinfo=None)
 
         for p_key, p_config in pipelines.items():
-            if not self._running:
+            if not is_manual and not self._running:
                 break
 
             if target_pipeline and p_key != target_pipeline:
@@ -202,8 +202,8 @@ class WatchFolderEngine(EngineBase):
             if p_config.get("enabled") is False:
                 continue
 
-            watch_path = p_config.get("watch_folder")
-            if not watch_path:
+            watch_path = p_config.get("watch_folder") or p_config.get("campaign_folder") or (channel.watch_folder if p_key == "long" else None)
+            if not watch_path or not str(watch_path).strip():
                 continue
 
             health_service.update_status(channel_id, p_key, "SCANNING")
@@ -227,11 +227,6 @@ class WatchFolderEngine(EngineBase):
                 state_modified = True
                 
             state["today_intake"] = today_intake
-
-            if daily_limit > 0 and state.get("today_intake", 0) >= daily_limit:
-                health_service.record_log(channel_id, p_key, "FAIL", "Daily Limit Reached")
-                health_service.update_status(channel_id, p_key, "IDLE")
-                continue
 
             candidates, path_ok = scanner.scan(watch_path)
             if not path_ok:
@@ -280,10 +275,7 @@ class WatchFolderEngine(EngineBase):
             p_errors = 0
 
             for folder_entry in valid_candidates:
-                if not self._running:
-                    break
-                if daily_limit > 0 and state.get("today_intake", 0) >= daily_limit:
-                    health_service.record_log(channel_id, p_key, "FAIL", "Daily Limit Reached")
+                if not is_manual and not self._running:
                     break
 
                 folder_path = folder_entry if isinstance(folder_entry, str) else folder_entry.get("path")

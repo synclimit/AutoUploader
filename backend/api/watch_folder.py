@@ -18,7 +18,20 @@ def get_all_health(db: Session = Depends(get_db)):
 def get_account_health(channel_id: str, db: Session = Depends(get_db)):
     return WatchFolderService.get_account_health(db, channel_id)
 
+from pydantic import BaseModel
+
+class ScanNowRequest(BaseModel):
+    channel_id: Optional[str] = None
+    pipeline_type: Optional[str] = None
+
 @router.post("/scan")
-def trigger_scan_now(channel_id: Optional[str] = None, pipeline_type: Optional[str] = None):
-    return WatchFolderService.trigger_scan_now(channel_id=channel_id, pipeline_type=pipeline_type)
+@router.post("/scan-now")
+def trigger_scan_now(
+    body: Optional[ScanNowRequest] = None,
+    channel_id: Optional[str] = None,
+    pipeline_type: Optional[str] = None
+):
+    cid = (body.channel_id if body and body.channel_id else channel_id) or None
+    ptype = (body.pipeline_type if body and body.pipeline_type else pipeline_type) or None
+    return WatchFolderService.trigger_scan_now(channel_id=cid, pipeline_type=ptype)
 

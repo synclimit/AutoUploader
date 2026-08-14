@@ -16,11 +16,32 @@ export default function ReviewVideoRow({ video, isSelected, isActive, onToggleSe
   // Status Colors
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Needs Review': return 'text-amber-400'
-      case 'Ready': return 'text-blue-400'
-      case 'Error': return 'text-red-400'
+      case 'Needs Review':
+      case 'REVIEW':
+      case 'WATCHED': return 'text-amber-400'
+      case 'Ready':
+      case 'QUEUED': return 'text-blue-400'
+      case 'UPLOADING': return 'text-cyan-400'
+      case 'SCHEDULED': return 'text-purple-400'
+      case 'COMPLETED':
       case 'Approved': return 'text-green-400'
+      case 'Error':
+      case 'FAILED': return 'text-red-400'
       default: return 'text-white/50'
+    }
+  }
+
+  const getDisplayStatus = (status) => {
+    switch (status) {
+      case 'WATCHED':
+      case 'REVIEW': return 'Needs Review'
+      case 'QUEUED': return 'Queued'
+      case 'UPLOADING': return 'Uploading'
+      case 'SCHEDULED': return 'Scheduled'
+      case 'COMPLETED': return 'Completed'
+      case 'FAILED': return 'Failed'
+      case 'CANCELLED': return 'Cancelled'
+      default: return status || 'Unknown'
     }
   }
 
@@ -90,8 +111,8 @@ export default function ReviewVideoRow({ video, isSelected, isActive, onToggleSe
 
         <div className="flex items-center gap-2 mt-0.5">
           <div className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-all ${getStatusColor(video.status)}`}>
-             <AlertCircle size={10} className={video.status === 'Needs Review' ? 'animate-pulse' : ''} />
-             {video.status}
+             <AlertCircle size={10} className={video.status === 'Needs Review' || video.status === 'WATCHED' || video.status === 'REVIEW' ? 'animate-pulse' : ''} />
+             {video.status_label || getDisplayStatus(video.status)}
           </div>
           {video.schedule_time && (
             <div className="text-[9px] font-bold text-[var(--accent-400)]/80 flex items-center gap-1 border border-[var(--accent-500)]/20 rounded-[4px] px-1.5 py-0.5 bg-[var(--accent-500)]/[0.02]">

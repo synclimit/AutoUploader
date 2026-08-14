@@ -28,6 +28,14 @@ export default function ReviewWorkspace() {
     // eslint-disable-next-line
   }, [])
 
+  // Background Auto-Refresh for newly discovered videos
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetchTasks();
+    }, 5000);
+    return () => clearInterval(pollInterval);
+  }, [fetchTasks]);
+
   // Runtime Polling & State Watcher
   useEffect(() => {
     let intervalId;

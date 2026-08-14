@@ -152,13 +152,11 @@ def validate(path: str) -> ValidationResult:
         # TODO: Sprint 8.7 Replace fallback identifier with SHA256 video hash.
 
     # Thumbnail logic
-    thumbnail_path = None
-    if not is_direct_file:
-        thumbnail_path = _find_thumbnail(folder_path, video_name, metadata.get("thumbnail"))
+    thumbnail_path = _find_thumbnail(folder_path, video_name, metadata.get("thumbnail"))
 
     # Timestamps txt
-    ts_txt = os.path.join(folder_path, "timestamps.txt")
-    timestamps_path = ts_txt if not is_direct_file and os.path.isfile(ts_txt) else None
+    ts_txt = os.path.join(folder_path, f"{video_name}.txt") if is_direct_file else os.path.join(folder_path, "timestamps.txt")
+    timestamps_path = ts_txt if os.path.isfile(ts_txt) else None
 
     logger.info(
         f"[VALIDATOR] Package valid — "

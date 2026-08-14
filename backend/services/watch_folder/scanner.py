@@ -40,32 +40,41 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
     if not watch_folder_path or not watch_folder_path.strip():
         return [], True  # No path configured — silently do nothing
 
+    candidates = []
+    seen_paths = set()
+
     try:
-        entries = list(os.scandir(watch_folder_path))
+        for root, dirs, files in os.walk(watch_folder_path):
+            dirs[:] = [d for d in dirs if not d.startswith((".", "_")) and not d.lower().endswith((".ignored", ".deleted"))]
+            
+            # 1. If folder has metadata.json, treat the directory as a package
+            if "metadata.json" in files:
+                if root not in seen_paths and _is_stable(root):
+                    try:
+                        mtime = os.stat(root).st_mtime
+                    except OSError:
+                        mtime = 0
+                    candidates.append({"path": root, "mtime": mtime})
+                    seen_paths.add(root)
+                    dirs[:] = []
+                    continue
+
+            # 2. Add individual video files
+            for f in files:
+                if f.startswith((".", "_")) or f.lower().endswith((".ignored", ".deleted")):
+                    continue
+                if f.lower().endswith((".mp4", ".mov", ".mkv")):
+                    full_path = os.path.join(root, f)
+                    if full_path not in seen_paths and _is_stable(full_path):
+                        try:
+                            mtime = os.stat(full_path).st_mtime
+                        except OSError:
+                            mtime = 0
+                        candidates.append({"path": full_path, "mtime": mtime})
+                        seen_paths.add(full_path)
     except (OSError, PermissionError) as e:
         logger.error(f"[SCANNER] Cannot access watch folder: {watch_folder_path!r} — {e}")
-        return [], False  # Signal ERROR state to engine
-
-    candidates = []
-
-    for entry in entries:
-        if entry.name.startswith(".") or entry.name.startswith("_") or entry.name.lower().endswith(".ignored") or entry.name.lower().endswith(".deleted"):
-            continue
-        if entry.is_dir(follow_symlinks=False):
-            candidate_path = entry.path
-        elif entry.is_file(follow_symlinks=False) and entry.name.lower().endswith((".mp4", ".mov", ".mkv")):
-            candidate_path = entry.path
-        else:
-            continue
-
-        if _is_stable(candidate_path):
-            try:
-                mtime = os.stat(candidate_path).st_mtime
-            except OSError:
-                mtime = 0
-            candidates.append({"path": candidate_path, "mtime": mtime})
-        else:
-            logger.debug(f"[SCANNER] INVALID_VIDEO_COPYING (still writing): {candidate_path!r} — deferred")
+        return [], False
 
     return candidates, True
 

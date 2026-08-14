@@ -108,16 +108,28 @@ export default function ChannelDetailWorkspace({ channel }) {
     try {
       if (Object.keys(patch).length > 0) {
         await updateAccount(channel.id, patch)
-        toast.success('Configuration saved. Redirecting to Review Module...', {
-          style: { background: '#0a0f18', color: '#22d3ee', border: '1px solid rgba(34, 211, 238, 0.2)' },
-          iconTheme: { primary: '#22d3ee', secondary: '#0a0f18' }
-        })
         setOriginal(JSON.parse(JSON.stringify(drafts)))
-
-        // Redirect directly to Review Module for video review & approval
-        const { useAppStore } = await import('../../../store/app/appStore')
-        useAppStore.getState().setActiveModule('Review')
       }
+
+      // Immediately trigger scan on watch/campaign folder to ingest all videos
+      try {
+        await apiClient.post('/watch-folder/scan-now', { channel_id: channel.id })
+      } catch (scanErr) {
+        console.warn('Scan trigger notice:', scanErr)
+      }
+
+      toast.success('Configuration saved. Videos loaded into Review Module!', {
+        style: { background: '#0a0f18', color: '#22d3ee', border: '1px solid rgba(34, 211, 238, 0.2)' },
+        iconTheme: { primary: '#22d3ee', secondary: '#0a0f18' }
+      })
+
+      // Prefetch review tasks and redirect directly to Review Module
+      const { useQueueStore } = await import('../../../store/upload/uploadStore')
+      useQueueStore.getState().setFilters({ status: ['WATCHED', 'REVIEW', 'WAITING', 'WAITING_AI', 'SCHEDULED', 'QUEUED'] })
+      await useQueueStore.getState().fetchTasks()
+
+      const { useAppStore } = await import('../../../store/app/appStore')
+      useAppStore.getState().setActiveModule('Review')
     } catch (e) {
       toast.error('Failed to save channel configuration', {
         style: { background: '#0a0f18', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }

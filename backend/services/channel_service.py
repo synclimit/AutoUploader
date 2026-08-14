@@ -410,6 +410,15 @@ class ChannelService:
             ChannelService._populate_profile_name(channel, db)
             ChannelService._populate_avatar_url(channel, db)
             ChannelService._populate_dashboard_fields(channel, db)
+            
+            # Immediately trigger watch / campaign folder scan for this channel
+            try:
+                from services.watch_folder_service import WatchFolderService
+                WatchFolderService.trigger_scan_now(channel_id=channel_id)
+            except Exception as scan_e:
+                import logging
+                logging.getLogger("ChannelService").warning(f"Auto-scan on channel update non-fatal error: {scan_e}")
+                
             return channel
         except IntegrityError:
             db.rollback()
