@@ -21,8 +21,9 @@ import logging
 
 logger = logging.getLogger("watch_folder.scanner")
 
-# Minimum age (seconds) of all files in a folder before it is considered stable.
-STABILITY_WINDOW_SECONDS = 3
+VIDEO_EXTENSIONS = (
+    ".mp4", ".mov", ".mkv", ".avi", ".webm", ".flv", ".m4v", ".wmv", ".ts", ".3gp", ".m4p", ".mpeg", ".mpg"
+)
 
 
 def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
@@ -37,14 +38,18 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
           candidates: list of dicts like {"path": str, "mtime": float}
           path_ok: False if the path was inaccessible (OSError), True otherwise
     """
-    if not watch_folder_path or not watch_folder_path.strip():
+    if not watch_folder_path or not str(watch_folder_path).strip():
         return [], True  # No path configured — silently do nothing
+
+    clean_path = str(watch_folder_path).strip().strip('"').strip("'")
+    if not os.path.exists(clean_path):
+        return [], False
 
     candidates = []
     seen_paths = set()
 
     try:
-        for root, dirs, files in os.walk(watch_folder_path):
+        for root, dirs, files in os.walk(clean_path):
             dirs[:] = [d for d in dirs if not d.startswith((".", "_")) and not d.lower().endswith((".ignored", ".deleted"))]
             
             # 1. If folder has metadata.json, treat the directory as a package
@@ -63,7 +68,7 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
             for f in files:
                 if f.startswith((".", "_")) or f.lower().endswith((".ignored", ".deleted")):
                     continue
-                if f.lower().endswith((".mp4", ".mov", ".mkv")):
+                if f.lower().endswith(VIDEO_EXTENSIONS):
                     full_path = os.path.join(root, f)
                     if full_path not in seen_paths and _is_stable(full_path):
                         try:
@@ -73,7 +78,7 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
                         candidates.append({"path": full_path, "mtime": mtime})
                         seen_paths.add(full_path)
     except (OSError, PermissionError) as e:
-        logger.error(f"[SCANNER] Cannot access watch folder: {watch_folder_path!r} — {e}")
+        logger.error(f"[SCANNER] Cannot access watch folder: {clean_path!r} — {e}")
         return [], False
 
     return candidates, True
@@ -81,29 +86,20 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
 
 def _is_stable(path: str) -> bool:
     """
-    Returns True if the path (file or directory) has not been modified within STABILITY_WINDOW_SECONDS.
-    A folder with no files is considered stable.
+    Returns True if the path (file or directory) is non-empty and readable.
+    If another process is currently writing to the file, Windows locks it and open() fails.
     """
-    now = time.time()
-    cutoff = now - STABILITY_WINDOW_SECONDS
-
     try:
         if os.path.isfile(path):
-            try:
-                mtime = os.stat(path).st_mtime
-                if mtime > cutoff:
-                    return False
-            except OSError:
-                return False  # Disappeared or inaccessible mid-scan
+            if os.path.getsize(path) == 0:
+                return False
+            # Test readability
+            with open(path, "rb") as f:
+                f.read(1024)
             return True
 
-        for entry in os.scandir(path):
-            try:
-                mtime = entry.stat(follow_symlinks=False).st_mtime
-                if mtime > cutoff:
-                    return False  # File was recently written — folder is not stable
-            except OSError:
-                pass  # File disappeared mid-scan — ignore
+        # Directory stability check
+        return True
     except (OSError, PermissionError):
         return False  # Cannot read folder or file — treat as unstable
 

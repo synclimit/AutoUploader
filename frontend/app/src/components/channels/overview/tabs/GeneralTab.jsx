@@ -790,7 +790,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     )
   }
 
-  const isConfigured = (pipeline) => draft?.[pipeline]?.watch_folder ? '✓ Configured' : '⚠ Missing Folder'
+  const isConfigured = (pipeline) => (draft?.[pipeline]?.watch_folder || draft?.[pipeline]?.campaign_folder) ? '✓ Configured' : '⚠ Missing Folder'
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">

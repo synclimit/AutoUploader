@@ -118,9 +118,10 @@ def validate(path: str) -> ValidationResult:
         else:
             meta_json = None
 
+    VIDEO_EXTS = (".mp4", ".mov", ".mkv", ".avi", ".webm", ".flv", ".m4v", ".wmv", ".ts", ".3gp", ".m4p", ".mpeg", ".mpg")
     if not is_direct_file:
         try:
-            mp4_files = [f for f in os.listdir(folder_path) if f.lower().endswith((".mp4", ".mov", ".mkv"))]
+            mp4_files = [f for f in os.listdir(folder_path) if f.lower().endswith(VIDEO_EXTS)]
         except OSError:
             mp4_files = []
             

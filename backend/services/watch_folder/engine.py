@@ -16,6 +16,7 @@ State machine per pipeline:
   IDLE → SCANNING → (per folder: VALIDATING → IMPORTING) → IDLE
   Any scan: path error → ERROR (retries on next cycle)
 """
+import os
 import time
 import logging
 import threading
@@ -202,8 +203,11 @@ class WatchFolderEngine(EngineBase):
             if p_config.get("enabled") is False:
                 continue
 
-            watch_path = p_config.get("watch_folder") or p_config.get("campaign_folder") or (channel.watch_folder if p_key == "long" else None)
-            if not watch_path or not str(watch_path).strip():
+            raw_watch = p_config.get("watch_folder") or p_config.get("campaign_folder") or (channel.watch_folder if p_key == "long" else None)
+            if not raw_watch or not str(raw_watch).strip():
+                continue
+            watch_path = str(raw_watch).strip().strip('"').strip("'")
+            if not os.path.exists(watch_path):
                 continue
 
             health_service.update_status(channel_id, p_key, "SCANNING")
