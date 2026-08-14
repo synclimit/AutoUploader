@@ -10,12 +10,15 @@ Compression=lzma
 SolidCompression=yes
 SetupIconFile=..\assets\icon.ico
 UninstallDisplayIcon={app}\RaynzPitStop.exe
+PrivilegesRequired=admin
+CloseApplications=yes
+CloseApplicationsFilter=*RaynzPitStop*
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
 
 [Files]
-Source: "..\backend\dist\RaynzPitStop\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\backend\dist\RaynzPitStop\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
 
 [Icons]
 Name: "{group}\Raynz PitStop"; Filename: "{app}\RaynzPitStop.exe"
