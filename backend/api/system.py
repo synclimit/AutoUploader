@@ -1,3 +1,13 @@
+import sys
+import os
+import json
+import time
+import tempfile
+import threading
+import subprocess
+import urllib.request
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
 import tkinter as tk
 from tkinter import filedialog
