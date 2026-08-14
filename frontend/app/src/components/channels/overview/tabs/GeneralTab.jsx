@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import apiClient from '../../../../api/client'
 import { useAppStore } from '../../../../store/app/appStore'
 import UploadJournal from './UploadJournal'
+import WatchFolderDiagnosticModal from '../../../common/WatchFolderDiagnosticModal'
 
 export default function GeneralTab({ draft, original, onChange, states, channelStatus, channelId }) {
   
@@ -10,6 +11,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
   const [isScanning, setIsScanning] = useState({})
   const [queuePlans, setQueuePlans] = useState({})
   const [isBuildingQueue, setIsBuildingQueue] = useState({})
+  const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false)
 
   const updatePipeline = (key, field, value) => {
     const updated = { ...draft }
@@ -255,11 +257,15 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     try {
       const res = await apiClient.get('/system/browse-folder')
       if (res && res.path) {
+        const updated = { ...draft }
+        updated[key] = { ...(updated[key] || {}), enabled: true }
         if (isCampaign) {
-          updatePipeline(key, 'campaign_folder', res.path);
+          updated[key].campaign_folder = res.path
+          onChange(updated)
           triggerScan(key, res.path); // Auto trigger scan immediately after selection
         } else {
-          updatePipeline(key, 'watch_folder', res.path);
+          updated[key].watch_folder = res.path
+          onChange(updated)
         }
       }
     } catch (e) {
@@ -803,7 +809,15 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
           <HeartPulse size={24} />
         </div>
         <div className="flex-1 flex flex-col gap-1">
-          <h2 className="text-[16px] font-bold text-white">Channel Health</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-[16px] font-bold text-white">Channel Health</h2>
+            <button
+              onClick={() => setIsDiagnosticOpen(true)}
+              className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-bold text-[11px] rounded-[6px] hover:bg-cyan-500/20 transition-all flex items-center gap-1.5"
+            >
+              🔍 Run Folder Diagnostic
+            </button>
+          </div>
           {channelStatus === 'Connected' ? (
             <span className="text-[12px] font-bold text-green-400 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Overall System Healthy</span>
           ) : (
@@ -880,6 +894,12 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       {renderPipeline('long', 'Watch Long Videos')}
       {renderPipeline('shorts', 'Watch Short Videos')}
       
+      <WatchFolderDiagnosticModal
+        channelId={channelId}
+        isOpen={isDiagnosticOpen}
+        onClose={() => setIsDiagnosticOpen(false)}
+      />
+
     </div>
   )
 }

@@ -35,3 +35,16 @@ def trigger_scan_now(
     ptype = (body.pipeline_type if body and body.pipeline_type else pipeline_type) or None
     return WatchFolderService.trigger_scan_now(channel_id=cid, pipeline_type=ptype)
 
+class DiagnoseRequest(BaseModel):
+    channel_id: Optional[str] = None
+
+@router.post("/diagnose")
+def diagnose_folder(body: Optional[DiagnoseRequest] = None, channel_id: Optional[str] = None, db: Session = Depends(get_db)):
+    cid = (body.channel_id if body and body.channel_id else channel_id) or None
+    return WatchFolderService.diagnose_folder(db, channel_id=cid)
+
+@router.post("/force-ingest")
+def force_ingest(body: Optional[DiagnoseRequest] = None, channel_id: Optional[str] = None, db: Session = Depends(get_db)):
+    cid = (body.channel_id if body and body.channel_id else channel_id) or None
+    return WatchFolderService.force_ingest(db, channel_id=cid)
+
