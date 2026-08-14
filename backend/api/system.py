@@ -190,8 +190,9 @@ def check_update():
         req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases")
         req.add_header("User-Agent", "AutoUploader-App")
         
+        # 1. First attempt: Query GitHub Releases API
         try:
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=10) as response:
                 releases = json.loads(response.read().decode())
                 if isinstance(releases, list) and len(releases) > 0:
                     latest_version = releases[0].get("tag_name", "")
@@ -204,49 +205,42 @@ def check_update():
                                 break
                         if download_url:
                             break
-                
-                # Fetch remote version.json to compare build numbers
-                remote_build = 0
-                try:
-                    v_req = urllib.request.Request("https://raw.githubusercontent.com/synclimit/AutoUploader/master/version.json")
-                    v_req.add_header("User-Agent", "AutoUploader-App")
-                    with urllib.request.urlopen(v_req, timeout=5) as v_res:
-                        remote_ver_data = json.loads(v_res.read().decode())
-                        remote_build = remote_ver_data.get("build", 0)
-                        if remote_ver_data.get("version"):
-                            latest_version = "v" + remote_ver_data.get("version")
-                except Exception:
-                    pass
-                
-                # Compare builds if available and download_url exists
-                update_available = False
-                if download_url:
-                    if remote_build > local_build:
-                        update_available = True
-                    elif not remote_build and latest_version and latest_version != "latest" and latest_version != local_version:
-                        update_available = True
-                    
-                return {
-                    "success": True,
-                    "update_available": update_available,
-                    "local_version": f"{local_version} (Build {local_build})",
-                    "latest_version": f"{latest_version} (Build {remote_build})" if remote_build else latest_version,
-                    "release_notes": release_notes,
-                    "download_url": download_url,
-                    "install_path": os.path.dirname(sys.executable)
-                }
-        except urllib.error.HTTPError as e:
-            if e.code == 404:
-                # No releases yet
-                return {
-                    "success": True,
-                    "update_available": False,
-                    "local_version": local_version,
-                    "latest_version": local_version,
-                    "release_notes": "No public releases available yet on GitHub.",
-                    "download_url": ""
-                }
-            raise e
+        except Exception as e:
+            print("GitHub Releases API lookup error (will use direct fallback URL):", e)
+
+        # 2. Direct Fallback URL if API response had no executable asset
+        if not download_url:
+            download_url = "https://github.com/synclimit/AutoUploader/releases/download/latest/RaynzPitStop_Setup.exe"
+            
+        # 3. Fetch remote version.json to compare build numbers
+        remote_build = 0
+        try:
+            v_req = urllib.request.Request("https://raw.githubusercontent.com/synclimit/AutoUploader/master/version.json")
+            v_req.add_header("User-Agent", "AutoUploader-App")
+            with urllib.request.urlopen(v_req, timeout=5) as v_res:
+                remote_ver_data = json.loads(v_res.read().decode())
+                remote_build = remote_ver_data.get("build", 0)
+                if remote_ver_data.get("version"):
+                    latest_version = "v" + remote_ver_data.get("version")
+        except Exception as e:
+            print("Remote version.json check error:", e)
+        
+        # 4. Compare builds
+        update_available = False
+        if remote_build > local_build:
+            update_available = True
+        elif not remote_build and latest_version and latest_version != "latest" and latest_version != local_version:
+            update_available = True
+            
+        return {
+            "success": True,
+            "update_available": update_available,
+            "local_version": f"{local_version} (Build {local_build})",
+            "latest_version": f"{latest_version} (Build {remote_build})" if remote_build else latest_version,
+            "release_notes": release_notes or "Automatic performance improvements and bug fixes.",
+            "download_url": download_url,
+            "install_path": os.path.dirname(sys.executable)
+        }
             
     except Exception as e:
         print("Update check error:", e)
