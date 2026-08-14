@@ -24,64 +24,60 @@ def open_url(req: OpenUrlRequest):
 
 @router.get("/browse-folder", response_model=BrowseFolderResponse)
 def browse_folder():
-    """Opens a native folder picker dialog on the server machine."""
+    """Opens a clean native folder picker dialog without popping up any CMD or PowerShell console window."""
     import sys
-    import subprocess
     import threading
 
+    folder_path = [None]
+
+    def _open_tkinter():
+        try:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            res = filedialog.askdirectory(title="Select Watch Folder")
+            root.destroy()
+            if res:
+                folder_path[0] = res
+        except Exception as e:
+            print("Tkinter dialog notice:", e)
+
+    # 1. Primary: Native Tkinter dialog (No process spawning, 0 CMD windows)
+    try:
+        t = threading.Thread(target=_open_tkinter)
+        t.start()
+        t.join(timeout=30)
+        if folder_path[0]:
+            return BrowseFolderResponse(path=folder_path[0])
+    except Exception as e:
+        print("Primary picker notice:", e)
+
+    # 2. Secondary: Silent PowerShell FolderBrowserDialog (CREATE_NO_WINDOW)
     if sys.platform == "win32":
-        # Use PowerShell for a more reliable dialog that doesn't hang in background threads
+        import subprocess
         script = """
         Add-Type -AssemblyName System.Windows.Forms
-        $dlg = New-Object System.Windows.Forms.OpenFileDialog
-        $dlg.Title = 'Select Watch Folder'
-        $dlg.Filter = 'Folder|*.none'
-        $dlg.CheckFileExists = $false
-        $dlg.CheckPathExists = $true
-        $dlg.FileName = 'Folder Selection'
-        $dlg.ValidateNames = $false
-        $form = New-Object System.Windows.Forms.Form
-        $form.TopMost = $true
-        $result = $dlg.ShowDialog($form)
-        if ($result -eq 'OK') {
-            Write-Output (Split-Path $dlg.FileName)
+        $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+        $dlg.Description = 'Select Watch Folder'
+        $dlg.ShowNewFolderButton = $true
+        if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+            [Console]::Out.Write($dlg.SelectedPath)
         }
         """
         try:
             out = subprocess.check_output(
-                ["powershell", "-NoProfile", "-Command", script],
-                creationflags=subprocess.CREATE_NO_WINDOW
+                ["powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script],
+                creationflags=0x08000000  # CREATE_NO_WINDOW
             )
-            path = out.decode("utf-8").strip()
+            path = out.decode("utf-8", errors="ignore").strip()
             if path:
                 return BrowseFolderResponse(path=path)
-            return BrowseFolderResponse(path=None)
         except Exception as e:
-            print("Browse folder error (PS):", e)
-            return BrowseFolderResponse(path=None)
-    else:
-        # Fallback to Tkinter for non-Windows (if any)
-        import tkinter as tk
-        from tkinter import filedialog
-        folder_path = [None]
-        def _open_dialog():
-            try:
-                root = tk.Tk()
-                root.withdraw()
-                root.attributes('-topmost', True)
-                folder_path[0] = filedialog.askdirectory(title="Select Watch Folder")
-                root.destroy()
-            except Exception as e:
-                print("Tkinter error:", e)
+            print("PowerShell folder picker notice:", e)
 
-        try:
-            t = threading.Thread(target=_open_dialog)
-            t.start()
-            t.join()
-            return BrowseFolderResponse(path=folder_path[0] or None)
-        except Exception as e:
-            print("Browse folder error:", e)
-            return BrowseFolderResponse(path=None)
+    return BrowseFolderResponse(path=folder_path[0] or None)
 
 
 @router.get("/logs")
