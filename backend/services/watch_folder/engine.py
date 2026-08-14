@@ -193,8 +193,6 @@ class WatchFolderEngine(EngineBase):
                 if p_k in pipelines and isinstance(pipelines[p_k], dict):
                     if not pipelines[p_k].get("watch_folder") and not pipelines[p_k].get("campaign_folder") and channel.watch_folder:
                         pipelines[p_k]["watch_folder"] = channel.watch_folder
-                    if pipelines[p_k].get("enabled") is False and (pipelines[p_k].get("watch_folder") or pipelines[p_k].get("campaign_folder") or channel.watch_folder):
-                        pipelines[p_k]["enabled"] = True
 
         if not pipelines:
             return summary

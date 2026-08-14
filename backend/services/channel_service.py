@@ -188,16 +188,13 @@ class ChannelService:
             try:
                 import json
                 if getattr(channel, "pipelines", None):
-                    pipelines = json.loads(channel.pipelines)
-                    long_p = pipelines.get("long", {})
-                    # For UI display purposes, if it's campaign strategy, show campaign folder, otherwise watch folder
-                    strat = long_p.get("automation_strategy", "continuous")
-                    if strat == "campaign":
-                        channel.folder = long_p.get("campaign_folder")
-                        channel.watch_folder = long_p.get("campaign_folder") # For the ReviewWorkspace backwards compatibility
-                    else:
-                        channel.folder = long_p.get("watch_folder")
-                        channel.watch_folder = long_p.get("watch_folder")
+                    pipelines = json.loads(channel.pipelines) if isinstance(channel.pipelines, str) else channel.pipelines
+                    long_p = pipelines.get("long", {}) if isinstance(pipelines, dict) else {}
+                    shorts_p = pipelines.get("shorts", {}) if isinstance(pipelines, dict) else {}
+                    long_wf = long_p.get("watch_folder") or long_p.get("campaign_folder")
+                    shorts_wf = shorts_p.get("watch_folder") or shorts_p.get("campaign_folder")
+                    channel.folder = long_wf or shorts_wf
+                    channel.watch_folder = long_wf or shorts_wf
             except:
                 pass
             
@@ -372,6 +369,16 @@ class ChannelService:
         
         if data.pipelines is not None: 
             channel.pipelines = data.pipelines
+            try:
+                import json
+                pipes = json.loads(data.pipelines) if isinstance(data.pipelines, str) else data.pipelines
+                if isinstance(pipes, dict):
+                    long_wf = pipes.get("long", {}).get("watch_folder") or pipes.get("long", {}).get("campaign_folder")
+                    shorts_wf = pipes.get("shorts", {}).get("watch_folder") or pipes.get("shorts", {}).get("campaign_folder")
+                    if long_wf or shorts_wf:
+                        channel.watch_folder = long_wf or shorts_wf
+            except Exception:
+                pass
             # Update pending tasks schedules to match new pipelines
             try:
                 import json
