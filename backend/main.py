@@ -487,7 +487,7 @@ if __name__ == "__main__":
                 print(f"[Tray] Error showing window: {err}")
 
     def exit_application():
-        nonlocal tray_service_instance
+        global tray_service_instance
         if tray_service_instance:
             try:
                 tray_service_instance.stop()
