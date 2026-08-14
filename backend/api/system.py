@@ -153,24 +153,30 @@ def run_installer_async(exe_path: str):
     clean_exe_path = os.path.normpath(exe_path)
     clean_app_exe = os.path.normpath(app_exe)
     
-    bat_path = os.path.join(tempfile.gettempdir(), "run_update.bat")
-    ps_path = os.path.join(tempfile.gettempdir(), "run_update.ps1")
+    temp_dir = tempfile.gettempdir()
+    bat_path = os.path.join(temp_dir, "run_update.bat")
+    ps_path = os.path.join(temp_dir, "run_update.ps1")
+    log_path = os.path.join(temp_dir, "update_installer.log")
     
     ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
+"[{datetime.now()}] Starting updater script for {clean_app_dir}" | Out-File -FilePath "{log_path}" -Encoding utf8
 Start-Sleep -Seconds 2
 Get-Process -Name "{os.path.splitext(exe_name)[0]}" -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 1
 $installerArgs = @('/DIR="{clean_app_dir}"', '/SILENT', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
+"[{datetime.now()}] Running installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 $proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
+"[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 Start-Sleep -Seconds 1
 Set-Location -Path "{clean_app_dir}"
+"[{datetime.now()}] Launching updated app: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 Start-Process -FilePath "{clean_app_exe}"
 '''
 
     bat_content = f'''@echo off
 setlocal
 timeout /t 2 /nobreak > nul
-taskkill /f /t /im "{exe_name}" > nul 2>&1
+taskkill /f /im "{exe_name}" > nul 2>&1
 timeout /t 1 /nobreak > nul
 powershell -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"
 exit
@@ -180,7 +186,14 @@ exit
             f_ps.write(ps_content)
         with open(bat_path, "w", encoding="utf-8") as f_bat:
             f_bat.write(bat_content)
-        subprocess.Popen(['cmd.exe', '/c', bat_path], creationflags=subprocess.CREATE_NO_WINDOW)
+            
+        # 0x00000008 (DETACHED_PROCESS) | 0x00000200 (CREATE_NEW_PROCESS_GROUP)
+        DETACHED_FLAGS = 0x00000008 | 0x00000200
+        subprocess.Popen(
+            ['cmd.exe', '/c', 'start', '""', '/min', bat_path],
+            creationflags=DETACHED_FLAGS,
+            close_fds=True
+        )
     except Exception as e:
         print("Failed to execute update script:", e)
 
