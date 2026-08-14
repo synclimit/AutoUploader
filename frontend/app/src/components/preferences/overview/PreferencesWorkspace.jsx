@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Settings, UploadCloud, PlaySquare, Sparkles, Bell, Cpu, Palette, Sliders, Info, ChevronDown, ChevronRight } from 'lucide-react'
+import { Settings, UploadCloud, PlaySquare, Sparkles, Bell, Cpu, Palette, Sliders, Info, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react'
 import { useSettingsStore } from '../../../store/settings/settingsStore'
 import { showToast } from '../../common/NotificationToast'
 import PreferencesNavigation from './PreferencesNavigation'
@@ -161,8 +161,9 @@ export default function PreferencesWorkspace() {
     }
   }
 
-  // Cleanup interval on unmount
+  // Cleanup interval on unmount & auto check version on mount
   useEffect(() => {
+    handleCheckUpdate()
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
     }
@@ -379,22 +380,46 @@ export default function PreferencesWorkspace() {
           {(activeCategory === 'about' || searchQuery) && (
             <PreferenceSection id="about" title="About Ryanz Pitstop" icon={Info} description="Application version and licensing information.">
               <div className="pl-4 py-2 border-l-2 border-[var(--accent-500)]/30">
-                <p className="text-white text-[14px] font-medium">Ryanz Pitstop Pro</p>
-                <p className="text-white/50 text-[12px] mt-1">Current Version: {updateInfo ? updateInfo.local_version : '1.0.0'}</p>
-                <p className="text-white/30 text-[11px] mt-4 mb-4">Licensed to the current user.</p>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-white text-[15px] font-bold">Ryanz Pitstop Pro</p>
+                    <p className="text-cyan-400 font-mono text-[13px] font-bold mt-1 flex items-center gap-2">
+                      📌 Versi Terpasang Saat Ini: 
+                      <span className="text-white bg-white/10 px-2.5 py-0.5 rounded font-mono border border-white/10">
+                        {updateInfo ? updateInfo.local_version : 'Loading version...'}
+                      </span>
+                    </p>
+                  </div>
+                  <button 
+                    onClick={handleCheckUpdate}
+                    disabled={isCheckingUpdate}
+                    className="px-3.5 py-2 border border-white/10 text-white/80 text-xs font-bold rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    <RefreshCw size={13} className={isCheckingUpdate ? "animate-spin text-cyan-400" : ""} />
+                    {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
+                  </button>
+                </div>
                 
                 {updateInfo?.update_available ? (
-                  <div className="bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/20 rounded-xl p-4 mt-2">
-                    <p className="text-[var(--accent-400)] font-bold text-sm mb-1">New Version Available: {updateInfo.latest_version}</p>
-                    <p className="text-white/60 text-xs mb-4 whitespace-pre-line">{updateInfo.release_notes || 'Bug fixes and performance improvements.'}</p>
+                  <div className="bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/30 rounded-xl p-4 mt-2 shadow-lg">
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
+                      <span className="text-white/70 text-xs font-bold">
+                        Versi Saat Ini di PC Anda: <span className="text-amber-400 font-mono font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{updateInfo.local_version}</span>
+                      </span>
+                      <span className="text-cyan-300 font-bold text-xs font-mono bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                        Versi Terbaru: {updateInfo.latest_version}
+                      </span>
+                    </div>
+                    
+                    <p className="text-white/80 text-xs mb-4 whitespace-pre-line leading-relaxed">{updateInfo.release_notes || 'Bug fixes and performance improvements.'}</p>
                     
                     {isInstalling && downloadProgress && downloadProgress.status === 'downloading' && (
                       <div className="mb-4">
                         <div className="flex justify-between text-xs text-white/60 mb-1">
-                          <span>Downloading...</span>
-                          <span>{downloadProgress.progress}% ({Math.round(downloadProgress.downloaded / 1024 / 1024)}MB / {Math.round(downloadProgress.total / 1024 / 1024)}MB)</span>
+                          <span>Downloading update package...</span>
+                          <span>{downloadProgress.progress}% ({Math.round((downloadProgress.downloaded || 0) / 1024 / 1024)}MB / {Math.round((downloadProgress.total || 0) / 1024 / 1024)}MB)</span>
                         </div>
-                        <div className="w-full bg-black/30 rounded-full h-2 overflow-hidden border border-white/5">
+                        <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden border border-white/10">
                           <div 
                             className="bg-[var(--accent-500)] h-full transition-all duration-300 relative"
                             style={{ width: `${downloadProgress.progress}%` }}
@@ -408,23 +433,17 @@ export default function PreferencesWorkspace() {
                     <button 
                       onClick={handleInstallUpdate}
                       disabled={isInstalling}
-                      className="px-4 py-2 bg-[var(--accent-500)] text-white text-xs font-bold rounded-lg hover:bg-[var(--accent-600)] transition-colors disabled:opacity-50"
+                      className="w-full py-2.5 bg-[var(--accent-500)] text-[#05080e] text-xs font-bold rounded-lg hover:bg-[var(--accent-400)] transition-colors disabled:opacity-50 shadow-[0_0_15px_rgba(34,211,238,0.3)] flex items-center justify-center gap-2"
                     >
-                      {isInstalling ? (downloadProgress?.status === 'installing' ? 'Restarting Application...' : 'Downloading & Installing...') : 'Download & Install Update'}
+                      {isInstalling ? (downloadProgress?.status === 'installing' ? 'Restarting Application...' : 'Downloading & Installing Update...') : `Update dari ${updateInfo.local_version} ➔ ${updateInfo.latest_version}`}
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={handleCheckUpdate}
-                      disabled={isCheckingUpdate}
-                      className="px-4 py-2 border border-white/10 text-white/70 text-xs font-medium rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
-                    >
-                      {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
-                    </button>
+                  <div className="mt-3 flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.05]">
+                    <span className="text-xs text-white/60">Status Pembaruan: <span className="text-green-400 font-bold">✓ Anda sudah menggunakan versi terbaru</span></span>
                     <button 
                       onClick={handleOpenLogs}
-                      className="px-4 py-2 border border-[var(--accent-500)]/30 bg-[var(--accent-500)]/10 text-[var(--accent-400)] text-xs font-bold rounded-lg hover:bg-[var(--accent-500)]/20 transition-colors flex items-center gap-2"
+                      className="px-3 py-1.5 border border-[var(--accent-500)]/30 bg-[var(--accent-500)]/10 text-[var(--accent-400)] text-xs font-bold rounded-lg hover:bg-[var(--accent-500)]/20 transition-colors flex items-center gap-1.5"
                     >
                       📁 Open Debug Logs Folder
                     </button>
