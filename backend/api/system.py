@@ -328,10 +328,17 @@ def download_and_install_async(download_url: str, installer_path: str):
                     if total_size > 0:
                         update_progress["progress"] = min(100, int((downloaded / total_size) * 100))
         
-        update_progress["status"] = "installing"
-        update_progress["progress"] = 100
-        update_progress["message"] = "Download complete. Installing..."
-        run_installer_async(installer_path)
+        is_frozen = getattr(sys, 'frozen', False)
+        if is_frozen:
+            update_progress["status"] = "installing"
+            update_progress["progress"] = 100
+            update_progress["message"] = "Download complete. Installing and restarting..."
+            run_installer_async(installer_path)
+        else:
+            update_progress["status"] = "dev_mode_downloaded"
+            update_progress["progress"] = 100
+            update_progress["message"] = f"Download complete! Installer saved to {installer_path}. Running installer..."
+            run_installer_async(installer_path)
     except Exception as e:
         print("Download error:", e)
         update_progress["status"] = "error"

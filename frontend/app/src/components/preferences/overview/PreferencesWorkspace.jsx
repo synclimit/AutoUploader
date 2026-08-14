@@ -141,6 +141,10 @@ export default function PreferencesWorkspace() {
               if (progData.data.status === 'installing') {
                 clearInterval(pollIntervalRef.current)
                 showToast('Update downloaded. Application will restart shortly...', 'success', 8000)
+              } else if (progData.data.status === 'dev_mode_downloaded') {
+                clearInterval(pollIntervalRef.current)
+                showToast('Update downloaded! Running installer...', 'success', 8000)
+                setIsInstalling(false)
               } else if (progData.data.status === 'error') {
                 clearInterval(pollIntervalRef.current)
                 showToast('Error during download: ' + progData.data.message, 'error')
