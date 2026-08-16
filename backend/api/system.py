@@ -267,7 +267,7 @@ def check_update():
 
         # 2. Direct Fallback URL if API response had no executable asset
         if not download_url:
-            download_url = "https://github.com/synclimit/AutoUploader/releases/latest/download/RaynzPitStop_Setup.exe"
+            download_url = "https://raw.githubusercontent.com/synclimit/AutoUploader/master/release/RaynzPitStop_Setup.exe"
             
         # 3. If remote_build was not found in release title, fetch remote version.json
         if not remote_build:
