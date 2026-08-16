@@ -423,6 +423,14 @@ class ChannelService:
             # Immediately trigger watch / campaign folder scan for this channel
             try:
                 from services.watch_folder_service import WatchFolderService
+                from models import IgnoredVideo, UploadTask
+                db.query(IgnoredVideo).filter(IgnoredVideo.channel_id == channel_id).delete()
+                db.query(UploadTask).filter(
+                    UploadTask.channel_id == channel_id,
+                    UploadTask.status.in_(["CANCELLED", "FAILED"])
+                ).delete(synchronize_session=False)
+                db.commit()
+
                 WatchFolderService.trigger_scan_now(channel_id=channel_id)
             except Exception as scan_e:
                 import logging
