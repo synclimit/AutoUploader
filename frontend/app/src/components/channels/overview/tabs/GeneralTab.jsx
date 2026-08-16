@@ -269,21 +269,33 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     if (isBrowsingFolder) return;
     setIsBrowsingFolder(true);
     try {
-      const res = await apiClient.get('/system/browse-folder')
-      if (res && res.path) {
-        const updated = { ...draft }
-        updated[key] = { ...(updated[key] || {}), enabled: true }
+      let selectedPath = null;
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.select_folder) {
+        const res = await window.pywebview.api.select_folder();
+        if (res && res.length > 0) {
+          selectedPath = res[0];
+        }
+      } else {
+        const res = await apiClient.get('/system/browse-folder');
+        if (res && res.path) {
+          selectedPath = res.path;
+        }
+      }
+
+      if (selectedPath) {
+        const updated = { ...draft };
+        updated[key] = { ...(updated[key] || {}), enabled: true };
         if (isCampaign) {
-          updated[key].campaign_folder = res.path
-          onChange(updated)
-          triggerScan(key, res.path); // Auto trigger scan immediately after selection
+          updated[key].campaign_folder = selectedPath;
+          onChange(updated);
+          triggerScan(key, selectedPath);
         } else {
-          updated[key].watch_folder = res.path
-          onChange(updated)
+          updated[key].watch_folder = selectedPath;
+          onChange(updated);
         }
       }
     } catch (e) {
-      console.error("Browse folder failed", e)
+      console.error("Browse folder failed", e);
     } finally {
       setIsBrowsingFolder(false);
     }
@@ -512,7 +524,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                     </div>
                     <input 
                       type="number" min="0" max="100" 
-                      value={p.daily_limit !== undefined ? p.daily_limit : 0} 
+                      value={p.daily_limit !== undefined && p.daily_limit !== null ? p.daily_limit : 10} 
                       onChange={(e) => {
                         const val = parseInt(e.target.value);
                         updateDailyLimit(key, isNaN(val) ? 0 : val);

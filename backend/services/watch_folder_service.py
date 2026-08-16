@@ -204,7 +204,7 @@ class WatchFolderService:
     @staticmethod
     def force_ingest(db: Session, channel_id: Optional[str] = None):
         import json
-        from models import Channel
+        from models import Channel, IgnoredVideo
         from services.watch_folder.engine import get_engine
 
         channels = db.query(Channel).all()
@@ -227,6 +227,9 @@ class WatchFolderService:
 
             ch.pipelines = json.dumps(pipelines)
             ch.watch_folder_enabled = True
+
+            # Clear tombstone/ignored entries for this channel so force_ingest can re-import videos
+            db.query(IgnoredVideo).filter(IgnoredVideo.channel_id == ch.id).delete()
 
         db.commit()
 

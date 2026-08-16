@@ -232,7 +232,13 @@ class WatchFolderEngine(EngineBase):
             health_service.record_log(channel_id, p_key, "PASS", "Pipeline Configured")
             health_service.record_scan(channel_id, p_key)
 
-            daily_limit = int(p_config.get("daily_limit", 2))
+            raw_limit = p_config.get("daily_limit", 100)
+            try:
+                daily_limit = int(raw_limit)
+            except Exception:
+                daily_limit = 100
+            if daily_limit <= 0:
+                daily_limit = 100
             
             # Ground truth: Calculate today_intake directly from DB for channel local calendar day
             today_intake = db.query(UploadTask).filter(
