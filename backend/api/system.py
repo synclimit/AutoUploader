@@ -141,11 +141,12 @@ def run_installer_async(exe_path: str):
     log_path = os.path.join(temp_dir, "update_installer.log")
     
     ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
-"[{datetime.now()}] Starting updater script for {clean_app_dir}" | Out-File -FilePath "{log_path}" -Encoding utf8
+$rawDir = "{clean_app_dir}".TrimEnd('\\', '/')
+"[{datetime.now()}] Starting updater script for $rawDir" | Out-File -FilePath "{log_path}" -Encoding utf8
 Start-Sleep -Seconds 2
 Get-Process -Name "RaynzPitStop", "RaynzPitStop_App", "AutoUploader" -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
-$installerArgs = @('/DIR="{clean_app_dir}"', '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
+$installerArgs = @("/DIR=`"$rawDir`"", '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
 "[{datetime.now()}] Running elevated installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 $proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
 "[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
@@ -153,11 +154,11 @@ Start-Sleep -Seconds 2
 
 $targetExe = "{clean_app_exe}"
 if (-not (Test-Path -LiteralPath $targetExe)) {{
-    $fallbackExe = Join-Path "{clean_app_dir}" "RaynzPitStop.exe"
+    $fallbackExe = Join-Path "$rawDir" "RaynzPitStop.exe"
     if (Test-Path -LiteralPath $fallbackExe) {{
         $targetExe = $fallbackExe
     }} else {{
-        $fallbackExe2 = Join-Path "{clean_app_dir}" "RaynzPitStop_App.exe"
+        $fallbackExe2 = Join-Path "$rawDir" "RaynzPitStop_App.exe"
         if (Test-Path -LiteralPath $fallbackExe2) {{
             $targetExe = $fallbackExe2
         }}
@@ -166,7 +167,7 @@ if (-not (Test-Path -LiteralPath $targetExe)) {{
 
 if (Test-Path -LiteralPath $targetExe) {{
     "[{datetime.now()}] Launching updated app: $targetExe" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-    Start-Process -FilePath "$targetExe" -WorkingDirectory "{clean_app_dir}"
+    Start-Process -FilePath "$targetExe" -WorkingDirectory "$rawDir"
 }} else {{
     "[{datetime.now()}] App exe not found at: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 }}
