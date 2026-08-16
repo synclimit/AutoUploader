@@ -54,6 +54,6 @@ test_assets/
 AutoUploade_UI_Design_System/
 DNA APLIKASI SAMPAI DEPLOY/
 # Releases
-release/
-*.exe
+!release/
+release/*
 !release/RaynzPitStop_Setup.exe

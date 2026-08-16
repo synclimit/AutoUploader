@@ -10,7 +10,7 @@ DisableDirPage=no
 UsePreviousAppDir=no
 OutputDir=..\release
 OutputBaseFilename=RaynzPitStop_Setup
-Compression=lzma
+Compression=lzma2/ultra64
 SolidCompression=yes
 SetupIconFile=..\assets\icon.ico
 UninstallDisplayIcon={app}\RaynzPitStop.exe
@@ -22,7 +22,7 @@ CloseApplicationsFilter=*RaynzPitStop*,*AutoUploader*
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
 
 [Files]
-Source: "..\backend\dist\RaynzPitStop\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
+Source: "..\backend\dist\RaynzPitStop\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace; Excludes: "*\discovery_cache\*"
 
 [Icons]
 Name: "{group}\Raynz PitStop"; Filename: "{app}\RaynzPitStop.exe"
