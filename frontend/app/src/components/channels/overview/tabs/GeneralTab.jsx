@@ -417,8 +417,16 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   </div>
                   <div className="h-[44px] rounded-[10px] bg-[#05080e] border border-white/[0.08] flex items-center justify-between px-3 overflow-hidden">
                     <span className="text-[13px] font-mono text-white/80 truncate">{p.watch_folder || 'Select a folder...'}</span>
-                    <button onClick={() => browseFolder(key, false)} className="h-[28px] px-3 rounded-[6px] bg-[var(--accent-500)]/10 text-[var(--accent-400)] text-[11px] font-bold hover:bg-[var(--accent-500)]/20 transition-all shrink-0">
-                      Browse
+                    <button 
+                      type="button"
+                      disabled={isBrowsingFolder}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        browseFolder(key, false);
+                      }} 
+                      className={`h-[28px] px-3 rounded-[6px] bg-[var(--accent-500)]/10 text-[var(--accent-400)] text-[11px] font-bold hover:bg-[var(--accent-500)]/20 transition-all shrink-0 ${isBrowsingFolder ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                      {isBrowsingFolder ? 'Opening...' : 'Browse'}
                     </button>
                   </div>
                 </div>
@@ -481,8 +489,16 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   </div>
                   <div className="h-[44px] rounded-[10px] bg-[#05080e] border border-purple-500/30 flex items-center justify-between px-3 overflow-hidden">
                     <span className="text-[13px] font-mono text-purple-100 truncate">{p.campaign_folder || 'Select a campaign folder...'}</span>
-                    <button onClick={() => browseFolder(key, true)} className="h-[28px] px-3 rounded-[6px] bg-purple-500/10 text-purple-400 text-[11px] font-bold hover:bg-purple-500/20 transition-all shrink-0">
-                      Browse
+                    <button 
+                      type="button"
+                      disabled={isBrowsingFolder}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        browseFolder(key, true);
+                      }} 
+                      className={`h-[28px] px-3 rounded-[6px] bg-purple-500/10 text-purple-400 text-[11px] font-bold hover:bg-purple-500/20 transition-all shrink-0 ${isBrowsingFolder ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                      {isBrowsingFolder ? 'Opening...' : 'Browse'}
                     </button>
                   </div>
                 </div>
