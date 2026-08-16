@@ -269,22 +269,28 @@ def check_update():
         if not download_url:
             download_url = "https://raw.githubusercontent.com/synclimit/AutoUploader/master/release/RaynzPitStop_Setup.exe"
             
-        # 3. If remote_build was not found in release title, fetch remote version.json
-        if not remote_build:
-            for branch in ["master", "main"]:
-                try:
-                    v_req = urllib.request.Request(f"https://raw.githubusercontent.com/synclimit/AutoUploader/{branch}/version.json")
-                    v_req.add_header("User-Agent", "AutoUploader-App")
-                    with _safe_urlopen(v_req, timeout=5) as v_res:
-                        remote_ver_data = json.loads(v_res.read().decode())
-                        remote_build = remote_ver_data.get("build", 0)
-                        if remote_ver_data.get("version"):
-                            latest_version = "v" + remote_ver_data.get("version")
-                        if remote_build:
-                            break
-                except Exception as e:
-                    print(f"Remote version.json check error for branch {branch}:", e)
+        # 3. Always check remote version.json on master/main branch for latest commit build
+        master_build = 0
+        master_version = ""
+        for branch in ["master", "main"]:
+            try:
+                v_req = urllib.request.Request(f"https://raw.githubusercontent.com/synclimit/AutoUploader/{branch}/version.json")
+                v_req.add_header("User-Agent", "AutoUploader-App")
+                with _safe_urlopen(v_req, timeout=5) as v_res:
+                    remote_ver_data = json.loads(v_res.read().decode())
+                    master_build = remote_ver_data.get("build", 0)
+                    if remote_ver_data.get("version"):
+                        master_version = "v" + remote_ver_data.get("version")
+                    if master_build:
+                        break
+            except Exception as e:
+                print(f"Remote version.json check error for branch {branch}:", e)
         
+        if master_build > remote_build:
+            remote_build = master_build
+            if master_version:
+                latest_version = master_version
+
         # 4. Compare builds and versions
         update_available = False
         if remote_build > local_build:
