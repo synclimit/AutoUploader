@@ -126,12 +126,10 @@ def run_installer_async(exe_path: str):
     if getattr(sys, 'frozen', False):
         app_exe = sys.executable
         app_dir = os.path.dirname(app_exe)
-        exe_name = os.path.basename(app_exe)
     else:
         # Dev mode fallback
         app_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        exe_name = "RaynzPitStop.exe"
-        app_exe = os.path.join(app_dir, exe_name)
+        app_exe = os.path.join(app_dir, "RaynzPitStop.exe")
 
     clean_app_dir = os.path.normpath(app_dir).rstrip('\\/')
     clean_exe_path = os.path.normpath(exe_path)
@@ -154,22 +152,21 @@ $proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs 
 Start-Sleep -Seconds 2
 
 $targetExe = "{clean_app_exe}"
-if (-not (Test-Path $targetExe)) {{
+if (-not (Test-Path -LiteralPath $targetExe)) {{
     $fallbackExe = Join-Path "{clean_app_dir}" "RaynzPitStop.exe"
-    if (Test-Path $fallbackExe) {{
+    if (Test-Path -LiteralPath $fallbackExe) {{
         $targetExe = $fallbackExe
     }} else {{
         $fallbackExe2 = Join-Path "{clean_app_dir}" "RaynzPitStop_App.exe"
-        if (Test-Path $fallbackExe2) {{
+        if (Test-Path -LiteralPath $fallbackExe2) {{
             $targetExe = $fallbackExe2
         }}
     }}
 }}
 
-if (Test-Path $targetExe) {{
-    Set-Location -Path "{clean_app_dir}"
+if (Test-Path -LiteralPath $targetExe) {{
     "[{datetime.now()}] Launching updated app: $targetExe" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-    Start-Process -FilePath $targetExe
+    Start-Process -FilePath "$targetExe" -WorkingDirectory "{clean_app_dir}"
 }} else {{
     "[{datetime.now()}] App exe not found at: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 }}
@@ -177,12 +174,13 @@ if (Test-Path $targetExe) {{
 
     bat_content = f'''@echo off
 setlocal
+cd /d "%TEMP%"
 timeout /t 1 /nobreak > nul
 taskkill /f /im "RaynzPitStop.exe" > nul 2>&1
 taskkill /f /im "RaynzPitStop_App.exe" > nul 2>&1
 taskkill /f /im "AutoUploader.exe" > nul 2>&1
 timeout /t 1 /nobreak > nul
-powershell -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"
 exit
 '''
     try:
@@ -193,7 +191,8 @@ exit
             
         DETACHED_FLAGS = 0x00000008 | 0x00000200
         subprocess.Popen(
-            ['cmd.exe', '/c', 'start', '""', '/min', bat_path],
+            ['cmd.exe', '/c', bat_path],
+            cwd=temp_dir,
             creationflags=DETACHED_FLAGS,
             close_fds=True
         )
