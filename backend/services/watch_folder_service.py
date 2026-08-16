@@ -231,6 +231,13 @@ class WatchFolderService:
             # Clear tombstone/ignored entries for this channel so force_ingest can re-import videos
             db.query(IgnoredVideo).filter(IgnoredVideo.channel_id == ch.id).delete()
 
+            # Clear cancelled/failed tasks for this channel so force_ingest can re-ingest them into Review
+            from models import UploadTask
+            db.query(UploadTask).filter(
+                UploadTask.channel_id == ch.id,
+                UploadTask.status.in_(["CANCELLED", "FAILED"])
+            ).delete(synchronize_session=False)
+
         db.commit()
 
         engine = get_engine()
