@@ -149,7 +149,9 @@ class WatchFolderService:
             for p_key in ["long", "shorts"]:
                 p_cfg = pipelines.get(p_key, {})
                 enabled = p_cfg.get("enabled", True if p_key == "long" and ch.watch_folder else False)
-                wf = p_cfg.get("watch_folder") or p_cfg.get("campaign_folder") or (ch.watch_folder if p_key == "long" else None)
+                raw_wf = p_cfg.get("watch_folder") or p_cfg.get("campaign_folder") or (ch.watch_folder if p_key == "long" else None)
+                from services.system.path_service import PathService
+                wf = PathService.resolve_local_path(raw_wf) if raw_wf else None
 
                 pipe_info = {
                     "pipeline_type": p_key,
@@ -204,7 +206,7 @@ class WatchFolderService:
     @staticmethod
     def force_ingest(db: Session, channel_id: Optional[str] = None):
         import json
-        from models import Channel, IgnoredVideo
+        from models import Channel, IgnoredVideo, UploadTask
         from services.watch_folder.engine import get_engine
 
         channels = db.query(Channel).all()
@@ -218,6 +220,12 @@ class WatchFolderService:
             except Exception:
                 pipelines = {}
 
+            if not pipelines and ch.watch_folder:
+                pipelines = {
+                    "long": {"enabled": True, "watch_folder": ch.watch_folder, "daily_limit": 100},
+                    "shorts": {"enabled": True, "watch_folder": ch.watch_folder, "daily_limit": 100}
+                }
+
             for p_key in ["long", "shorts"]:
                 if p_key not in pipelines:
                     pipelines[p_key] = {}
@@ -228,15 +236,14 @@ class WatchFolderService:
             ch.pipelines = json.dumps(pipelines)
             ch.watch_folder_enabled = True
 
-            # Clear tombstone/ignored entries for this channel so force_ingest can re-import videos
-            db.query(IgnoredVideo).filter(IgnoredVideo.channel_id == ch.id).delete()
+            # Clear tombstone/ignored entries so force_ingest can re-import videos
+            db.query(IgnoredVideo).filter(
+                or_(IgnoredVideo.channel_id == ch.id, IgnoredVideo.channel_id == None)
+            ).delete(synchronize_session=False)
 
-            # Clear existing non-active tasks (WATCHED, REVIEW, CANCELLED, FAILED, WAITING) for this channel
-            # so force_ingest can re-ingest all watch folder videos fresh into Review Workspace
-            from models import UploadTask
+            # Clear existing tasks so force_ingest can re-ingest watch folder videos fresh into Review Workspace
             db.query(UploadTask).filter(
-                UploadTask.channel_id == ch.id,
-                UploadTask.status.in_(["WATCHED", "REVIEW", "CANCELLED", "FAILED", "WAITING"])
+                UploadTask.channel_id == ch.id
             ).delete(synchronize_session=False)
 
         db.commit()
@@ -252,3 +259,4 @@ class WatchFolderService:
                 "message": f"Force ingest completed! {summary.tasks_created} videos created into Review Workspace."
             }
         }
+

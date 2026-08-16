@@ -90,6 +90,10 @@ def validate(path: str) -> ValidationResult:
     Run the full validation pipeline for a candidate package.
     `path` can be a directory (standard package) or a direct .mp4 file.
     """
+    if not path:
+        return _fail("", MISSING_VIDEO, "Path is empty")
+        
+    path = os.path.normpath(path)
     if not os.path.exists(path):
         return _fail(path, MISSING_VIDEO, f"Path no longer exists: {path!r}")
 

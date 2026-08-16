@@ -41,7 +41,7 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
     if not watch_folder_path or not str(watch_folder_path).strip():
         return [], True  # No path configured — silently do nothing
 
-    clean_path = str(watch_folder_path).strip().strip('"').strip("'")
+    clean_path = os.path.normpath(str(watch_folder_path).strip().strip('"').strip("'"))
     if not os.path.exists(clean_path):
         return [], False
 
@@ -54,13 +54,14 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
             
             # 1. If folder has metadata.json, treat the directory as a package
             if "metadata.json" in files:
-                if root not in seen_paths and _is_stable(root):
+                norm_root = os.path.normpath(root)
+                if norm_root not in seen_paths and _is_stable(norm_root):
                     try:
-                        mtime = os.stat(root).st_mtime
+                        mtime = os.stat(norm_root).st_mtime
                     except OSError:
                         mtime = 0
-                    candidates.append({"path": root, "mtime": mtime})
-                    seen_paths.add(root)
+                    candidates.append({"path": norm_root, "mtime": mtime})
+                    seen_paths.add(norm_root)
                     dirs[:] = []
                     continue
 
@@ -69,7 +70,7 @@ def scan(watch_folder_path: str) -> tuple[list[dict], bool]:
                 if f.startswith((".", "_")) or f.lower().endswith((".ignored", ".deleted")):
                     continue
                 if f.lower().endswith(VIDEO_EXTENSIONS):
-                    full_path = os.path.join(root, f)
+                    full_path = os.path.normpath(os.path.join(root, f))
                     if full_path not in seen_paths and _is_stable(full_path):
                         try:
                             mtime = os.stat(full_path).st_mtime

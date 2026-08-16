@@ -544,18 +544,11 @@ if __name__ == "__main__":
                 webview.windows[0].destroy()
             except Exception:
                 pass
-        sys.exit(0)
+        os._exit(0)
 
     class Api:
         def close(self):
-            if webview.windows:
-                try:
-                    webview.windows[0].hide()
-                    if tray_service_instance:
-                        tray_service_instance.notify_hidden()
-                except Exception as err:
-                    print(f"[Tray] Error hiding window: {err}")
-                    webview.windows[0].destroy()
+            exit_application()
         def minimize(self):
             if webview.windows:
                 webview.windows[0].minimize()

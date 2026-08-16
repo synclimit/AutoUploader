@@ -4,6 +4,32 @@ import sys
 
 class PathService:
     @staticmethod
+    def resolve_local_path(path: str) -> str:
+        """
+        Dynamically resolves paths across different Windows user accounts and PCs.
+        If a stored path (e.g. C:\Users\FAISAL\Downloads\Video) is run on another PC
+        (e.g. C:\Users\TEMAN\Downloads\Video), automatically adapts to the current user's profile.
+        """
+        if not path or not isinstance(path, str):
+            return path
+        
+        clean_path = os.path.normpath(str(path).strip().strip('"').strip("'"))
+        if os.path.exists(clean_path):
+            return clean_path
+
+        user_home = os.path.expanduser('~')
+        parts = clean_path.split(os.sep)
+        
+        # Match C:\Users\<old_user>\...
+        if len(parts) >= 3 and parts[0].lower().endswith(':') and parts[1].lower() == 'users':
+            rel_subpath = os.sep.join(parts[3:]) if len(parts) > 3 else ""
+            candidate = os.path.normpath(os.path.join(user_home, rel_subpath))
+            if os.path.exists(candidate):
+                return candidate
+
+        return clean_path
+
+    @staticmethod
     def get_appdata_dir() -> str:
         """Get the root AppData directory for Raynz PitStop."""
         appdata = os.environ.get('APPDATA')

@@ -223,7 +223,8 @@ class WatchFolderEngine(EngineBase):
             raw_watch = p_config.get("watch_folder") or p_config.get("campaign_folder") or (channel.watch_folder if p_key == "long" else None)
             if not raw_watch or not str(raw_watch).strip():
                 continue
-            watch_path = str(raw_watch).strip().strip('"').strip("'")
+            from services.system.path_service import PathService
+            watch_path = PathService.resolve_local_path(raw_watch)
             if not os.path.exists(watch_path):
                 continue
 

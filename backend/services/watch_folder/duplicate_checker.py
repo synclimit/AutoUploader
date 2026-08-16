@@ -59,6 +59,9 @@ def check(video_id: str, package_folder: str, db: Session, channel_id: str = Non
     Returns:
         DuplicateCheckResult with is_duplicate=True → caller must skip import.
     """
+    import os
+    if package_folder:
+        package_folder = os.path.normpath(package_folder)
 
     # -----------------------------------------------------------------------
     # Step 0 — Ignored / User-Deleted Tombstone Guard
