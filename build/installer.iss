@@ -7,7 +7,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DefaultDirName={autopf}\Raynz PitStop
 DefaultGroupName=Raynz PitStop
 DisableDirPage=no
-UsePreviousAppDir=yes
+UsePreviousAppDir=no
 OutputDir=..\release
 OutputBaseFilename=RaynzPitStop_Setup
 Compression=lzma
@@ -16,7 +16,7 @@ SetupIconFile=..\assets\icon.ico
 UninstallDisplayIcon={app}\RaynzPitStop.exe
 PrivilegesRequired=admin
 CloseApplications=yes
-CloseApplicationsFilter=*RaynzPitStop*
+CloseApplicationsFilter=*RaynzPitStop*,*AutoUploader*
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"

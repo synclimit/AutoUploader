@@ -34,60 +34,10 @@ def open_url(req: OpenUrlRequest):
 
 @router.get("/browse-folder", response_model=BrowseFolderResponse)
 def browse_folder():
-    """Opens a clean native folder picker dialog without popping up any CMD or PowerShell console window."""
-    import sys
-    import threading
-
-    folder_path = [None]
-
-    def _open_tkinter():
-        try:
-            import tkinter as tk
-            from tkinter import filedialog
-            root = tk.Tk()
-            root.withdraw()
-            root.attributes('-topmost', True)
-            res = filedialog.askdirectory(title="Select Watch Folder")
-            root.destroy()
-            if res:
-                folder_path[0] = res
-        except Exception as e:
-            print("Tkinter dialog notice:", e)
-
-    # 1. Primary: Native Tkinter dialog (No process spawning, 0 CMD windows)
-    try:
-        t = threading.Thread(target=_open_tkinter)
-        t.start()
-        t.join(timeout=30)
-        if folder_path[0]:
-            return BrowseFolderResponse(path=folder_path[0])
-    except Exception as e:
-        print("Primary picker notice:", e)
-
-    # 2. Secondary: Silent PowerShell FolderBrowserDialog (CREATE_NO_WINDOW)
-    if sys.platform == "win32":
-        import subprocess
-        script = """
-        Add-Type -AssemblyName System.Windows.Forms
-        $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-        $dlg.Description = 'Select Watch Folder'
-        $dlg.ShowNewFolderButton = $true
-        if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-            [Console]::Out.Write($dlg.SelectedPath)
-        }
-        """
-        try:
-            out = subprocess.check_output(
-                ["powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script],
-                creationflags=0x08000000  # CREATE_NO_WINDOW
-            )
-            path = out.decode("utf-8", errors="ignore").strip()
-            if path:
-                return BrowseFolderResponse(path=path)
-        except Exception as e:
-            print("PowerShell folder picker notice:", e)
-
-    return BrowseFolderResponse(path=folder_path[0] or None)
+    """Opens modern Windows File Explorer folder picker dialog (IFileOpenDialog)."""
+    from services.system.folder_picker import open_modern_folder_picker
+    path = open_modern_folder_picker()
+    return BrowseFolderResponse(path=path)
 
 
 @router.get("/logs")
@@ -139,6 +89,34 @@ import subprocess
 import threading
 import shutil
 
+import ssl
+
+def _get_ssl_context():
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        return ctx
+    except Exception:
+        return None
+
+def _safe_urlopen(req, timeout=10):
+    try:
+        return urllib.request.urlopen(req, timeout=timeout)
+    except Exception:
+        ctx = _get_ssl_context()
+        if ctx:
+            return urllib.request.urlopen(req, timeout=timeout, context=ctx)
+        raise
+
+update_progress = {
+    "status": "idle",
+    "progress": 0,
+    "downloaded": 0,
+    "total": 0,
+    "message": ""
+}
+
 def run_installer_async(exe_path: str):
     # Wait a bit so the API response can be sent to the frontend
     time.sleep(2)
@@ -166,20 +144,34 @@ def run_installer_async(exe_path: str):
     
     ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
 "[{datetime.now()}] Starting updater script for {clean_app_dir}" | Out-File -FilePath "{log_path}" -Encoding utf8
-Start-Sleep -Seconds 1
+Start-Sleep -Seconds 2
 Get-Process -Name "RaynzPitStop", "RaynzPitStop_App", "AutoUploader" -ErrorAction SilentlyContinue | Stop-Process -Force
-Start-Sleep -Seconds 1
+Start-Sleep -Seconds 2
 $installerArgs = @('/DIR="{clean_app_dir}"', '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
 "[{datetime.now()}] Running elevated installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 $proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
 "[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-Start-Sleep -Seconds 1
-if (Test-Path "{clean_app_exe}") {{
+Start-Sleep -Seconds 2
+
+$targetExe = "{clean_app_exe}"
+if (-not (Test-Path $targetExe)) {{
+    $fallbackExe = Join-Path "{clean_app_dir}" "RaynzPitStop.exe"
+    if (Test-Path $fallbackExe) {{
+        $targetExe = $fallbackExe
+    }} else {{
+        $fallbackExe2 = Join-Path "{clean_app_dir}" "RaynzPitStop_App.exe"
+        if (Test-Path $fallbackExe2) {{
+            $targetExe = $fallbackExe2
+        }}
+    }}
+}}
+
+if (Test-Path $targetExe) {{
     Set-Location -Path "{clean_app_dir}"
-    "[{datetime.now()}] Launching updated app: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-    Start-Process -FilePath "{clean_app_exe}"
+    "[{datetime.now()}] Launching updated app: $targetExe" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
+    Start-Process -FilePath $targetExe
 }} else {{
-    "[{datetime.now()}] App exe not found: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
+    "[{datetime.now()}] App exe not found at: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 }}
 '''
 
@@ -199,7 +191,6 @@ exit
         with open(bat_path, "w", encoding="utf-8") as f_bat:
             f_bat.write(bat_content)
             
-        # 0x00000008 (DETACHED_PROCESS) | 0x00000200 (CREATE_NEW_PROCESS_GROUP)
         DETACHED_FLAGS = 0x00000008 | 0x00000200
         subprocess.Popen(
             ['cmd.exe', '/c', 'start', '""', '/min', bat_path],
@@ -213,17 +204,22 @@ exit
 @router.get("/update/check")
 def check_update():
     try:
-        # Get local version
+        # Get local version with MEIPASS / internal priority
         import sys
         if getattr(sys, 'frozen', False):
-            base_dir = sys._MEIPASS
             exe_dir = os.path.dirname(sys.executable)
-            if os.path.exists(os.path.join(exe_dir, "version.json")):
-                base_dir = exe_dir
+            mei_dir = getattr(sys, '_MEIPASS', exe_dir)
+            version_file = os.path.join(mei_dir, "version.json")
+            if not os.path.exists(version_file):
+                internal_ver = os.path.join(exe_dir, "_internal", "version.json")
+                if os.path.exists(internal_ver):
+                    version_file = internal_ver
+                else:
+                    version_file = os.path.join(exe_dir, "version.json")
         else:
             base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            version_file = os.path.join(base_dir, "version.json")
             
-        version_file = os.path.join(base_dir, "version.json")
         local_version = "v1.0.0"
         local_build = 0
         if os.path.exists(version_file):
@@ -242,7 +238,7 @@ def check_update():
         
         # 1. First attempt: Query GitHub Releases API
         try:
-            with urllib.request.urlopen(req, timeout=10) as response:
+            with _safe_urlopen(req, timeout=10) as response:
                 releases = json.loads(response.read().decode())
                 if isinstance(releases, list) and len(releases) > 0:
                     import re
@@ -254,13 +250,11 @@ def check_update():
                                 rel_body = rel.get("body", "")
                                 release_notes = rel_body
                                 
-                                # Extract build number from release title or body (e.g. "Build 122")
                                 m = re.search(r'Build\s+(\d+)', rel_name + " " + rel_body, re.IGNORECASE)
                                 if m:
                                     remote_build = int(m.group(1))
                                 
-                                # Extract version
-                                v_m = re.search(r'v?(\d+\.\d+\.\d+)', rel_name, re.IGNORECASE)
+                                v_m = re.search(r'v?(\d+\.\d+\.\d+)', rel_name + " " + rel.get("tag_name", ""), re.IGNORECASE)
                                 if v_m:
                                     latest_version = "v" + v_m.group(1)
                                 else:
@@ -277,22 +271,25 @@ def check_update():
             
         # 3. If remote_build was not found in release title, fetch remote version.json
         if not remote_build:
-            try:
-                v_req = urllib.request.Request("https://raw.githubusercontent.com/synclimit/AutoUploader/master/version.json")
-                v_req.add_header("User-Agent", "AutoUploader-App")
-                with urllib.request.urlopen(v_req, timeout=5) as v_res:
-                    remote_ver_data = json.loads(v_res.read().decode())
-                    remote_build = remote_ver_data.get("build", 0)
-                    if remote_ver_data.get("version"):
-                        latest_version = "v" + remote_ver_data.get("version")
-            except Exception as e:
-                print("Remote version.json check error:", e)
+            for branch in ["master", "main"]:
+                try:
+                    v_req = urllib.request.Request(f"https://raw.githubusercontent.com/synclimit/AutoUploader/{branch}/version.json")
+                    v_req.add_header("User-Agent", "AutoUploader-App")
+                    with _safe_urlopen(v_req, timeout=5) as v_res:
+                        remote_ver_data = json.loads(v_res.read().decode())
+                        remote_build = remote_ver_data.get("build", 0)
+                        if remote_ver_data.get("version"):
+                            latest_version = "v" + remote_ver_data.get("version")
+                        if remote_build:
+                            break
+                except Exception as e:
+                    print(f"Remote version.json check error for branch {branch}:", e)
         
-        # 4. Compare builds
+        # 4. Compare builds and versions
         update_available = False
         if remote_build > local_build:
             update_available = True
-        elif not remote_build and latest_version and latest_version != "latest" and latest_version != local_version:
+        elif latest_version and latest_version != "latest" and latest_version != local_version:
             update_available = True
             
         return {
@@ -323,7 +320,7 @@ def download_and_install_async(download_url: str, installer_path: str):
     try:
         req = urllib.request.Request(download_url)
         req.add_header("User-Agent", "AutoUploader-App")
-        with urllib.request.urlopen(req) as response:
+        with _safe_urlopen(req, timeout=60) as response:
             total_size = int(response.info().get('Content-Length', 0))
             update_progress["total"] = total_size
             downloaded = 0
@@ -339,7 +336,28 @@ def download_and_install_async(download_url: str, installer_path: str):
                     update_progress["downloaded"] = downloaded
                     if total_size > 0:
                         update_progress["progress"] = min(100, int((downloaded / total_size) * 100))
+
+        # Validate downloaded binary file (Must be a PE executable starting with 'MZ')
+        if os.path.exists(installer_path):
+            with open(installer_path, 'rb') as check_f:
+                header = check_f.read(2)
+                if header != b'MZ':
+                    from services.system.diagnostic_service import diagnostic_service
+                    diagnostic_service.log("ERROR", "UPDATE", "INVALID_PE_HEADER", "Downloaded installer package header is not PE executable.", error_id="ERR-UPDATE-004")
+                    raise ValueError("Downloaded installer package is invalid or corrupt (received non-executable payload).")
+
+        from services.system.diagnostic_service import diagnostic_service
+        from services.system.path_service import PathService
+        diagnostic_service.log("INFO", "UPDATE", "DOWNLOAD_SUCCESS", f"Update downloaded successfully to {installer_path}")
         
+        # Save pending update verification file
+        try:
+            update_flag_file = os.path.join(PathService.get_logs_dir(), "pending_update_verify.json")
+            with open(update_flag_file, "w") as uf:
+                json.dump({"expected_version": update_progress.get("latest_version", "unknown"), "timestamp": time.time()}, uf)
+        except Exception:
+            pass
+
         is_frozen = getattr(sys, 'frozen', False)
         if is_frozen:
             update_progress["status"] = "installing"
@@ -353,6 +371,8 @@ def download_and_install_async(download_url: str, installer_path: str):
             run_installer_async(installer_path)
     except Exception as e:
         print("Download error:", e)
+        from services.system.diagnostic_service import diagnostic_service
+        diagnostic_service.log("ERROR", "UPDATE", "DOWNLOAD_FAILED", f"Update download failed: {e}", error_id="ERR-UPDATE-002", exc_info=e)
         update_progress["status"] = "error"
         update_progress["message"] = str(e)
 
@@ -360,15 +380,13 @@ def download_and_install_async(download_url: str, installer_path: str):
 @router.post("/update/install")
 def install_update(req: InstallUpdateRequest):
     try:
-        # Check if already downloading
         if update_progress["status"] == "downloading":
             return {"success": True, "message": "Download already in progress."}
             
-        # Download the file to a temp location
         temp_dir = tempfile.gettempdir()
-        installer_path = os.path.join(temp_dir, "AutoUploader_Update.exe")
+        timestamp = int(time.time())
+        installer_path = os.path.join(temp_dir, f"RaynzPitStop_Update_{timestamp}.exe")
         
-        # Spawn thread to download and run installer
         threading.Thread(target=download_and_install_async, args=(req.download_url, installer_path), daemon=True).start()
         
         return {"success": True, "message": "Update download started. Application will restart shortly."}
@@ -395,6 +413,41 @@ def get_app_logs(lines: int = 500):
         with open(log_file, "r", encoding="utf-8", errors="replace") as f:
             last_lines = collections.deque(f, lines)
             return {"success": True, "logs": "".join(last_lines)}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@router.get("/diagnostic/summary")
+def get_diagnostic_summary():
+    """Returns application metrics, telemetry, and error summary."""
+    from services.system.diagnostic_service import DiagnosticService
+    return {"success": True, "data": DiagnosticService.get_summary()}
+
+@router.get("/diagnostic/logs")
+def get_diagnostic_logs(
+    limit: int = 200,
+    module: Optional[str] = None,
+    level: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Returns filtered diagnostic logs."""
+    from services.system.diagnostic_service import diagnostic_service
+    logs = diagnostic_service.get_logs(limit=limit, module=module, level=level, search=search)
+    return {"success": True, "data": logs}
+
+@router.post("/diagnostic/export")
+def export_diagnostic_report():
+    """Generates a redacted diagnostic ZIP archive for gravity/developer analysis."""
+    from services.system.diagnostic_service import diagnostic_service
+    from fastapi.responses import FileResponse
+    try:
+        zip_path = diagnostic_service.export_report_zip()
+        filename = os.path.basename(zip_path)
+        return FileResponse(
+            path=zip_path,
+            filename=filename,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
     except Exception as e:
         return {"success": False, "error": str(e)}
 

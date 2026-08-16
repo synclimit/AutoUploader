@@ -36,11 +36,10 @@ class CampaignReviewService:
             db.add(session)
             db.flush()
         
-        # We need to reconcile the assets from scan_data with existing assets in the session
-        # If new assets appeared in scan_data, add them.
-        # If existing assets are no longer in scan_data, we might leave them or mark them.
-        # For simplicity, we can do a full sync since it's a review staging area.
-        
+        if scan_data and getattr(scan_data, 'success', True) is False:
+            # Do not wipe assets if the scan failed due to non-existent folder path
+            return session
+
         existing_assets = {a.fingerprint: a for a in session.assets}
         seen_fingerprints = set()
         

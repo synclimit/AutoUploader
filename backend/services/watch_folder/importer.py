@@ -162,7 +162,7 @@ def create_task(
         # State (Architecture Rule 2: must keep existing initial state -> WATCHED)
         status="WATCHED",
         metadata_source="RENDERER",           # Always RENDERER for Watch Folder imports
-        source_type=channel.source_type,      # M1_VIDEO_SPLITTER or M3_PLAYLIST_BUILDER
+        source_type=channel.source_type if (channel.source_type and channel.source_type in ["M1_VIDEO_SPLITTER", "M3_PLAYLIST_BUILDER"]) else "M1_VIDEO_SPLITTER",
 
         # Package paths
         package_folder=result.package_folder,

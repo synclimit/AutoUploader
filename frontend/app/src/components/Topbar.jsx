@@ -152,6 +152,14 @@ export default function Topbar() {
           </div>
 
           <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('open-diagnostic-center'))}
+            className="w-9 h-9 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center hover:bg-cyan-500/20 hover:text-cyan-300 transition-all cursor-pointer shrink-0"
+            title="Diagnostic Center & Error Telemetry"
+          >
+            <Activity size={16} />
+          </button>
+
+          <button 
             onClick={() => setShowDevLogs(true)}
             className="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/40 flex items-center justify-center hover:bg-white/10 hover:text-white transition-all cursor-pointer shrink-0"
             title="Developer Logs"

@@ -227,11 +227,11 @@ class ChannelService:
                 ChannelService._populate_profile_name(acc, db)
                 ChannelService._populate_avatar_url(acc, db)
                 ChannelService._populate_dashboard_fields(acc, db)
-                valid_accounts.append(acc)
             except Exception as e:
-                logger.error(f"[ChannelService] Failed to populate channel {acc.id} ({getattr(acc, 'channel_name', 'Unknown')}): {e}", exc_info=True)
-                # DO NOT CRASH THE ENDPOINT! We want to test Phase 7 "Continue execution"
-                continue
+                logger.error(f"[ChannelService] Non-fatal error populating channel {acc.id} ({getattr(acc, 'channel_name', 'Unknown')}): {e}", exc_info=True)
+                from services.system.diagnostic_service import diagnostic_service
+                diagnostic_service.log("WARNING", "CHANNEL", "POPULATE_WARNING", f"Failed populating metadata for channel {acc.id}: {e}", error_id="ERR-CHANNEL-001")
+            valid_accounts.append(acc)
                 
         logger.info("[ChannelService] Serialize Response & Return")
         return valid_accounts
@@ -344,6 +344,8 @@ class ChannelService:
                 channel.profile_id = data.profile_id
         if data.watch_folder is not None:
             channel.watch_folder = data.watch_folder if data.watch_folder.strip() else None
+            if channel.watch_folder:
+                channel.watch_folder_enabled = True
         if data.watch_folder_enabled is not None:
             channel.watch_folder_enabled = data.watch_folder_enabled
             

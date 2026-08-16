@@ -189,6 +189,11 @@ class AccountListResponse(BaseModel):
     mode: Optional[str] = "Campaign"
     watch_folder: Optional[str] = None
     folder: Optional[str] = None
+    pipelines: Optional[str] = None
+    pipeline_states: Optional[str] = None
+    upload_defaults: Optional[str] = None
+    ai_identity: Optional[str] = None
+    schema_version: Optional[int] = 1
 
     class Config:
         from_attributes = True
@@ -580,6 +585,7 @@ class CampaignScanAsset(BaseModel):
 
 class CampaignScanResponse(BaseModel):
     success: bool = True
+    message: Optional[str] = None
     summary: CampaignScanSummary
     assets: List[CampaignScanAsset]
 

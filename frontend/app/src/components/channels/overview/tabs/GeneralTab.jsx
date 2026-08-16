@@ -24,14 +24,24 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     if (!folderPath) return;
     setIsScanning(prev => ({ ...prev, [key]: true }));
     try {
-      const res = await apiClient.post('/campaign-scan', { campaign_folder: folderPath });
+      const res = await apiClient.post('/campaign-scan', { campaign_folder: folderPath, channel_id: channelId });
       const scanPayload = (res && res.summary) ? res : (res?.data ?? res);
       if (scanPayload) {
-        // Send scan result to review engine to create/update session
-        const reviewRes = await apiClient.post(`/campaign-review?channel_id=${channelId}&pipeline_type=${key}`, scanPayload);
-        const sessionPayload = (reviewRes && reviewRes.id) ? reviewRes : (reviewRes?.data ?? reviewRes);
-        if (sessionPayload) {
-          setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
+        if (scanPayload.success === false) {
+          setScanResults(prev => ({
+            ...prev,
+            [key]: {
+              ...(prev[key] || {}),
+              error_message: scanPayload.message || 'Folder path does not exist on this PC. Please click Browse.'
+            }
+          }));
+        } else {
+          // Send scan result to review engine to create/update session
+          const reviewRes = await apiClient.post(`/campaign-review?channel_id=${channelId}&pipeline_type=${key}`, scanPayload);
+          const sessionPayload = (reviewRes && reviewRes.id) ? reviewRes : (reviewRes?.data ?? reviewRes);
+          if (sessionPayload) {
+            setScanResults(prev => ({ ...prev, [key]: sessionPayload }));
+          }
         }
       }
     } catch (e) {
@@ -253,7 +263,11 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
     </div>
   )
 
+  const [isBrowsingFolder, setIsBrowsingFolder] = useState(false)
+
   const browseFolder = async (key, isCampaign = false) => {
+    if (isBrowsingFolder) return;
+    setIsBrowsingFolder(true);
     try {
       const res = await apiClient.get('/system/browse-folder')
       if (res && res.path) {
@@ -270,6 +284,8 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
       }
     } catch (e) {
       console.error("Browse folder failed", e)
+    } finally {
+      setIsBrowsingFolder(false);
     }
   }
 
@@ -451,10 +467,17 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
             ) : (
               <>
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-bold text-purple-400 uppercase tracking-wider">Campaign Folder</label>
-                    {renderTooltip('Folder Campaign yang berisi ratusan video batch Anda. Scan otomatis dilakukan saat folder dipilih.')}
-                    {renderDirtyIndicator(key, 'campaign_folder')}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] font-bold text-purple-400 uppercase tracking-wider">Campaign Folder</label>
+                      {renderTooltip('Folder Campaign yang berisi ratusan video batch Anda. Scan otomatis dilakukan saat folder dipilih.')}
+                      {renderDirtyIndicator(key, 'campaign_folder')}
+                    </div>
+                    {scanData?.error_message && (
+                      <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 animate-pulse">
+                        ⚠️ {scanData.error_message}
+                      </span>
+                    )}
                   </div>
                   <div className="h-[44px] rounded-[10px] bg-[#05080e] border border-purple-500/30 flex items-center justify-between px-3 overflow-hidden">
                     <span className="text-[13px] font-mono text-purple-100 truncate">{p.campaign_folder || 'Select a campaign folder...'}</span>

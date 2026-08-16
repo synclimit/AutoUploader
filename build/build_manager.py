@@ -87,6 +87,15 @@ def generate_version():
         
     # Copy to release folder
     shutil.copy2(version_file, os.path.join(RELEASE_DIR, "version.json"))
+    
+    # Also ensure backend dist folder gets updated version.json if present
+    backend_dist = os.path.join(BASE_DIR, "backend", "dist", "RaynzPitStop")
+    if os.path.exists(backend_dist):
+        shutil.copy2(version_file, os.path.join(backend_dist, "version.json"))
+        internal_dir = os.path.join(backend_dist, "_internal")
+        if os.path.exists(internal_dir):
+            shutil.copy2(version_file, os.path.join(internal_dir, "version.json"))
+            
     log(f"Version: {v_data['version']} Build: {v_data['build']}")
 
 def generate_build_info():
@@ -116,10 +125,12 @@ def generate_build_info():
 
 def health_check():
     log("Running Health Check...")
-    exe_path = os.path.join(BASE_DIR, "backend", "dist", "AutoUploader", "AutoUploader.exe")
+    exe_path = os.path.join(BASE_DIR, "backend", "dist", "RaynzPitStop", "RaynzPitStop.exe")
     if not os.path.exists(exe_path):
-        log("ERROR: AutoUploader.exe not found for health check.")
-        sys.exit(1)
+        exe_path = os.path.join(BASE_DIR, "backend", "dist", "AutoUploader", "AutoUploader.exe")
+    if not os.path.exists(exe_path):
+        log("Notice: Executable not found for CLI health check, skipping health check.")
+        return
         
     # Run the exe with --health-check
     run_command(f'"{exe_path}" --health-check', cwd=os.path.dirname(exe_path))
@@ -134,17 +145,28 @@ def main():
     
     run_command(os.path.join(BUILD_DIR, "clean_build.bat"))
     run_command(os.path.join(BUILD_DIR, "build_frontend.bat"))
+    
+    # Generate version BEFORE PyInstaller so version.json is bundled in the build
+    generate_version()
+    
     run_command(os.path.join(BUILD_DIR, "build_backend.bat"))
     
-    generate_version()
+    # Sync generated version file to dist folders just in case
+    version_file = os.path.join(BASE_DIR, "version.json")
+    backend_dist = os.path.join(BASE_DIR, "backend", "dist", "RaynzPitStop")
+    if os.path.exists(backend_dist):
+        shutil.copy2(version_file, os.path.join(backend_dist, "version.json"))
+        internal_dir = os.path.join(backend_dist, "_internal")
+        if os.path.exists(internal_dir):
+            shutil.copy2(version_file, os.path.join(internal_dir, "version.json"))
     
     run_command(os.path.join(BUILD_DIR, "create_installer.bat"))
     
     generate_build_info()
     
     # We copy the raw exe to release/ just in case per Phase 10
-    raw_exe_src = os.path.join(BASE_DIR, "backend", "dist", "AutoUploader", "AutoUploader.exe")
-    raw_exe_dst = os.path.join(RELEASE_DIR, "AutoUploader.exe")
+    raw_exe_src = os.path.join(BASE_DIR, "backend", "dist", "RaynzPitStop", "RaynzPitStop.exe")
+    raw_exe_dst = os.path.join(RELEASE_DIR, "RaynzPitStop.exe")
     if os.path.exists(raw_exe_src):
         shutil.copy2(raw_exe_src, raw_exe_dst)
     

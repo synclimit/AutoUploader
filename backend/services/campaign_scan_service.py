@@ -16,8 +16,18 @@ class CampaignScanService:
         and returns a read-only scan result.
         """
         if not folder_path or not os.path.exists(folder_path):
+            from services.system.diagnostic_service import diagnostic_service
+            diagnostic_service.log(
+                "ERROR",
+                "REVIEW",
+                "FOLDER_NOT_FOUND",
+                f"Campaign scan failed: folder path does not exist on this machine ('{folder_path or 'Not Specified'}')",
+                error_id="ERR-REVIEW-001",
+                context={"folder_path": folder_path, "channel_id": channel_id}
+            )
             return CampaignScanResponse(
                 success=False,
+                message=f"Folder path does not exist on this PC: '{folder_path or 'Not Specified'}'",
                 summary=CampaignScanSummary(),
                 assets=[]
             )

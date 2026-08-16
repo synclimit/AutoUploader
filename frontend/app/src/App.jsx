@@ -100,10 +100,11 @@ function renderModule(activeModule) {
 
 import AccountsConfirm from './components/accounts/accounts/AccountsConfirm'
 import NotificationToast from './components/common/NotificationToast'
+import DiagnosticCenterModal from './components/common/DiagnosticCenterModal'
 import { Toaster } from 'react-hot-toast'
 import ActivationWizard from './components/license/ActivationWizard'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSettingsStore } from './store/settings/settingsStore'
 
 export default function App() {
@@ -113,6 +114,18 @@ export default function App() {
   const licenseData = useSplashStore((s) => s.licenseData)
   const recheckLicense = useSplashStore((s) => s.recheckLicense)
   const config = useSettingsStore(s => s.config)
+
+  const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false)
+  const [diagnosticErrorId, setDiagnosticErrorId] = useState(null)
+
+  useEffect(() => {
+    const handleOpenDiagnostic = (e) => {
+      setDiagnosticErrorId(e.detail?.errorId || null)
+      setIsDiagnosticOpen(true)
+    }
+    window.addEventListener('open-diagnostic-center', handleOpenDiagnostic)
+    return () => window.removeEventListener('open-diagnostic-center', handleOpenDiagnostic)
+  }, [])
 
   useEffect(() => {
     if (!config) return
@@ -147,6 +160,7 @@ export default function App() {
       <div className="h-screen w-screen bg-[var(--bg-primary)] text-white overflow-hidden flex flex-col relative" style={{'--bg-primary': 'var(--bg-primary, #0b0f17)'}}>
         <ActivationWizard statusData={licenseData} checkLicense={recheckLicense} />
         <NotificationToast />
+        <DiagnosticCenterModal isOpen={isDiagnosticOpen} onClose={() => setIsDiagnosticOpen(false)} initialErrorId={diagnosticErrorId} />
         <Toaster position="bottom-right" />
       </div>
     )
@@ -166,6 +180,7 @@ export default function App() {
 
       </div>
       <NotificationToast />
+      <DiagnosticCenterModal isOpen={isDiagnosticOpen} onClose={() => setIsDiagnosticOpen(false)} initialErrorId={diagnosticErrorId} />
       <Toaster position="bottom-right" />
     </div>
 

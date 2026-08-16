@@ -3,6 +3,8 @@ import { Search, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Zap, FileVideo
 import apiClient from '../../api/client'
 import { showToast } from './NotificationToast'
 
+import { createPortal } from 'react-dom'
+
 export default function WatchFolderDiagnosticModal({ channelId, isOpen, onClose, onRefreshQueue }) {
   const [isDiagnosing, setIsDiagnosing] = useState(false)
   const [isForceIngesting, setIsForceIngesting] = useState(false)
@@ -49,9 +51,11 @@ export default function WatchFolderDiagnosticModal({ channelId, isOpen, onClose,
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#070b14] border border-cyan-500/30 rounded-[20px] shadow-[0_0_50px_rgba(6,182,212,0.15)] flex flex-col overflow-hidden">
+  const portalTarget = document.getElementById('portal-root') || document.body
+
+  return createPortal(
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-fadeIn">
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#070b14] border border-cyan-500/40 rounded-[20px] shadow-[0_0_80px_rgba(6,182,212,0.4)] flex flex-col overflow-hidden z-[1000000]">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-white/[0.02]">
@@ -221,6 +225,7 @@ export default function WatchFolderDiagnosticModal({ channelId, isOpen, onClose,
         </div>
 
       </div>
-    </div>
+    </div>,
+    portalTarget
   )
 }

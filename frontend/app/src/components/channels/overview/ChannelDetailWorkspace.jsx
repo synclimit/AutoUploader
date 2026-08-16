@@ -32,41 +32,40 @@ export default function ChannelDetailWorkspace({ channel }) {
   const [currentChannelId, setCurrentChannelId] = useState(null)
   const [playlists, setPlaylists] = useState([])
 
-  // Initialize state
+  // Initialize state from channel props whenever channel or configuration changes
   useEffect(() => {
-    if (channel && channel.id !== currentChannelId && 'schema_version' in channel) {
-      const parseJSON = (str, fallback) => {
-        try { return typeof str === 'string' ? JSON.parse(str) : (str || fallback) }
-        catch { return fallback }
-      }
-      const initial = {
-        pipelines: parseJSON(channel.pipelines, { long: {}, shorts: {} }),
-        upload_defaults: parseJSON(channel.upload_defaults, { long: { basic_info: {}, advanced: {} }, shorts: { basic_info: {}, advanced: {} } }),
-        ai_identity: parseJSON(channel.ai_identity, {})
-      }
-      setOriginal(initial)
-      setDrafts(JSON.parse(JSON.stringify(initial))) // deep copy
-      setCurrentChannelId(channel.id)
-      setAliasDraft(channel.alias || '')
-      setIsEditingAlias(false)
-
-      if (channel.authentication_status === 'Connected') {
-        const fetchPlaylists = async () => {
-          try {
-            const res = await apiClient.get(`/channels/${channel.id}/playlists`)
-            if (res && Array.isArray(res)) {
-              setPlaylists(res.map(p => ({ label: p.title, value: p.id })))
-            }
-          } catch (e) {
-            console.error("Failed to fetch playlists:", e)
-          }
-        }
-        fetchPlaylists()
-      } else {
-        setPlaylists([])
-      }
+    if (!channel || !channel.id) return;
+    const parseJSON = (str, fallback) => {
+      try { return typeof str === 'string' ? JSON.parse(str) : (str || fallback) }
+      catch { return fallback }
     }
-  }, [channel?.id, currentChannelId, channel?.authentication_status])
+    const initial = {
+      pipelines: parseJSON(channel.pipelines, { long: {}, shorts: {} }),
+      upload_defaults: parseJSON(channel.upload_defaults, { long: { basic_info: {}, advanced: {} }, shorts: { basic_info: {}, advanced: {} } }),
+      ai_identity: parseJSON(channel.ai_identity, {})
+    }
+    setOriginal(initial)
+    setDrafts(JSON.parse(JSON.stringify(initial))) // deep copy
+    setCurrentChannelId(channel.id)
+    setAliasDraft(channel.alias || '')
+    setIsEditingAlias(false)
+
+    if (channel.authentication_status === 'Connected') {
+      const fetchPlaylists = async () => {
+        try {
+          const res = await apiClient.get(`/channels/${channel.id}/playlists`)
+          if (res && Array.isArray(res)) {
+            setPlaylists(res.map(p => ({ label: p.title, value: p.id })))
+          }
+        } catch (e) {
+          console.error("Failed to fetch playlists:", e)
+        }
+      }
+      fetchPlaylists()
+    } else {
+      setPlaylists([])
+    }
+  }, [channel?.id, channel?.schema_version, channel?.pipelines, channel?.upload_defaults, channel?.ai_identity])
 
   const [realtimeStates, setRealtimeStates] = useState(channel?.pipeline_states || '{}')
   
@@ -117,18 +116,10 @@ export default function ChannelDetailWorkspace({ channel }) {
         console.warn('Scan trigger notice:', scanErr)
       }
 
-      toast.success('Configuration saved. Videos loaded into Review Module!', {
+      toast.success('Configuration saved successfully!', {
         style: { background: '#0a0f18', color: '#22d3ee', border: '1px solid rgba(34, 211, 238, 0.2)' },
         iconTheme: { primary: '#22d3ee', secondary: '#0a0f18' }
       })
-
-      // Prefetch review tasks and redirect directly to Review Module
-      const { useQueueStore } = await import('../../../store/upload/uploadStore')
-      useQueueStore.getState().setFilters({ status: ['WATCHED', 'REVIEW', 'WAITING', 'WAITING_AI', 'SCHEDULED', 'QUEUED'] })
-      await useQueueStore.getState().fetchTasks()
-
-      const { useAppStore } = await import('../../../store/app/appStore')
-      useAppStore.getState().setActiveModule('Review')
     } catch (e) {
       toast.error('Failed to save channel configuration', {
         style: { background: '#0a0f18', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }

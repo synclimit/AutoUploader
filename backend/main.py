@@ -125,7 +125,44 @@ Base.metadata.create_all(bind=engine)
 
 @app.on_event("startup")
 def startup_event():
-    """Start the background threads."""
+    """Start the background threads and diagnostic verification."""
+    try:
+        from services.system.diagnostic_service import diagnostic_service
+        diagnostic_service.log("INFO", "SYSTEM", "STARTUP", "Application backend initialized successfully.")
+        
+        # Verify update version post-restart
+        update_flag_file = os.path.join(PathService.get_logs_dir(), "pending_update_verify.json")
+        if os.path.exists(update_flag_file):
+            try:
+                with open(update_flag_file, "r") as uf:
+                    u_data = json.load(uf)
+                os.remove(update_flag_file)
+                
+                expected_ver = u_data.get("expected_version")
+                frozen = getattr(sys, 'frozen', False)
+                base_dir = sys._MEIPASS if frozen else os.path.dirname(os.path.abspath(__file__))
+                version_file = os.path.join(base_dir, "version.json")
+                actual_ver = None
+                if os.path.exists(version_file):
+                    with open(version_file, "r") as vf:
+                        actual_ver = "v" + json.load(vf).get("version", "")
+                        
+                if expected_ver and actual_ver and expected_ver.lower() != actual_ver.lower():
+                    diagnostic_service.log(
+                        "ERROR",
+                        "UPDATE",
+                        "VERSION_VERIFY_FAILED",
+                        f"Update applied but version mismatch detected. Expected: {expected_ver}, Actual: {actual_ver}",
+                        error_id="ERR-UPDATE-VERSION-MISMATCH",
+                        details={"expected": expected_ver, "actual": actual_ver}
+                    )
+                else:
+                    diagnostic_service.log("INFO", "UPDATE", "VERSION_VERIFY_SUCCESS", f"Update verified successfully. Running version: {actual_ver or expected_ver}")
+            except Exception as ve:
+                print("Update verification notice:", ve)
+    except Exception as e:
+        print("[Diagnostic Startup Notice]", e)
+
     try:
         from database.db import SessionLocal, engine
         from sqlalchemy import text, inspect
@@ -419,10 +456,18 @@ if __name__ == "__main__":
     except Exception:
         pass
         
-    # Prevent multiple instances
+    # Prevent multiple instances with retry delay to allow previous process cleanup after auto-update
     mutex_name = "Global\\AutoUploader_SingleInstance_Mutex"
-    mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
-    if ctypes.windll.kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
+    mutex = None
+    already_exists = True
+    for _ in range(5):
+        mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
+        if ctypes.windll.kernel32.GetLastError() != 183: # ERROR_ALREADY_EXISTS
+            already_exists = False
+            break
+        time.sleep(0.5)
+        
+    if already_exists:
         sys.exit(0)
     
     # Redirect stdout and stderr to a file so we can see what's crashing
