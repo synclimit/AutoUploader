@@ -56,3 +56,4 @@ DNA APLIKASI SAMPAI DEPLOY/
 # Releases
 release/
 *.exe
+!release/RaynzPitStop_Setup.exe

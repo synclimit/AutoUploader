@@ -52,10 +52,13 @@ def check_dependencies():
         log("ERROR: npm is not installed or not in PATH.")
         sys.exit(1)
         
-    # 3. PyInstaller (inside backend venv)
+    # 3. PyInstaller
     pyinstaller_path = os.path.join(BASE_DIR, "backend", "venv", "Scripts", "pyinstaller.exe")
-    if not os.path.exists(pyinstaller_path) or subprocess.call(f'"{pyinstaller_path}" --version', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0:
-        log("ERROR: PyInstaller not found in backend venv. Run: cd ../backend && venv\\Scripts\\pip install pyinstaller")
+    has_pyi = os.path.exists(pyinstaller_path) and subprocess.call(f'"{pyinstaller_path}" --version', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    if not has_pyi:
+        has_pyi = subprocess.call("python -m PyInstaller --version", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    if not has_pyi:
+        log("ERROR: PyInstaller not found. Please install pyinstaller via: pip install pyinstaller")
         sys.exit(1)
         
     # 4. Inno Setup
