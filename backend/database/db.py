@@ -29,18 +29,23 @@ def ensure_schema_migrations(target_engine):
     try:
         from sqlalchemy import inspect, text
         inspector = inspect(target_engine)
+        
+        # 1. Sync accounts <-> channels table entries to guarantee Foreign Key integrity
+        if inspector.has_table("channels") and inspector.has_table("accounts"):
+            with target_engine.begin() as conn:
+                conn.execute(text("INSERT OR IGNORE INTO accounts (id, channel_name) SELECT id, alias_name FROM channels WHERE id IS NOT NULL"))
+                conn.execute(text("INSERT OR IGNORE INTO channels (id, alias_name) SELECT id, channel_name FROM accounts WHERE id IS NOT NULL AND channel_name IS NOT NULL"))
+
+        # 2. Sync upload_tasks columns and legacy channel_id / account_id mappings
         if inspector.has_table("upload_tasks"):
             existing = {c["name"] for c in inspector.get_columns("upload_tasks")}
-            with target_engine.connect() as conn:
+            with target_engine.begin() as conn:
                 if "channel_id" not in existing:
                     conn.execute(text("ALTER TABLE upload_tasks ADD COLUMN channel_id VARCHAR"))
-                    conn.commit()
                 if "account_id" not in existing:
                     conn.execute(text("ALTER TABLE upload_tasks ADD COLUMN account_id VARCHAR"))
-                    conn.commit()
                 conn.execute(text("UPDATE upload_tasks SET channel_id = account_id WHERE (channel_id IS NULL OR channel_id = '') AND account_id IS NOT NULL"))
                 conn.execute(text("UPDATE upload_tasks SET account_id = channel_id WHERE (account_id IS NULL OR account_id = '') AND channel_id IS NOT NULL"))
-                conn.commit()
     except Exception as e:
         print("[DB Schema Migration Notice]", e)
 

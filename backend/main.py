@@ -319,6 +319,9 @@ def startup_event():
                             db.rollback()
                 if table == "upload_tasks":
                     try:
+                        if inspector.has_table("channels") and inspector.has_table("accounts"):
+                            db.execute(text("INSERT OR IGNORE INTO accounts (id, channel_name) SELECT id, alias_name FROM channels WHERE id IS NOT NULL"))
+                            db.execute(text("INSERT OR IGNORE INTO channels (id, alias_name) SELECT id, channel_name FROM accounts WHERE id IS NOT NULL AND channel_name IS NOT NULL"))
                         db.execute(text("UPDATE upload_tasks SET channel_id = account_id WHERE (channel_id IS NULL OR channel_id = '') AND account_id IS NOT NULL"))
                         db.execute(text("UPDATE upload_tasks SET account_id = channel_id WHERE (account_id IS NULL OR account_id = '') AND channel_id IS NOT NULL"))
                         db.commit()
