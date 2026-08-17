@@ -130,17 +130,20 @@ jobs:
         run: |
           hdiutil create -volname "RaynzPitStop" -srcfolder dist/RaynzPitStop.app -ov -format UDZO RaynzPitStop.dmg
 
-      - name: Cleanup Old macOS Asset
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read Version Info
+        id: ver
+        shell: bash
         run: |
-          gh release delete-asset latest RaynzPitStop.dmg -y || true
+          VERSION=$(python3 -c "import json; print(json.load(open('version.json'))['version'])")
+          BUILD=$(python3 -c "import json; print(json.load(open('version.json'))['build'])")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build=$BUILD" >> $GITHUB_OUTPUT
 
       - name: Update Release with macOS DMG
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Latest Ryanz Pitstop Build
-          body: "Automatically compiled latest build from master."
+          name: Ryanz Pitstop v${{ steps.ver.outputs.version }} (Build ${{ steps.ver.outputs.build }})
+          body: "Ryanz Pitstop v${{ steps.ver.outputs.version }} (Build ${{ steps.ver.outputs.build }})"
           files: backend/RaynzPitStop.dmg
           make_latest: true
