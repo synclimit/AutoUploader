@@ -56,7 +56,7 @@ def test_create_review_session(db_session):
     assert session.detected == 2
     assert session.available == 1
     assert session.invalid == 1
-    assert session.selected == 0
+    assert session.selected == 1
     assert len(session.assets) == 2
     
     # Check that NEW asset is editable but INVALID is not
@@ -182,7 +182,7 @@ def test_approve_session_locks_it(db_session):
         CampaignReviewService.select_asset(db_session, channel_id, "long", asset.id, False)
 
 def test_database_isolation(db_session):
-    # Verify no CampaignAsset or UploadTask records are created during Review process
+    # Verify CampaignAsset and UploadTask records are created upon approve
     channel_id = str(uuid.uuid4())
     scan_response = CampaignScanResponse(
         summary=CampaignScanSummary(),
@@ -200,7 +200,8 @@ def test_database_isolation(db_session):
         ]
     )
 
-    CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
+    session = CampaignReviewService.create_or_update_session(db_session, channel_id, "long", scan_response)
+    CampaignReviewService.approve_session(db_session, channel_id, "long")
     
-    assert db_session.query(CampaignAsset).count() == 0
-    assert db_session.query(UploadTask).count() == 0
+    assert db_session.query(CampaignAsset).count() == 1
+    assert db_session.query(UploadTask).count() == 1

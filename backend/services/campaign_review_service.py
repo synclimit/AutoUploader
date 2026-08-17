@@ -158,6 +158,56 @@ class CampaignReviewService:
         return session
 
     @staticmethod
+    def _auto_promote_to_review(db: Session, session: CampaignReviewSession, channel_id: str, pipeline_type: str):
+        from models import Channel, UploadTask
+        channel = db.query(Channel).filter(Channel.id == channel_id).first()
+        for review_asset in session.assets:
+            if review_asset.selected and review_asset.filepath:
+                # Promote to CampaignAsset if not existing
+                if review_asset.sha256 and not CampaignAssetService.exists(db, review_asset.fingerprint, channel_id=channel_id):
+                    asset_data = {
+                        "channel_id": channel_id,
+                        "campaign_id": session.id,
+                        "fingerprint": review_asset.fingerprint,
+                        "sha256": review_asset.sha256,
+                        "filepath": review_asset.filepath,
+                        "filename": review_asset.filename,
+                        "filesize": review_asset.filesize,
+                        "duration_seconds": review_asset.duration_seconds,
+                        "source_type": "CAMPAIGN",
+                        "asset_origin": "CAMPAIGN_SCAN",
+                        "status": "NEW"
+                    }
+                    CampaignAssetService.create_asset(db, asset_data)
+                
+                # Direct promotion to UploadTask in Review workspace
+                existing_task = db.query(UploadTask).filter(
+                    UploadTask.channel_id == channel_id,
+                    UploadTask.video_path == review_asset.filepath
+                ).first()
+                if not existing_task:
+                    import os
+                    task = UploadTask(
+                        id=str(uuid.uuid4()),
+                        channel_id=channel_id,
+                        account_id=channel_id,
+                        profile_id=channel.profile_id if channel else None,
+                        status="WATCHED",
+                        metadata_source="RENDERER",
+                        source_type="M1_VIDEO_SPLITTER",
+                        package_folder=os.path.dirname(review_asset.filepath),
+                        video_path=review_asset.filepath,
+                        file_name=review_asset.filename,
+                        file_size=int(review_asset.filesize or 0),
+                        title=review_asset.title or review_asset.filename.rsplit('.', 1)[0],
+                        privacy_status="private",
+                        pipeline_type=pipeline_type,
+                        upload_mode="Waiting For Approval",
+                        created_at=datetime.utcnow()
+                    )
+                    db.add(task)
+
+    @staticmethod
     def recalculate_summary(db: Session, session: CampaignReviewSession):
         detected = 0
         available = 0
