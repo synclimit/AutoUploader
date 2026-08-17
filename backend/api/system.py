@@ -228,46 +228,36 @@ def check_update():
                 local_version = "v" + ver_data.get("version", "1.0.0")
                 local_build = ver_data.get("build", 0)
 
-        download_url = ""
+        download_url = "https://github.com/synclimit/AutoUploader/releases/download/latest/RaynzPitStop_Setup.exe"
         latest_version = ""
         release_notes = ""
         remote_build = 0
         
-        req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases")
-        req.add_header("User-Agent", "AutoUploader-App")
-        
-        # 1. First attempt: Query GitHub Releases API
+        # 1. Query GitHub Releases API for tag 'latest' specifically
+        tag_req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases/tags/latest")
+        tag_req.add_header("User-Agent", "AutoUploader-App")
         try:
-            with _safe_urlopen(req, timeout=10) as response:
-                releases = json.loads(response.read().decode())
-                if isinstance(releases, list) and len(releases) > 0:
+            with _safe_urlopen(tag_req, timeout=10) as response:
+                rel = json.loads(response.read().decode())
+                if isinstance(rel, dict):
                     import re
-                    for rel in releases:
-                        for asset in rel.get("assets", []):
-                            if asset.get("name", "").endswith(".exe"):
-                                download_url = asset.get("browser_download_url", "")
-                                rel_name = rel.get("name", "")
-                                rel_body = rel.get("body", "")
-                                release_notes = rel_body
-                                
-                                m = re.search(r'Build\s+(\d+)', rel_name + " " + rel_body, re.IGNORECASE)
-                                if m:
-                                    remote_build = int(m.group(1))
-                                
-                                v_m = re.search(r'v?(\d+\.\d+\.\d+)', rel_name + " " + rel.get("tag_name", ""), re.IGNORECASE)
-                                if v_m:
-                                    latest_version = "v" + v_m.group(1)
-                                else:
-                                    latest_version = rel.get("tag_name", "")
-                                break
-                        if download_url:
+                    for asset in rel.get("assets", []):
+                        if asset.get("name", "").endswith(".exe"):
+                            download_url = asset.get("browser_download_url", "")
+                            rel_name = rel.get("name", "")
+                            rel_body = rel.get("body", "")
+                            release_notes = rel_body
+                            
+                            m = re.search(r'Build\s+(\d+)', rel_name + " " + rel_body, re.IGNORECASE)
+                            if m:
+                                remote_build = int(m.group(1))
+                            
+                            v_m = re.search(r'v?(\d+\.\d+\.\d+)', rel_name + " " + rel_body, re.IGNORECASE)
+                            if v_m:
+                                latest_version = "v" + v_m.group(1)
                             break
         except Exception as e:
-            print("GitHub Releases API lookup error (will use direct fallback URL):", e)
-
-        # 2. Direct Fallback URL if API response had no executable asset
-        if not download_url:
-            download_url = "https://raw.githubusercontent.com/synclimit/AutoUploader/master/release/RaynzPitStop_Setup.exe"
+            print("GitHub Releases API tag latest lookup error:", e)
             
         # 3. Always check remote version.json on master/main branch for latest commit build
         master_build = 0
