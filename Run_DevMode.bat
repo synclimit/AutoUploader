@@ -17,6 +17,10 @@ echo Starting Raynz PitStop Frontend (Port 5188)...
 cd /d "D:\RaynzPitStop\frontend\app"
 start "Raynz PitStop Frontend" npm run dev
 
+echo Waiting for services to initialize...
+timeout /t 3 >nul
+start http://localhost:5188
+
 echo.
 echo Raynz PitStop Dev Mode launched successfully!
 echo Frontend UI: http://localhost:5188

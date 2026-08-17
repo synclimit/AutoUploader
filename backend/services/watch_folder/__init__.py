@@ -1,1 +1,1 @@
-# watch_folder package
+# Package initialization\n

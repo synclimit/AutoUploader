@@ -5,7 +5,7 @@ import sys
 class PathService:
     @staticmethod
     def resolve_local_path(path: str) -> str:
-        """
+        r"""
         Dynamically resolves paths across different Windows user accounts and PCs.
         If a stored path (e.g. C:\Users\FAISAL\Downloads\Video) is run on another PC
         (e.g. C:\Users\TEMAN\Downloads\Video), automatically adapts to the current user's profile.
@@ -28,6 +28,8 @@ class PathService:
                 return candidate
 
         return clean_path
+
+
 
     @staticmethod
     def get_appdata_dir() -> str:

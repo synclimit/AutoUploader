@@ -8,6 +8,15 @@ import os
 import sys
 import logging
 
+if getattr(sys, 'frozen', False):
+    base_dir = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    if base_dir not in sys.path:
+        sys.path.insert(0, base_dir)
+else:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if base_dir not in sys.path:
+        sys.path.insert(0, base_dir)
+
 from datetime import datetime
 
 from services.system.path_service import PathService
@@ -38,7 +47,7 @@ if "--health-check" in sys.argv:
         sys.exit(1)
         
     print("[HEALTH] All checks passed.")
-    sys.exit(0)
+    os._exit(0)
 
 from database.db import engine
 from database.db import SessionLocal
