@@ -57,7 +57,7 @@ from models import UploadTask
 from fastapi.middleware.cors import CORSMiddleware
 from api.profiles import router as profiles_router
 from api.channels import router as accounts_router
-from api.queue import router as queue_router
+from api.queue_router import router as queue_router
 from api.watch_folder import router as watch_folder_router
 from api.upload_engine import router as upload_engine_router
 from api.settings import router as settings_router

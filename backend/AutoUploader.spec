@@ -11,7 +11,7 @@ block_cipher = None
 
 a = Analysis(
     ['main.py'],
-    pathex=['.', 'services', 'services/system', 'services/watch_folder', 'services/upload_engine', 'services/license', 'services/ai', 'services/ai_engine', 'api', 'database', 'scheduler'],
+    pathex=['.'],
     binaries=[] + binaries_pyd + binaries_core + binaries_fa + binaries_star + binaries_uv,
     datas=[
         ('frontend_dist', 'frontend_dist'),
@@ -58,7 +58,7 @@ a = Analysis(
         'schemas',
         'api',
         'api.channels',
-        'api.queue',
+        'api.queue_router',
         'api.watch_folder',
         'api.upload_engine',
         'api.settings',
