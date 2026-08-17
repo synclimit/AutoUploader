@@ -24,7 +24,14 @@ from services.system.path_service import PathService
 # 1. Migrate paths if this is the first run before DB binds
 PathService.perform_first_run_migration()
 
-# 2. Handle health-check CLI argument
+from services.watch_folder.engine import get_engine as get_wf_engine
+from services.upload_engine.engine import get_engine as get_upload_engine
+from services.campaign_execution_service import get_campaign_execution_engine
+from scheduler.upload_scheduler import get_scheduler_engine
+from scheduler.metadata_sync_scheduler import get_metadata_sync_engine
+from services.ai.automation import get_ai_automation_engine
+
+# 2. Handle health-check CLI argument (after full import validation)
 if "--health-check" in sys.argv:
     print("[HEALTH] Running health check...")
     try:
@@ -48,40 +55,6 @@ if "--health-check" in sys.argv:
         
     print("[HEALTH] All checks passed.")
     os._exit(0)
-
-from database.db import engine
-from database.db import SessionLocal
-from models import Base
-Base.metadata.create_all(bind=engine)
-from models import UploadTask
-from fastapi.middleware.cors import CORSMiddleware
-from api.profiles import router as profiles_router
-from api.channels import router as accounts_router
-from api.queue_router import router as queue_router
-from api.watch_folder import router as watch_folder_router
-from api.upload_engine import router as upload_engine_router
-from api.settings import router as settings_router
-from api.history import router as history_router
-from api.dashboard import router as dashboard_router
-from api.import_api import router as import_router
-from api.system import router as system_router
-from api.media import router as media_router
-from api.ai_engine import router as ai_engine_router
-from api.license import router as license_router
-from api.analytics import router as analytics_router
-from api.campaign_assets import router as campaign_assets_router
-from api.campaign_scan import router as campaign_scan_router
-from api.campaign_review import router as campaign_review_router
-from api.campaign_queue import router as campaign_queue_router
-from api.campaign_execution import router as campaign_execution_router
-from api.routers.oauth_router import router as oauth_router
-
-from services.watch_folder.engine import get_engine as get_wf_engine
-from services.upload_engine.engine import get_engine as get_upload_engine
-from services.campaign_execution_service import get_campaign_execution_engine
-from scheduler.upload_scheduler import get_scheduler_engine
-from scheduler.metadata_sync_scheduler import get_metadata_sync_engine
-from services.ai.automation import get_ai_automation_engine
 
 # Configure logging so Watch Folder Engine output is visible and logs are saved to a file
 log_dir = PathService.get_logs_dir()
