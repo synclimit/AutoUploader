@@ -587,7 +587,7 @@ if __name__ == "__main__":
 
     import time
     url = f"http://127.0.0.1:8000/?_cb={int(time.time())}"
-    webview.create_window(
+    window = webview.create_window(
         "Raynz PitStop", 
         url, 
         width=1200, 
@@ -597,4 +597,6 @@ if __name__ == "__main__":
         background_color='#05080e',
         js_api=api
     )
+    window.events.closed += exit_application
+    window.events.closing += exit_application
     webview.start()
