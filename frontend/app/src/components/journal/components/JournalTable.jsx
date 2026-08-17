@@ -1,4 +1,3 @@
-import React, { memo } from 'react';
 import * as ReactWindow from 'react-window';
 const List = ReactWindow.FixedSizeList || ReactWindow.default?.FixedSizeList;
 import { Clock, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
