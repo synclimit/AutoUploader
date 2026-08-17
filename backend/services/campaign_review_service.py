@@ -164,12 +164,13 @@ class CampaignReviewService:
         for review_asset in session.assets:
             if review_asset.selected and review_asset.filepath:
                 # Promote to CampaignAsset if not existing
-                if review_asset.sha256 and not CampaignAssetService.exists(db, review_asset.fingerprint, channel_id=channel_id):
+                sha_val = review_asset.sha256 or review_asset.fingerprint
+                if not CampaignAssetService.exists(db, review_asset.fingerprint, channel_id=channel_id):
                     asset_data = {
                         "channel_id": channel_id,
                         "campaign_id": session.id,
                         "fingerprint": review_asset.fingerprint,
-                        "sha256": review_asset.sha256,
+                        "sha256": sha_val,
                         "filepath": review_asset.filepath,
                         "filename": review_asset.filename,
                         "filesize": review_asset.filesize,
