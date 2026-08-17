@@ -65,7 +65,7 @@ class CampaignReviewService:
                     filesize=scan_asset.filesize,
                     duration_seconds=scan_asset.duration_seconds,
                     status=scan_asset.status,
-                    selected=False,
+                    selected=True if scan_asset.status == "NEW" else False,
                     editable=True if scan_asset.status == "NEW" else False,
                     title=scan_asset.filename.rsplit('.', 1)[0] # Default title
                 )
@@ -83,6 +83,9 @@ class CampaignReviewService:
         
         # Recalculate summary
         CampaignReviewService.recalculate_summary(db, session)
+        
+        # Auto-promote campaign assets directly into UploadTask for Review Workspace
+        CampaignReviewService._auto_promote_to_review(db, session, channel_id, pipeline_type)
         
         db.commit()
         db.refresh(session)
@@ -149,26 +152,7 @@ class CampaignReviewService:
             return session
             
         session.status = "LOCKED"
-        
-        # Promote selected CampaignReviewAssets into physical CampaignAssets if they don't exist
-        for review_asset in session.assets:
-            if review_asset.selected and review_asset.sha256:
-                if not CampaignAssetService.exists(db, review_asset.fingerprint, channel_id=channel_id):
-                    asset_data = {
-                        "channel_id": channel_id,
-                        "campaign_id": session.id,
-                        "fingerprint": review_asset.fingerprint,
-                        "sha256": review_asset.sha256,
-                        "filepath": review_asset.filepath,
-                        "filename": review_asset.filename,
-                        "filesize": review_asset.filesize,
-                        "duration_seconds": review_asset.duration_seconds,
-                        "source_type": "CAMPAIGN",
-                        "asset_origin": "CAMPAIGN_SCAN",
-                        "status": "NEW"
-                    }
-                    CampaignAssetService.create_asset(db, asset_data)
-        
+        CampaignReviewService._auto_promote_to_review(db, session, channel_id, pipeline_type)
         db.commit()
         db.refresh(session)
         return session
