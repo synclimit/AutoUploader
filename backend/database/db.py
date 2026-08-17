@@ -30,11 +30,34 @@ def ensure_schema_migrations(target_engine):
         from sqlalchemy import inspect, text
         inspector = inspect(target_engine)
         
-        # 1. Sync accounts <-> channels table entries to guarantee Foreign Key integrity
+        # 1. Sync accounts <-> channels table entries to guarantee Foreign Key & Data integrity
         if inspector.has_table("channels") and inspector.has_table("accounts"):
+            acc_cols = set(c["name"] for c in inspector.get_columns("accounts"))
+            chn_cols = set(c["name"] for c in inspector.get_columns("channels"))
+            shared = [c for c in acc_cols if c in chn_cols and c not in ("id", "alias_name", "channel_name")]
+            
             with target_engine.begin() as conn:
-                conn.execute(text("INSERT OR IGNORE INTO accounts (id, channel_name) SELECT id, alias_name FROM channels WHERE id IS NOT NULL"))
-                conn.execute(text("INSERT OR IGNORE INTO channels (id, alias_name) SELECT id, channel_name FROM accounts WHERE id IS NOT NULL AND channel_name IS NOT NULL"))
+                # 1a. Insert missing channels from accounts with all shared columns
+                sel = "id, channel_name" + (", " + ", ".join(shared) if shared else "")
+                ins = "id, alias_name" + (", " + ", ".join(shared) if shared else "")
+                conn.execute(text(f"INSERT OR IGNORE INTO channels ({ins}) SELECT {sel} FROM accounts WHERE id IS NOT NULL"))
+                
+                # 1b. Reverse sync: insert missing accounts from channels
+                sel_rev = "id, alias_name" + (", " + ", ".join(shared) if shared else "")
+                ins_rev = "id, channel_name" + (", " + ", ".join(shared) if shared else "")
+                conn.execute(text(f"INSERT OR IGNORE INTO accounts ({ins_rev}) SELECT {sel_rev} FROM channels WHERE id IS NOT NULL"))
+
+                # 1c. Fill in missing/null columns in channels from accounts
+                for col in ["alias_name"] + shared:
+                    acc_col = "channel_name" if col == "alias_name" else col
+                    if acc_col in acc_cols:
+                        conn.execute(text(f"UPDATE channels SET {col} = (SELECT {acc_col} FROM accounts WHERE accounts.id = channels.id) WHERE ({col} IS NULL OR {col} = '') AND EXISTS (SELECT 1 FROM accounts WHERE accounts.id = channels.id AND accounts.{acc_col} IS NOT NULL AND accounts.{acc_col} != '')"))
+
+                # 1d. Fill in missing/null columns in accounts from channels
+                for col in ["channel_name"] + shared:
+                    chn_col = "alias_name" if col == "channel_name" else col
+                    if chn_col in chn_cols:
+                        conn.execute(text(f"UPDATE accounts SET {col} = (SELECT {chn_col} FROM channels WHERE channels.id = accounts.id) WHERE ({col} IS NULL OR {col} = '') AND EXISTS (SELECT 1 FROM channels WHERE channels.id = accounts.id AND channels.{chn_col} IS NOT NULL AND channels.{chn_col} != '')"))
 
         # 2. Sync upload_tasks columns and legacy channel_id / account_id mappings
         if inspector.has_table("upload_tasks"):

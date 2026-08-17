@@ -320,8 +320,28 @@ def startup_event():
                 if table == "upload_tasks":
                     try:
                         if inspector.has_table("channels") and inspector.has_table("accounts"):
-                            db.execute(text("INSERT OR IGNORE INTO accounts (id, channel_name) SELECT id, alias_name FROM channels WHERE id IS NOT NULL"))
-                            db.execute(text("INSERT OR IGNORE INTO channels (id, alias_name) SELECT id, channel_name FROM accounts WHERE id IS NOT NULL AND channel_name IS NOT NULL"))
+                            acc_cols = set(c["name"] for c in inspector.get_columns("accounts"))
+                            chn_cols = set(c["name"] for c in inspector.get_columns("channels"))
+                            shared = [c for c in acc_cols if c in chn_cols and c not in ("id", "alias_name", "channel_name")]
+                            
+                            sel = "id, channel_name" + (", " + ", ".join(shared) if shared else "")
+                            ins = "id, alias_name" + (", " + ", ".join(shared) if shared else "")
+                            db.execute(text(f"INSERT OR IGNORE INTO channels ({ins}) SELECT {sel} FROM accounts WHERE id IS NOT NULL"))
+                            
+                            sel_rev = "id, alias_name" + (", " + ", ".join(shared) if shared else "")
+                            ins_rev = "id, channel_name" + (", " + ", ".join(shared) if shared else "")
+                            db.execute(text(f"INSERT OR IGNORE INTO accounts ({ins_rev}) SELECT {sel_rev} FROM channels WHERE id IS NOT NULL"))
+
+                            for col in ["alias_name"] + shared:
+                                acc_col = "channel_name" if col == "alias_name" else col
+                                if acc_col in acc_cols:
+                                    db.execute(text(f"UPDATE channels SET {col} = (SELECT {acc_col} FROM accounts WHERE accounts.id = channels.id) WHERE ({col} IS NULL OR {col} = '') AND EXISTS (SELECT 1 FROM accounts WHERE accounts.id = channels.id AND accounts.{acc_col} IS NOT NULL AND accounts.{acc_col} != '')"))
+
+                            for col in ["channel_name"] + shared:
+                                chn_col = "alias_name" if col == "channel_name" else col
+                                if chn_col in chn_cols:
+                                    db.execute(text(f"UPDATE accounts SET {col} = (SELECT {chn_col} FROM channels WHERE channels.id = accounts.id) WHERE ({col} IS NULL OR {col} = '') AND EXISTS (SELECT 1 FROM accounts WHERE accounts.id = channels.id AND accounts.{chn_col} IS NOT NULL AND accounts.{chn_col} != '')"))
+
                         db.execute(text("UPDATE upload_tasks SET channel_id = account_id WHERE (channel_id IS NULL OR channel_id = '') AND account_id IS NOT NULL"))
                         db.execute(text("UPDATE upload_tasks SET account_id = channel_id WHERE (account_id IS NULL OR account_id = '') AND channel_id IS NOT NULL"))
                         db.commit()
