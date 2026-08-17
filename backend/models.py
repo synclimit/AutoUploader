@@ -113,12 +113,27 @@ class OAuthCredential(Base):
     channel = relationship("Channel", back_populates="oauth_credential")
 
 
+from sqlalchemy.orm import relationship, validates
+
 class UploadTask(Base):
     __tablename__ = "upload_tasks"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     channel_id = Column(String, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
+    account_id = Column(String, nullable=True)
     profile_id = Column(String, ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True)
+
+    @validates('channel_id')
+    def _validate_channel_id(self, key, value):
+        self.account_id = value
+        return value
+
+    def __init__(self, **kwargs):
+        if 'channel_id' in kwargs and 'account_id' not in kwargs:
+            kwargs['account_id'] = kwargs['channel_id']
+        elif 'account_id' in kwargs and 'channel_id' not in kwargs:
+            kwargs['channel_id'] = kwargs['account_id']
+        super().__init__(**kwargs)
     
     # State Machine
     status = Column(String, nullable=False, default="WATCHED")

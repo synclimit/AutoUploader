@@ -198,6 +198,7 @@ def startup_event():
                 ("updated_at", "DATETIME")
             ],
             "upload_tasks": [
+                ("account_id", "VARCHAR"),
                 ("channel_id", "VARCHAR"),
                 ("profile_id", "VARCHAR"),
                 ("status", "VARCHAR DEFAULT 'WATCHED'"),
@@ -316,6 +317,14 @@ def startup_event():
                         except Exception as e:
                             print(f"[DB Error] {e}")
                             db.rollback()
+                if table == "upload_tasks":
+                    try:
+                        db.execute(text("UPDATE upload_tasks SET channel_id = account_id WHERE (channel_id IS NULL OR channel_id = '') AND account_id IS NOT NULL"))
+                        db.execute(text("UPDATE upload_tasks SET account_id = channel_id WHERE (account_id IS NULL OR account_id = '') AND channel_id IS NOT NULL"))
+                        db.commit()
+                    except Exception as e:
+                        print(f"[DB Sync Notice] {e}")
+                        db.rollback()
         db.close()
     except Exception as e:
         print(f"[DB Migration Error] {e}")
