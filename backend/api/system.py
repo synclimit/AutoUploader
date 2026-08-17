@@ -148,7 +148,7 @@ Get-Process -Name "RaynzPitStop", "RaynzPitStop_App", "AutoUploader" -ErrorActio
 Start-Sleep -Seconds 2
 $installerArgs = @("/DIR=`"$rawDir`"", '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
 "[{datetime.now()}] Running elevated installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -Verb RunAs -PassThru -Wait
+$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -WindowStyle Hidden -PassThru -Wait
 "[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
 Start-Sleep -Seconds 2
 
@@ -181,7 +181,7 @@ taskkill /f /im "RaynzPitStop.exe" > nul 2>&1
 taskkill /f /im "RaynzPitStop_App.exe" > nul 2>&1
 taskkill /f /im "AutoUploader.exe" > nul 2>&1
 timeout /t 1 /nobreak > nul
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "{ps_path}"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{ps_path}"
 exit
 '''
     try:
@@ -190,9 +190,10 @@ exit
         with open(bat_path, "w", encoding="utf-8") as f_bat:
             f_bat.write(bat_content)
             
-        DETACHED_FLAGS = 0x00000008 | 0x00000200
+        CREATE_NO_WINDOW = 0x08000000
+        DETACHED_FLAGS = 0x00000008 | 0x00000200 | CREATE_NO_WINDOW
         subprocess.Popen(
-            ['cmd.exe', '/c', bat_path],
+            ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', ps_path],
             cwd=temp_dir,
             creationflags=DETACHED_FLAGS,
             close_fds=True
