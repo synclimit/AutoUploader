@@ -11,12 +11,25 @@ from models import UploadTask, GlobalSettings, Channel, Profile
 def test_upload_task_immutability():
     db = SessionLocal()
     
+    # Clean old test data if present
+    db.query(UploadTask).filter(UploadTask.id == "test_immutable_task").delete()
+    db.query(Channel).filter(Channel.id == "test_account").delete()
+    db.query(Profile).filter(Profile.id == "test_profile").delete()
+    db.commit()
+
     # 1. Create initial settings
-    pref = GlobalSettings(general_theme="dark", general_language="en", upload_concurrent=3)
+    pref = db.query(GlobalSettings).first()
+    if not pref:
+        pref = GlobalSettings(general_theme="dark", general_language="en", upload_concurrent=3)
+        db.add(pref)
+    else:
+        pref.general_theme = "dark"
+        pref.upload_concurrent = 3
+    
     profile = Profile(id="test_profile", name="Default Profile", content_type="Longform (16:9)")
     channel = Channel(id="test_account", channel_name="Test Channel", publish_visibility="private", language="en")
     
-    db.add_all([pref, profile, channel])
+    db.add_all([profile, channel])
     db.commit()
     
     # 2. Create UploadTask based on these settings
@@ -27,7 +40,7 @@ def test_upload_task_immutability():
         description="Original Description",
         privacy_status="private",
         tags="test,vlog",
-        language="en",
+        default_language="en",
         source_type="MANUAL_UPLOAD",
         metadata_source="MANUAL",
         package_folder="/test/pkg",
@@ -51,11 +64,10 @@ def test_upload_task_immutability():
     assert refetched_task.description == "Original Description"
     assert refetched_task.privacy_status == "private"
     assert refetched_task.tags == "test,vlog"
-    assert refetched_task.language == "en"
+    assert refetched_task.default_language == "en"
     
     # Cleanup
     db.delete(refetched_task)
-    db.delete(pref)
     db.delete(channel)
     db.delete(profile)
     db.commit()

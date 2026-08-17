@@ -100,13 +100,19 @@ class UploadService:
         channel = db.query(Channel).filter(Channel.id == data.channel_id).first()
         if channel and data.source_type != 'CAMPAIGN_EXECUTION':
             try:
-                defaults_json = json.loads(channel.upload_defaults) if channel.upload_defaults else {}
-                advanced_json = json.loads(channel.advanced_settings) if channel.advanced_settings else {}
+                defaults_json = json.loads(channel.upload_defaults) if (channel.upload_defaults and isinstance(channel.upload_defaults, str)) else (channel.upload_defaults or {})
+                if not isinstance(defaults_json, dict):
+                    defaults_json = {}
+                advanced_json = json.loads(channel.advanced_settings) if (channel.advanced_settings and isinstance(channel.advanced_settings, str)) else (channel.advanced_settings or {})
+                if not isinstance(advanced_json, dict):
+                    advanced_json = {}
                 
                 pipeline = data.pipeline_type if data.pipeline_type else "long"
                 
-                p_defaults = defaults_json.get(pipeline, {}).get("basic_info", {})
-                p_advanced = defaults_json.get(pipeline, {}).get("advanced", {})
+                p_defaults = (defaults_json.get(pipeline) or {}).get("basic_info") or {}
+                p_advanced = (defaults_json.get(pipeline) or {}).get("advanced") or {}
+                if not isinstance(p_defaults, dict): p_defaults = {}
+                if not isinstance(p_advanced, dict): p_advanced = {}
                 
                 # Basic Info
                 if data.title is None and p_defaults.get("title_template"): data.title = p_defaults.get("title_template")

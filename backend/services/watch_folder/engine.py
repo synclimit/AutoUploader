@@ -211,6 +211,9 @@ class WatchFolderEngine(EngineBase):
         today_start = today_start_tz.astimezone(pytz.UTC).replace(tzinfo=None)
 
         for p_key, p_config in pipelines.items():
+            if not isinstance(p_config, dict):
+                continue
+
             if not is_manual and not self._running:
                 break
 

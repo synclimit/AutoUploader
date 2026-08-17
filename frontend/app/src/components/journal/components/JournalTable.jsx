@@ -1,5 +1,5 @@
-import * as ReactWindow from 'react-window';
-const List = ReactWindow.FixedSizeList || ReactWindow.default?.FixedSizeList;
+import React, { memo } from 'react';
+import { List } from 'react-window';
 import { Clock, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 

@@ -60,7 +60,7 @@ class MetadataSyncEngine(EngineBase):
     def _sync_channels(self):
         db = SessionLocal()
         try:
-            channels = db.query(Channel).filter(Channel.authentication_status == "Connected").all()
+            channels = db.query(Channel).all()
             for channel in channels:
                 try:
                     adv_settings = {}

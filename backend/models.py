@@ -90,6 +90,10 @@ class Channel(Base):
     def channel_name(self):
         return self.alias_name
 
+    @channel_name.setter
+    def channel_name(self, value):
+        self.alias_name = value
+
 
 class OAuthCredential(Base):
     __tablename__ = "oauth_credentials"

@@ -101,9 +101,11 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
       const queryString = queryParams.toString()
       const url = queryString ? `/queue?${queryString}` : '/queue'
       
-      const data = await apiClient.get(url)
+      const data: any = await apiClient.get(url)
+      const rawList = Array.isArray(data) ? data : (data?.data || (data?.tasks || []))
+      const safeList = Array.isArray(rawList) ? rawList : []
       
-      const mappedData = data.map((t: any) => ({ ...t, account_id: t.channel_id || t.account_id }))
+      const mappedData = safeList.map((t: any) => ({ ...t, account_id: t.channel_id || t.account_id }))
       
       const activeTask = get().activeTask
       let newActiveTask = activeTask
@@ -122,6 +124,7 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
         get().fetchTaskLogs(newActiveTask.id)
       }
     } catch (error: any) {
+      console.error("fetchTasks failed:", error)
       set({ error: error.message, loading: false })
     }
   },

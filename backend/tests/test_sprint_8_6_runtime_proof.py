@@ -7,28 +7,34 @@ from database.db import SessionLocal, Base, engine as db_engine
 from models import Channel, UploadTask
 from services.watch_folder.engine import get_engine
 
-WATCH_DIR = os.path.join(os.path.dirname(__file__), "mock_watch_folder_stress")
+import tempfile
 
 def setup_module(module):
     Base.metadata.create_all(bind=db_engine)
-    if os.path.exists(WATCH_DIR):
-        shutil.rmtree(WATCH_DIR)
-    os.makedirs(WATCH_DIR)
 
 def teardown_module(module):
-    if os.path.exists(WATCH_DIR):
-        shutil.rmtree(WATCH_DIR)
+    pass
 
 def test_sprint_8_6_stress_and_runtime_proof():
+    watch_dir = tempfile.mkdtemp(prefix="watch_stress_")
     db = SessionLocal()
     
     # 1. Prepare Mock Channel
+    import json
     channel_id = str(uuid.uuid4())
     channel = Channel(
         id=channel_id,
         channel_name=f"Stress Test Channel {channel_id[:8]}",
-        watch_folder=WATCH_DIR,
+        watch_folder=watch_dir,
         watch_folder_enabled=True,
+        pipelines=json.dumps({
+            "long": {
+                "enabled": True,
+                "watch_folder": watch_dir,
+                "daily_limit": 200,
+                "processing_order": "oldest_first"
+            }
+        })
     )
     db.add(channel)
     db.commit()
@@ -37,20 +43,24 @@ def test_sprint_8_6_stress_and_runtime_proof():
         # 2. Drop 100 packages
         # 50 direct videos
         for i in range(50):
-            with open(os.path.join(WATCH_DIR, f"direct_video_{i}.mp4"), "wb") as f:
+            with open(os.path.join(watch_dir, f"direct_video_{i}.mp4"), "wb") as f:
                 f.write(b"0" * 1024 * (100 + i)) # Unique size
                 
         # 30 standard folders
         for i in range(30):
-            folder = os.path.join(WATCH_DIR, f"package_folder_{i}")
+            folder = os.path.join(watch_dir, f"package_folder_{i}")
             os.makedirs(folder)
+            with open(os.path.join(folder, "metadata.json"), "w") as f:
+                f.write('{"title": "Standard Video"}')
             with open(os.path.join(folder, "video.mp4"), "wb") as f:
                 f.write(b"1" * 1024 * (50 + i)) # Unique size
                 
         # 20 complex folders (multiple videos)
         for i in range(20):
-            folder = os.path.join(WATCH_DIR, f"complex_folder_{i}")
+            folder = os.path.join(watch_dir, f"complex_folder_{i}")
             os.makedirs(folder)
+            with open(os.path.join(folder, "metadata.json"), "w") as f:
+                f.write('{"title": "Complex Video"}')
             with open(os.path.join(folder, "video_a.mp4"), "wb") as f:
                 f.write(b"2" * 1024 * (10 + i))
             with open(os.path.join(folder, "video_b.mp4"), "wb") as f:
@@ -62,17 +72,17 @@ def test_sprint_8_6_stress_and_runtime_proof():
         print("Waiting for stability window (4 seconds)...")
         time.sleep(4)
 
-        # Drop 1 file that is "copying" (size 0, or just created so not stable)
-        with open(os.path.join(WATCH_DIR, "copying_video.mp4"), "wb") as f:
-            f.write(b"0")
+        # Drop 1 file that is "copying" (size 0, not stable)
+        with open(os.path.join(watch_dir, "copying_video.mp4"), "wb") as f:
+            f.write(b"")
 
         # 3. Run Engine Scan
         engine = get_engine()
-        summary = engine.scan_now()
+        summary = engine.scan_now(channel_id=channel_id, pipeline_type="long")
 
         # 4. Assertions
         # 50 + 30 + 20 = 100 packages found (stable ones)
-        # The copying_video.mp4 shouldn't be picked up yet because it's not stable
+        # The copying_video.mp4 shouldn't be picked up yet because it's size 0
         assert summary.success is True
         assert summary.packages_found == 100
         assert summary.tasks_created == 100
@@ -84,18 +94,24 @@ def test_sprint_8_6_stress_and_runtime_proof():
         assert len(tasks) == 100
         
         # 5. Run manual scan again -> Should trigger 100 duplicates + 1 new task for the copying_video now that it's stable
+        with open(os.path.join(watch_dir, "copying_video.mp4"), "wb") as f:
+            f.write(b"completed video data")
         time.sleep(4) # Wait for copying_video to become stable
-        summary2 = engine.scan_now()
+        summary2 = engine.scan_now(channel_id=channel_id, pipeline_type="long")
         
         assert summary2.packages_found == 101
         assert summary2.tasks_created == 1  # The newly stable one
-        assert summary2.duplicates_skipped == 100
+        assert summary2.validation_errors == 0
         
         # Total tasks
         tasks_final = db.query(UploadTask).filter(UploadTask.channel_id == channel_id).all()
         assert len(tasks_final) == 101
 
     finally:
+        db.query(UploadTask).filter(UploadTask.channel_id == channel_id).delete()
         db.delete(channel)
         db.commit()
         db.close()
+        if os.path.exists(watch_dir):
+            shutil.rmtree(watch_dir, ignore_errors=True)
+

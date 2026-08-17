@@ -55,15 +55,10 @@ def create_task(
     # Phase 6 & 13: Fallback to long if not specified
     pipeline_type = p_key if p_key else "long"
     
-    # Fallback configs if none provided (for legacy mapping compatibility)
-    if not p_config:
-        p_config = {
-            "schedule_mode": "application",
-            "schedule": ["09:00"],
-            "humanize": {"enabled": False, "min_delay_minutes": 0, "max_delay_minutes": 0}
-        }
+    if not isinstance(p_config, dict):
+        p_config = {}
         
-    schedule_list = p_config.get("schedule", ["09:00"])
+    schedule_list = p_config.get("schedule") or ["09:00"]
     if not isinstance(schedule_list, list) or len(schedule_list) == 0:
         schedule_list = ["09:00"]
     
@@ -74,17 +69,25 @@ def create_task(
     advanced_json = {}
     if channel.upload_defaults:
         try:
-            defaults_json = json.loads(channel.upload_defaults)
+            defaults_json = json.loads(channel.upload_defaults) if isinstance(channel.upload_defaults, str) else channel.upload_defaults
+            if not isinstance(defaults_json, dict):
+                defaults_json = {}
         except Exception:
-            pass
+            defaults_json = {}
     if channel.advanced_settings:
         try:
-            advanced_json = json.loads(channel.advanced_settings)
+            advanced_json = json.loads(channel.advanced_settings) if isinstance(channel.advanced_settings, str) else channel.advanced_settings
+            if not isinstance(advanced_json, dict):
+                advanced_json = {}
         except Exception:
-            pass
+            advanced_json = {}
 
-    p_defaults = defaults_json.get(pipeline_type, {}).get("basic_info", {})
-    p_advanced = defaults_json.get(pipeline_type, {}).get("advanced", {})
+    p_defaults = (defaults_json.get(pipeline_type) or {}).get("basic_info") or {}
+    p_advanced = (defaults_json.get(pipeline_type) or {}).get("advanced") or {}
+    if not isinstance(p_defaults, dict):
+        p_defaults = {}
+    if not isinstance(p_advanced, dict):
+        p_advanced = {}
 
     final_title = result.title
     title_tpl = p_defaults.get("title_template")
@@ -153,6 +156,30 @@ def create_task(
         file_size = 0
         file_name = ""
 
+    humanize_dict = p_config.get("humanize")
+    if not isinstance(humanize_dict, dict):
+        humanize_dict = {}
+        
+    humanize_enabled = bool(humanize_dict.get("enabled", False))
+    try:
+        humanize_min = int(humanize_dict.get("min_delay_minutes", 0) or 0)
+    except (TypeError, ValueError):
+        humanize_min = 0
+    try:
+        humanize_max = int(humanize_dict.get("max_delay_minutes", 0) or 0)
+    except (TypeError, ValueError):
+        humanize_max = 0
+
+    rec_date = None
+    if result.recording_date:
+        try:
+            rec_date = datetime.fromisoformat(str(result.recording_date).replace("Z", "+00:00")).replace(tzinfo=None)
+        except Exception:
+            try:
+                rec_date = datetime.strptime(str(result.recording_date)[:10], "%Y-%m-%d")
+            except Exception:
+                rec_date = None
+
     task = UploadTask(
         id=str(uuid.uuid4()),
 
@@ -197,15 +224,15 @@ def create_task(
         # Timestamps
         created_at=datetime.utcnow(),
         scheduled_at=None,
-        recording_date=datetime.fromisoformat(result.recording_date.replace("Z", "+00:00")).replace(tzinfo=None) if result.recording_date else None,
+        recording_date=rec_date,
         
         # Scheduling Metadata (Phase 5)
         pipeline_type=pipeline_type,
         schedule_mode=p_config.get("schedule_mode", "application"),
         schedule_time=assigned_schedule_time,
-        humanize_enabled=p_config.get("humanize", {}).get("enabled", False),
-        humanize_min=int(p_config.get("humanize", {}).get("min_delay_minutes", 0)),
-        humanize_max=int(p_config.get("humanize", {}).get("max_delay_minutes", 0)),
+        humanize_enabled=humanize_enabled,
+        humanize_min=humanize_min,
+        humanize_max=humanize_max,
         
         # Sprint 10.5 Metadata Automation
         upload_mode="Auto Upload" if (
