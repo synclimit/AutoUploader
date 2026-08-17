@@ -70,6 +70,7 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ]
 )
+logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
 app = FastAPI()
 
