@@ -49,7 +49,7 @@ class ChannelService:
                 
                 token = OAuthRepository.load_token(db, channel.id)
                 if token:
-                    creds = OAuthClient.build_credentials(token)
+                    creds = OAuthClient.build_credentials(token, channel.id)
                     youtube = build("youtube", "v3", credentials=creds)
                     res = youtube.channels().list(mine=True, part="snippet").execute()
                     if res.get("items"):
@@ -677,7 +677,7 @@ class ChannelService:
             if RefreshService.is_expired(current_token):
                 current_token = RefreshService.refresh(db, channel_id, current_token)
                 
-            credentials = OAuthClient.build_credentials(current_token)
+            credentials = OAuthClient.build_credentials(current_token, channel_id)
             from googleapiclient.discovery import build
             youtube = build("youtube", "v3", credentials=credentials)
             result = []

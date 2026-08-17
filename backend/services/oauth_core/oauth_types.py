@@ -27,6 +27,7 @@ class OAuthToken:
     access_token: str
     refresh_token: Optional[str]
     expires_at: Optional[str]
+    channel_id: Optional[str] = None
 
 @dataclass
 class OAuthHealthReport:

@@ -65,7 +65,8 @@ class RefreshService:
             new_token = OAuthToken(
                 access_token=creds.token,
                 refresh_token=creds.refresh_token or current_token.refresh_token,
-                expires_at=creds.expiry.isoformat() if creds.expiry else None
+                expires_at=creds.expiry.isoformat() if creds.expiry else None,
+                channel_id=channel_id
             )
             
             OAuthRepository.save_or_update_token(db, channel_id, new_token)

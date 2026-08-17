@@ -55,7 +55,8 @@ class OAuthRepository:
         return OAuthToken(
             access_token=cred.access_token,
             refresh_token=cred.refresh_token,
-            expires_at=cred.token_expires_at.isoformat() if cred.token_expires_at else None
+            expires_at=cred.token_expires_at.isoformat() if cred.token_expires_at else None,
+            channel_id=channel_id
         )
 
     @staticmethod
