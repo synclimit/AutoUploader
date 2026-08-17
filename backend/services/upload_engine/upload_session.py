@@ -41,7 +41,7 @@ class UploadSession:
         creds = self._build_credentials()
         
         try:
-            youtube = build("youtube", "v3", credentials=creds)
+            youtube = build("youtube", "v3", credentials=creds, static_discovery=False)
             
             body = {
                 "snippet": {

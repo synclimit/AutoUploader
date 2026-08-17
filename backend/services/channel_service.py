@@ -50,7 +50,7 @@ class ChannelService:
                 token = OAuthRepository.load_token(db, channel.id)
                 if token:
                     creds = OAuthClient.build_credentials(token, channel.id)
-                    youtube = build("youtube", "v3", credentials=creds)
+                    youtube = build("youtube", "v3", credentials=creds, static_discovery=False)
                     res = youtube.channels().list(mine=True, part="snippet").execute()
                     if res.get("items"):
                         url = res["items"][0].get("snippet", {}).get("thumbnails", {}).get("default", {}).get("url")
@@ -507,7 +507,7 @@ class ChannelService:
         flow.fetch_token(code=code)
         credentials = flow.credentials
         
-        youtube = build("youtube", "v3", credentials=credentials)
+        youtube = build("youtube", "v3", credentials=credentials, static_discovery=False)
         channels_response = youtube.channels().list(mine=True, part="id,snippet,statistics").execute()
         
         if not channels_response.get("items"):
@@ -640,7 +640,7 @@ class ChannelService:
             # Update subscriber count
             credentials = OAuthClient.build_credentials(new_token)
             from googleapiclient.discovery import build
-            youtube = build("youtube", "v3", credentials=credentials)
+            youtube = build("youtube", "v3", credentials=credentials, static_discovery=False)
             channels_response = youtube.channels().list(mine=True, part="id,snippet,statistics").execute()
             if channels_response.get("items"):
                 item = channels_response["items"][0]
@@ -679,7 +679,7 @@ class ChannelService:
                 
             credentials = OAuthClient.build_credentials(current_token, channel_id)
             from googleapiclient.discovery import build
-            youtube = build("youtube", "v3", credentials=credentials)
+            youtube = build("youtube", "v3", credentials=credentials, static_discovery=False)
             result = []
             request = youtube.playlists().list(mine=True, part="snippet,id", maxResults=50)
             while request is not None:

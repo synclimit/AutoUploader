@@ -82,8 +82,8 @@ class MetadataSyncEngine(EngineBase):
                         continue
                         
                     from googleapiclient.discovery import build
-                    creds = OAuthClient.build_credentials(token)
-                    youtube = build("youtube", "v3", credentials=creds)
+                    creds = OAuthClient.build_credentials(token, channel.id)
+                    youtube = build("youtube", "v3", credentials=creds, static_discovery=False)
                     
                     res = youtube.channels().list(mine=True, part="snippet,statistics").execute()
                     if res.get("items"):

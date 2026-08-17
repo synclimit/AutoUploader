@@ -13,12 +13,12 @@ class YouTubePlugin(IAnalyticsProvider):
     def _get_youtube_service(self, credentials):
         if not credentials:
             raise ValueError("Credentials are required for YouTube API")
-        return build("youtube", "v3", credentials=credentials)
+        return build("youtube", "v3", credentials=credentials, static_discovery=False)
         
     def _get_youtube_analytics_service(self, credentials):
         if not credentials:
             raise ValueError("Credentials are required for YouTube API")
-        return build("youtubeAnalytics", "v2", credentials=credentials)
+        return build("youtubeAnalytics", "v2", credentials=credentials, static_discovery=False)
     
     def get_channel_metrics(self, channel_id: str, credentials: Any = None) -> Dict[str, Any]:
         youtube = self._get_youtube_service(credentials)

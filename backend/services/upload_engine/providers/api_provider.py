@@ -75,7 +75,7 @@ class APIUploader(BaseUploader):
                 if not context.db_session:
                     db.close()
                 
-            youtube = build("youtube", "v3", credentials=credentials)
+            youtube = build("youtube", "v3", credentials=credentials, static_discovery=False)
             
             # Helper to resolve Category ID
             def _resolve_category_id(val) -> str:
@@ -261,7 +261,7 @@ class APIUploader(BaseUploader):
                         scopes=config.scopes,
                         expiry=dt
                     )
-                    youtube = build("youtube", "v3", credentials=credentials)
+                    youtube = build("youtube", "v3", credentials=credentials, static_discovery=False)
                 except Exception as ref_err:
                     context.logger.warning(f"[APIUploader] Token refresh failed: {ref_err}")
             

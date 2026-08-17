@@ -232,7 +232,7 @@ def check_update():
         download_url = "https://github.com/synclimit/AutoUploader/releases/download/latest/RaynzPitStop_Setup.exe"
         latest_version = ""
         release_notes = ""
-        remote_build = 0
+        asset_build = 0
         
         # 1. Query GitHub Releases API for tag 'latest' specifically
         tag_req = urllib.request.Request("https://api.github.com/repos/synclimit/AutoUploader/releases/tags/latest")
@@ -251,7 +251,7 @@ def check_update():
                             
                             m = re.search(r'Build\s+(\d+)', rel_name + " " + rel_body, re.IGNORECASE)
                             if m:
-                                remote_build = int(m.group(1))
+                                asset_build = int(m.group(1))
                             
                             v_m = re.search(r'v?(\d+\.\d+\.\d+)', rel_name + " " + rel_body, re.IGNORECASE)
                             if v_m:
@@ -259,34 +259,14 @@ def check_update():
                             break
         except Exception as e:
             print("GitHub Releases API tag latest lookup error:", e)
-            
-        # 3. Always check remote version.json on master/main branch for latest commit build
-        master_build = 0
-        master_version = ""
-        for branch in ["master", "main"]:
-            try:
-                v_req = urllib.request.Request(f"https://raw.githubusercontent.com/synclimit/AutoUploader/{branch}/version.json")
-                v_req.add_header("User-Agent", "AutoUploader-App")
-                with _safe_urlopen(v_req, timeout=5) as v_res:
-                    remote_ver_data = json.loads(v_res.read().decode())
-                    master_build = remote_ver_data.get("build", 0)
-                    if remote_ver_data.get("version"):
-                        master_version = "v" + remote_ver_data.get("version")
-                    if master_build:
-                        break
-            except Exception as e:
-                print(f"Remote version.json check error for branch {branch}:", e)
-        
-        if master_build > remote_build:
-            remote_build = master_build
-            if master_version:
-                latest_version = master_version
 
-        # 4. Compare builds and versions
+        remote_build = asset_build if asset_build else local_build
+
+        # 4. Compare builds: Only offer update if uploaded release asset build > local build
         update_available = False
-        if remote_build > local_build:
+        if asset_build > local_build:
             update_available = True
-        elif latest_version and latest_version != "latest" and latest_version != local_version:
+        elif latest_version and latest_version != "latest" and latest_version != local_version and asset_build > local_build:
             update_available = True
             
         return {
