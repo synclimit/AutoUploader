@@ -8,11 +8,13 @@ import logging
 import json
 
 if getattr(sys, 'frozen', False):
-    base_dir = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    BASE_DIR = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
+    base_dir = BASE_DIR
     if base_dir not in sys.path:
         sys.path.insert(0, base_dir)
 else:
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    base_dir = BASE_DIR
     if base_dir not in sys.path:
         sys.path.insert(0, base_dir)
 
@@ -54,29 +56,6 @@ from services.campaign_execution_service import get_campaign_execution_engine
 from scheduler.upload_scheduler import get_scheduler_engine
 from scheduler.metadata_sync_scheduler import get_metadata_sync_engine
 from services.ai.automation import get_ai_automation_engine
-
-# 2. Handle health-check CLI argument (after full import validation)
-if "--health-check" in sys.argv:
-    print("[HEALTH] Running health check...")
-    try:
-        db = SessionLocal()
-        db.execute(text("SELECT 1"))
-        db.close()
-        print("[HEALTH] SQLite OK")
-    except Exception as e:
-        print(f"[HEALTH] SQLite failed: {e}")
-        sys.exit(1)
-        
-    try:
-        from services.license import license_service
-        lic = license_service.get_status()
-        print(f"[HEALTH] License Status: {lic.get('status')}")
-    except Exception as e:
-        print(f"[HEALTH] License module failed: {e}")
-        sys.exit(1)
-        
-    print("[HEALTH] All checks passed.")
-    os._exit(0)
 
 # Configure logging so Watch Folder Engine output is visible and logs are saved to a file
 log_dir = PathService.get_logs_dir()
@@ -443,6 +422,42 @@ async def serve_spa(full_path: str):
         return Response(content=content, media_type="text/html", headers=headers)
         
     return {"status": "backend_running", "message": "Frontend build not found."}
+
+# Handle health-check CLI argument (after full app, router, and SPA initialization)
+if "--health-check" in sys.argv:
+    print("[HEALTH] Running health check...")
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        print("[HEALTH] SQLite OK")
+    except Exception as e:
+        print(f"[HEALTH] SQLite failed: {e}")
+        sys.exit(1)
+        
+    try:
+        from services.license import license_service
+        lic = license_service.get_status()
+        print(f"[HEALTH] License Status: {lic.get('status')}")
+    except Exception as e:
+        print(f"[HEALTH] License module failed: {e}")
+        sys.exit(1)
+        
+    try:
+        from fastapi.testclient import TestClient
+        client = TestClient(app)
+        res = client.get("/")
+        if res.status_code == 200:
+            print("[HEALTH] SPA HTTP Endpoint OK (Status 200)")
+        else:
+            print(f"[HEALTH] SPA HTTP Endpoint returned status {res.status_code}")
+            sys.exit(1)
+    except Exception as e:
+        print(f"[HEALTH] SPA HTTP Endpoint test failed: {e}")
+        sys.exit(1)
+        
+    print("[HEALTH] All checks passed.")
+    os._exit(0)
 
 if __name__ == "__main__":
     import uvicorn
