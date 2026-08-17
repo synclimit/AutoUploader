@@ -184,6 +184,7 @@ def create_task(
         id=str(uuid.uuid4()),
 
         channel_id=channel.id,
+        account_id=channel.id,
         profile_id=channel.profile_id,  # Inherited from channel — nullable
 
         # State (Architecture Rule 2: must keep existing initial state -> WATCHED)
