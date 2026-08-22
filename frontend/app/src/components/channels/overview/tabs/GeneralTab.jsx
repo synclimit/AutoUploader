@@ -15,7 +15,7 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
 
   const updatePipeline = (key, field, value) => {
     const updated = { ...draft }
-    updated[key] = { ...(updated[key] || {}) }
+    updated[key] = { ...(updated[key] || {}), enabled: true }
     updated[key][field] = value
     onChange(updated)
   }

@@ -220,15 +220,25 @@ class WatchFolderEngine(EngineBase):
             if target_pipeline and p_key != target_pipeline:
                 continue
 
-            if p_config.get("enabled") is False:
-                continue
-
             raw_watch = p_config.get("watch_folder") or p_config.get("campaign_folder") or (channel.watch_folder if p_key == "long" else None)
             if not raw_watch or not str(raw_watch).strip():
                 continue
+
+            # If folder is configured, treat pipeline as enabled unless explicitly disabled without folder
+            if p_config.get("enabled") is False and not (p_config.get("watch_folder") or p_config.get("campaign_folder")):
+                continue
+
             from services.system.path_service import PathService
             watch_path = PathService.resolve_local_path(raw_watch)
-            if not os.path.exists(watch_path):
+            folder_exists = os.path.exists(watch_path) if watch_path else False
+            
+            logger.info(f"[ENGINE] Processing Channel '{getattr(channel, 'alias_name', channel_id)}' | pipeline: '{p_key}' | raw_watch: '{raw_watch}' -> resolved: '{watch_path}' (exists: {folder_exists})")
+
+            if not folder_exists:
+                logger.warning(f"[ENGINE] Watch folder does not exist on local disk: {watch_path}")
+                health_service.record_path_unavailable(channel_id, p_key)
+                health_service.record_scan_result(channel_id, p_key, "PATH_UNAVAILABLE", 0)
+                health_service.record_log(channel_id, p_key, "FAIL", "Folder Not Found")
                 continue
 
             health_service.update_status(channel_id, p_key, "SCANNING")
@@ -260,15 +270,18 @@ class WatchFolderEngine(EngineBase):
             state["today_intake"] = today_intake
 
             candidates, path_ok = scanner.scan(watch_path)
+            logger.info(f"[ENGINE] Scanner found {len(candidates)} file/package candidates in '{watch_path}' (path_ok: {path_ok})")
+
             if not path_ok:
                 health_service.record_path_unavailable(channel_id, p_key)
                 health_service.record_scan_result(channel_id, p_key, "PATH_UNAVAILABLE", 0)
-                health_service.record_log(channel_id, p_key, "FAIL", "Folder Not Found")
+                health_service.record_log(channel_id, p_key, "FAIL", "Folder Access Error")
                 continue
 
             health_service.record_log(channel_id, p_key, "PASS", "Folder Exists")
 
             if not candidates:
+                logger.info(f"[ENGINE] No video files found in folder: '{watch_path}'")
                 health_service.record_scan_result(channel_id, p_key, "NO_PACKAGES", 0)
                 health_service.update_status(channel_id, p_key, "IDLE")
                 continue
@@ -375,6 +388,8 @@ class WatchFolderEngine(EngineBase):
                     task = importer.create_task(result, channel, db, p_key, p_config, today_intake=state.get("today_intake", 0))
                     p_imported += 1
                     summary.tasks_created += 1
+                    logger.info(f"[ENGINE] Successfully imported task {task.id} ('{task.title}') to Review for channel {getattr(channel, 'alias_name', channel_id)}")
+                    locked_paths.add(folder_path)
                     state["today_intake"] = state.get("today_intake", 0) + 1
                     state_modified = True
                     health_service.record_log(channel_id, p_key, "PASS", "UploadTask Created")
