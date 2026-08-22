@@ -7,11 +7,25 @@ from .base import BaseAIProvider
 class GeminiProvider(BaseAIProvider):
     """
     Native Gemini Provider using Google's Generative Language API via httpx.
+    Includes multi-model fallback resilience against 503/404 errors.
     """
     
-    def _get_url(self, endpoint: str, stream: bool = False) -> str:
+    FALLBACK_MODELS = [
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-pro",
+        "gemini-2.5-flash",
+        "gemini-1.5-flash-latest"
+    ]
+
+    def _get_url(self, endpoint: str, model_override: str = None, stream: bool = False) -> str:
         base = self.base_url.rstrip("/") if self.base_url else "https://generativelanguage.googleapis.com"
-        model = self.model or "gemini-flash-latest"
+        model = model_override or self.model or "gemini-1.5-flash"
+        if model in ["gemini-flash-latest", "gemini-flash"]:
+            model = "gemini-1.5-flash"
+        elif model in ["gemini-pro-latest", "gemini-pro"]:
+            model = "gemini-1.5-pro"
+            
         if stream:
             return f"{base}/v1beta/models/{model}:streamGenerateContent?key={self.api_key}"
         return f"{base}/v1beta/models/{model}:generateContent?key={self.api_key}"
@@ -38,49 +52,78 @@ class GeminiProvider(BaseAIProvider):
         }
 
     async def generate(self, task: str, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        url = self._get_url("", stream=False)
         payload = self._build_payload(task, prompt, context)
         headers = {"Content-Type": "application/json"}
         
-        response = await AIHttpClient.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        
-        content = ""
-        if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
-            content = data["candidates"][0]["content"]["parts"][0]["text"]
+        target_model = self.model or "gemini-1.5-flash"
+        if target_model in ["gemini-flash-latest", "gemini-flash"]:
+            target_model = "gemini-1.5-flash"
             
-        return {
-            "content": content,
-            "raw": data
-        }
+        models_to_try = [target_model]
+        for fb in self.FALLBACK_MODELS:
+            if fb not in models_to_try:
+                models_to_try.append(fb)
+                
+        last_error = None
+        for m in models_to_try:
+            url = self._get_url("", model_override=m, stream=False)
+            try:
+                response = await AIHttpClient.post(url, headers=headers, json=payload)
+                if response.status_code == 200:
+                    data = response.json()
+                    content = ""
+                    if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
+                        content = data["candidates"][0]["content"]["parts"][0]["text"]
+                    return {
+                        "content": content,
+                        "raw": data,
+                        "model": m
+                    }
+                else:
+                    last_error = f"HTTP {response.status_code}: {response.text}"
+            except Exception as e:
+                last_error = str(e)
+                
+        raise RuntimeError(f"Gemini API Error (Tried models: {', '.join(models_to_try)}): {last_error}")
 
     async def generate_stream(self, task: str, prompt: str, context: Optional[Dict[str, Any]] = None):
-        url = self._get_url("", stream=True)
         payload = self._build_payload(task, prompt, context)
         headers = {"Content-Type": "application/json"}
         
-        async for chunk in AIHttpClient.stream_post(url, headers=headers, json=payload):
-            if chunk.status_code == 200:
-                async for line in chunk.aiter_lines():
-                    if line.startswith("data: "):
-                        try:
-                            data = json.loads(line[6:])
-                            if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
-                                yield data["candidates"][0]["content"]["parts"][0]["text"]
-                        except json.JSONDecodeError:
-                            continue
+        target_model = self.model or "gemini-1.5-flash"
+        if target_model in ["gemini-flash-latest", "gemini-flash"]:
+            target_model = "gemini-1.5-flash"
+            
+        models_to_try = [target_model]
+        for fb in self.FALLBACK_MODELS:
+            if fb not in models_to_try:
+                models_to_try.append(fb)
+
+        for m in models_to_try:
+            url = self._get_url("", model_override=m, stream=True)
+            try:
+                async for chunk in AIHttpClient.stream_post(url, headers=headers, json=payload):
+                    if chunk.status_code == 200:
+                        async for line in chunk.aiter_lines():
+                            if line.startswith("data: "):
+                                try:
+                                    data = json.loads(line[6:])
+                                    if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
+                                        yield data["candidates"][0]["content"]["parts"][0]["text"]
+                                except json.JSONDecodeError:
+                                    continue
+                        return
+            except Exception:
+                continue
 
     async def test_connection(self) -> Dict[str, Any]:
         start_time = time.time()
-        url = self._get_url("").replace(":generateContent", "").replace(":streamGenerateContent", "")
-        # Since _get_url returns a model-specific endpoint, let's just build the models endpoint directly
         base = self.base_url.rstrip("/") if self.base_url else "https://generativelanguage.googleapis.com"
         models_url = f"{base}/v1beta/models?key={self.api_key}"
         
         result = {
             "provider": "Gemini",
-            "model": self.model,
+            "model": self.model or "gemini-1.5-flash",
             "endpoint": models_url,
             "latency_ms": 0,
             "authentication": "Unknown",
@@ -109,17 +152,18 @@ class GeminiProvider(BaseAIProvider):
         return result
 
     async def get_models(self) -> List[str]:
-        # Gemini model list endpoint
         base = self.base_url.rstrip("/") if self.base_url else "https://generativelanguage.googleapis.com"
         url = f"{base}/v1beta/models?key={self.api_key}"
         try:
             response = await AIHttpClient.get(url, headers={"Content-Type": "application/json"})
             if response.status_code == 200:
                 data = response.json()
-                return [model["name"].replace("models/", "") for model in data.get("models", [])]
-            return []
+                valid = [m["name"].replace("models/", "") for m in data.get("models", []) if "generateContent" in m.get("supportedGenerationMethods", [])]
+                if valid:
+                    return valid
+            return self.FALLBACK_MODELS
         except Exception:
-            return []
+            return self.FALLBACK_MODELS
 
     @property
     def capabilities(self) -> List[str]:
