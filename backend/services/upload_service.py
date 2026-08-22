@@ -161,6 +161,19 @@ class UploadService:
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
             
+        # Record into IgnoredVideo so Watch Folder does not re-import the deleted video
+        try:
+            from models import IgnoredVideo
+            target_path = task.video_path or task.package_folder
+            if target_path:
+                db.add(IgnoredVideo(
+                    channel_id=task.channel_id,
+                    video_id=task.video_id,
+                    video_path=target_path
+                ))
+        except Exception:
+            pass
+
         db.delete(task)
         db.commit()
 

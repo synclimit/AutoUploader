@@ -289,18 +289,32 @@ class WatchFolderEngine(EngineBase):
             summary.packages_found += len(candidates)
             health_service.record_log(channel_id, p_key, "PASS", f"Packages Found ({len(candidates)})")
 
-            # Known tasks
+            # Known tasks & Ignored/Deleted tasks
             from schemas import QueueStatusEnum
+            from models import IgnoredVideo
             known_tasks = db.query(UploadTask).filter(UploadTask.channel_id == channel_id).all()
             locked_paths = set()
             for t in known_tasks:
                 if t.status in [QueueStatusEnum.watched, QueueStatusEnum.review, QueueStatusEnum.scheduled, QueueStatusEnum.queued, QueueStatusEnum.uploading, QueueStatusEnum.completed, QueueStatusEnum.cancelled]:
-                    locked_paths.add(t.package_folder)
+                    if t.package_folder:
+                        locked_paths.add(t.package_folder)
+                    if t.video_path:
+                        locked_paths.add(t.video_path)
             
+            ignored_records = db.query(IgnoredVideo).filter(
+                or_(IgnoredVideo.channel_id == channel_id, IgnoredVideo.channel_id == None)
+            ).all()
+            for ig in ignored_records:
+                if ig.video_path:
+                    locked_paths.add(ig.video_path)
+
             if not p_config.get("retry_failed", True):
                 for t in known_tasks:
                     if t.status == QueueStatusEnum.failed:
-                        locked_paths.add(t.package_folder)
+                        if t.package_folder:
+                            locked_paths.add(t.package_folder)
+                        if t.video_path:
+                            locked_paths.add(t.video_path)
 
             valid_candidates = []
             for c in candidates:

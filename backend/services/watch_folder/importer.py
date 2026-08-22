@@ -185,7 +185,8 @@ def create_task(
     from datetime import timedelta, time
 
     automation_strategy = str(p_config.get("automation_strategy", "continuous")).lower()
-    exec_source = "CAMPAIGN" if automation_strategy == "campaign" else "CONTINUOUS"
+    has_campaign = bool(automation_strategy == "campaign" or p_config.get("campaign_folder"))
+    exec_source = "CAMPAIGN" if has_campaign else "CONTINUOUS"
 
     tz_str = getattr(channel, "publish_timezone", None) or "Asia/Jakarta"
     try:
