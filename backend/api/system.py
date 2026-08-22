@@ -173,27 +173,21 @@ if (Test-Path -LiteralPath $targetExe) {{
 }}
 '''
 
-    bat_content = f'''@echo off
-setlocal
-cd /d "%TEMP%"
-timeout /t 1 /nobreak > nul
-taskkill /f /im "RaynzPitStop.exe" > nul 2>&1
-taskkill /f /im "RaynzPitStop_App.exe" > nul 2>&1
-taskkill /f /im "AutoUploader.exe" > nul 2>&1
-timeout /t 1 /nobreak > nul
-powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{ps_path}"
-exit
+    vbs_path = os.path.join(temp_dir, "run_update.vbs")
+    vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
+WshShell.Run "powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ""{ps_path}""", 0, False
 '''
+
     try:
         with open(ps_path, "w", encoding="utf-8") as f_ps:
             f_ps.write(ps_content)
-        with open(bat_path, "w", encoding="utf-8") as f_bat:
-            f_bat.write(bat_content)
+        with open(vbs_path, "w", encoding="utf-8") as f_vbs:
+            f_vbs.write(vbs_content)
             
         CREATE_NO_WINDOW = 0x08000000
         DETACHED_FLAGS = 0x00000008 | 0x00000200 | CREATE_NO_WINDOW
         subprocess.Popen(
-            ['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', ps_path],
+            ['wscript.exe', vbs_path],
             cwd=temp_dir,
             creationflags=DETACHED_FLAGS,
             close_fds=True
