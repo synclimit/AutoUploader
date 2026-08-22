@@ -119,6 +119,17 @@ export default function App() {
   const [diagnosticErrorId, setDiagnosticErrorId] = useState(null)
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
+        e.preventDefault();
+        window.location.reload();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     const handleOpenDiagnostic = (e) => {
       setDiagnosticErrorId(e.detail?.errorId || null)
       setIsDiagnosticOpen(true)

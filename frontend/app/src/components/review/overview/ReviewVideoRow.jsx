@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Play, Check, AlertCircle, Image as ImageIcon, Clock } from 'lucide-react'
+import { Check, Image as ImageIcon, Clock } from 'lucide-react'
 
-export default function ReviewVideoRow({ video, isSelected, isActive, onToggleSelect, onClickRow }) {
+export default function ReviewVideoRow({ index, video, isSelected, isActive, onToggleSelect, onClickRow }) {
   const [duration, setDuration] = useState(video.duration === '00:00' ? null : video.duration);
 
   const handleLoadedMetadata = (e) => {
@@ -13,50 +13,48 @@ export default function ReviewVideoRow({ video, isSelected, isActive, onToggleSe
     }
   };
 
-  // Status Colors
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Needs Review':
-      case 'REVIEW':
-      case 'WATCHED': return 'text-amber-400'
-      case 'Ready':
-      case 'QUEUED': return 'text-blue-400'
-      case 'UPLOADING': return 'text-cyan-400'
-      case 'SCHEDULED': return 'text-purple-400'
-      case 'COMPLETED':
-      case 'Approved': return 'text-green-400'
-      case 'Error':
-      case 'FAILED': return 'text-red-400'
-      default: return 'text-white/50'
-    }
-  }
+  const isCampaign = video.execution_source === 'CAMPAIGN' || video.automation_strategy === 'campaign';
 
-  const getDisplayStatus = (status) => {
-    switch (status) {
-      case 'WATCHED':
-      case 'REVIEW': return 'Needs Review'
-      case 'QUEUED': return 'Queued'
-      case 'UPLOADING': return 'Uploading'
-      case 'SCHEDULED': return 'Scheduled'
-      case 'COMPLETED': return 'Completed'
-      case 'FAILED': return 'Failed'
-      case 'CANCELLED': return 'Cancelled'
-      default: return status || 'Unknown'
+  // Format schedule date cleanly: "22 Agu, 12:00" or "Besok, 12:00"
+  const getScheduleLabel = () => {
+    if (!video.scheduled_at && !video.schedule_time) return null;
+    let dateStr = '';
+    if (video.scheduled_at) {
+      try {
+        const d = new Date(video.scheduled_at);
+        const today = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+
+        if (d.toDateString() === today.toDateString()) {
+          dateStr = 'Hari ini';
+        } else if (d.toDateString() === tomorrow.toDateString()) {
+          dateStr = 'Besok';
+        } else {
+          dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        }
+      } catch (e) {
+        dateStr = '';
+      }
     }
-  }
+    const timeStr = video.schedule_time || (video.scheduled_at ? new Date(video.scheduled_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '12:00');
+    return dateStr ? `${dateStr}, ${timeStr}` : timeStr;
+  };
+
+  const scheduleText = getScheduleLabel();
 
   return (
     <div 
       onClick={() => onClickRow(video.id)}
-      className={`group relative flex items-center gap-3 p-2.5 rounded-[12px] border neon-interactive ${
+      className={`group relative flex items-center gap-3 p-2 rounded-[10px] border transition-all cursor-pointer ${
         isActive 
-          ? 'active'
-          : 'border-transparent bg-white/[0.01]'
+          ? 'bg-cyan-950/25 border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+          : 'border-white/[0.04] bg-white/[0.015] hover:bg-white/[0.04] hover:border-white/[0.08]'
       }`}
     >
       
       {/* Thumbnail */}
-      <div className="relative w-[110px] h-[62px] rounded-[8px] overflow-hidden bg-black/40 shrink-0 border border-white/[0.05] group-hover:border-white/[0.15] transition-colors group-hover:brightness-105">
+      <div className="relative w-[100px] h-[58px] rounded-[6px] overflow-hidden bg-black/50 shrink-0 border border-white/[0.06]">
         {video.thumbnail_path ? (
           <>
             <img src={`/api/v1/media/thumbnail/${video.id}`} alt="Thumbnail" className="w-full h-full object-cover" />
@@ -70,55 +68,63 @@ export default function ReviewVideoRow({ video, isSelected, isActive, onToggleSe
           </div>
         )}
         
-        {/* Checkbox Overlay */}
+        {/* Index Pill on Thumbnail (Top-Left) */}
+        {index !== undefined && (
+          <div className="absolute top-1 left-1 z-20 px-1.5 py-0.5 rounded-[4px] bg-black/85 backdrop-blur-md text-[10px] font-mono font-bold text-cyan-300 border border-cyan-500/20">
+            #{index}
+          </div>
+        )}
+
+        {/* Checkbox (Hover or Selected) */}
         <div 
-          className="absolute top-1.5 left-1.5 z-20"
+          className={`absolute top-1 right-1 z-20 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
           onClick={(e) => { e.stopPropagation(); onToggleSelect(video.id); }}
         >
           <div className={`w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all ${
             isSelected 
-              ? 'bg-[var(--accent-500)] border-[var(--accent-500)] text-[#05080e]' 
-              : 'border-white/40 text-transparent bg-black/40 group-hover:border-white/60'
+              ? 'bg-cyan-500 border-cyan-500 text-black' 
+              : 'border-white/40 text-transparent bg-black/60 hover:border-white'
           }`}>
             <Check size={10} strokeWidth={3} />
           </div>
         </div>
 
-        <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/80 rounded-[4px] text-[9px] font-bold text-white/90 backdrop-blur-md">
+        {/* Duration */}
+        <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/80 rounded-[3px] text-[9px] font-mono font-semibold text-white/90">
           {duration || '00:00'}
         </div>
-        
-        {/* Hover Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
 
-      {/* Video Info (Main flex area) */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 py-0.5">
-        <div className={`font-bold text-[13px] truncate tracking-wide transition-colors ${isActive ? 'text-white' : 'text-white/80 group-hover:text-white'}`}>
+      {/* Video Details */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+        {/* Title */}
+        <div className={`font-semibold text-[13px] truncate leading-snug transition-colors ${isActive ? 'text-cyan-300' : 'text-white/90 group-hover:text-white'}`}>
           {video.title}
         </div>
         
-        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40 group-hover:text-white/50 transition-colors">
-          {video.channelLogo ? (
-            <div className="w-3.5 h-3.5 rounded-full bg-white/10 overflow-hidden">
-               <img src={video.channelLogo} alt="" className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-3.5 h-3.5 rounded-full bg-[var(--accent-500)]/20 text-[var(--accent-400)] flex items-center justify-center font-bold text-[6px]">CH</div>
-          )}
-          <span className="truncate max-w-[100px]">{video.channelName}</span>
+        {/* Line 2: Channel & Mode */}
+        <div className="flex items-center gap-2 text-[11px] text-white/50">
+          <span className="truncate max-w-[100px] text-white/70 font-medium">{video.channelName}</span>
+          <span className="text-white/20">•</span>
+          <span className={`text-[10px] font-semibold uppercase tracking-wider ${isCampaign ? 'text-purple-400' : 'text-cyan-400'}`}>
+            {isCampaign ? 'Campaign' : 'Continuous'}
+          </span>
         </div>
 
-        <div className="flex items-center gap-2 mt-0.5">
-          <div className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-all ${getStatusColor(video.status)}`}>
-             <AlertCircle size={10} className={video.status === 'Needs Review' || video.status === 'WATCHED' || video.status === 'REVIEW' ? 'animate-pulse' : ''} />
-             {video.status_label || getDisplayStatus(video.status)}
-          </div>
-          {video.schedule_time && (
-            <div className="text-[9px] font-bold text-[var(--accent-400)]/80 flex items-center gap-1 border border-[var(--accent-500)]/20 rounded-[4px] px-1.5 py-0.5 bg-[var(--accent-500)]/[0.02]">
-              <Clock size={9} /> {video.schedule_time} ({video.schedule_mode === 'youtube' ? 'YT' : 'App'})
+        {/* Line 3: Schedule Date & Status */}
+        <div className="flex items-center gap-2 text-[11px]">
+          {scheduleText && (
+            <div className="flex items-center gap-1 text-[11px] text-white/60 font-mono">
+              <Clock size={11} className="text-white/40" />
+              <span>{scheduleText}</span>
+              <span className="text-[9px] text-white/30 font-sans">({video.schedule_mode === 'youtube' ? 'YT' : 'App'})</span>
             </div>
           )}
+          {scheduleText && <span className="text-white/20">•</span>}
+          <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-400/90">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>Needs Review</span>
+          </div>
         </div>
       </div>
 

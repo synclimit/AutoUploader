@@ -18,14 +18,13 @@ export default function ReviewWorkspace() {
   const [aiAssistantEnabled, setAiAssistantEnabled] = useState(false)
   const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false)
 
-
   const { accounts, fetchAccounts } = useAccountsStore()
   const { tasks, fetchTasks, activeTask, setActiveTask, approveTask, updateTask, deleteTask, cancelTask, filters, setFilters, fetchTask, fetchTaskLogs } = useQueueStore()
 
   useEffect(() => {
     fetchAccounts()
-    // Default whitelist for Review Workspace
-    setFilters({ ...filters, status: ['WATCHED', 'REVIEW', 'WAITING', 'WAITING_AI', 'SCHEDULED', 'QUEUED'] })
+    // Default whitelist for Review Workspace with chronological schedule ordering
+    setFilters({ ...filters, status: ['WATCHED', 'REVIEW', 'WAITING', 'WAITING_AI', 'SCHEDULED', 'QUEUED'], sort_by: 'scheduled_at', sort_order: 'asc' })
     fetchTasks()
     // eslint-disable-next-line
   }, [])
@@ -70,8 +69,6 @@ export default function ReviewWorkspace() {
   }, [activeTask?.id])
 
   const filteredVideos = useMemo(() => {
-    // The main filtering is done in the backend. 
-    // We can do a small client-side filter just in case the backend hasn't reloaded yet, but ideally it's direct.
     return tasks
   }, [tasks])
 
@@ -82,7 +79,7 @@ export default function ReviewWorkspace() {
         ...v,
         channelName: channel?.channel_name || channel?.name || 'Unknown Channel',
         channelLogo: channel?.avatar_url || null,
-        duration: '00:00', // Need metadata parsing
+        duration: '00:00',
         resolution: '1080p',
         size: 'Unknown'
       };
@@ -129,7 +126,6 @@ export default function ReviewWorkspace() {
   }
 
   const handleBulkApprove = async () => {
-    // Save current active edits if the active task is among the selected ones
     if (activeTask && selectedVideoIds.includes(activeTask.id) && Object.keys(edits).length > 0) {
       await updateTask(activeTask.id, edits);
       setEdits({});
@@ -158,7 +154,7 @@ export default function ReviewWorkspace() {
     <div className="flex-1 h-full overflow-hidden px-5 py-2 flex flex-col relative bg-[#05080e]">
       
       {isChannelPickerOpen && (
-          <ChannelPickerDialog 
+        <ChannelPickerDialog 
           channels={accounts}
           selectedId={selectedChannelId}
           onSelect={(id) => { 
@@ -297,25 +293,34 @@ export default function ReviewWorkspace() {
 
           <span className="text-white/40 ml-2 mr-1">Sort By</span>
           <Select
-            value={`${filters?.sort_by || 'created_at'}:${filters?.sort_order || 'desc'}`}
+            value={`${filters?.sort_by || 'scheduled_at'}:${filters?.sort_order || 'asc'}`}
             onChange={(val) => {
               const parts = val.split(':');
               setFilters({ ...filters, sort_by: parts[0], sort_order: parts[1] });
               fetchTasks();
             }}
             options={[
-              {val: "created_at:desc", label: "Newest First"},
-              {val: "created_at:asc", label: "Oldest First"},
-              {val: "scheduled_at:desc", label: "Scheduled (Desc)"},
+              {val: "scheduled_at:asc", label: "Schedule (Earliest First)"},
+              {val: "scheduled_at:desc", label: "Schedule (Latest First)"},
+              {val: "created_at:asc", label: "Oldest Created First"},
+              {val: "created_at:desc", label: "Newest Created First"},
               {val: "title:asc", label: "Title (A-Z)"}
             ]}
-            className="w-[140px]"
+            className="w-[180px]"
           />
 
         </div>
 
         {/* Global Action Tools */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => { fetchTasks(); window.location.reload(); }}
+            title="Refresh Halaman"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] border border-white/[0.08] bg-[#05080e]/60 text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors text-[12px] font-bold neon-interactive"
+          >
+            <RotateCcw size={13} className="text-white/60" /> Refresh
+          </button>
+
           <button 
             onClick={() => setAiAssistantEnabled(!aiAssistantEnabled)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-[8px] transition-all text-[12px] font-bold neon-interactive border ${
@@ -348,9 +353,10 @@ export default function ReviewWorkspace() {
            </div>
            
            <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1.5 pr-2">
-              {mappedVideos.map(video => (
+              {mappedVideos.map((video, index) => (
                 <ReviewVideoRow 
                   key={video.id} 
+                  index={index + 1}
                   video={video} 
                   isSelected={selectedVideoIds.includes(video.id)}
                   isActive={activeTask?.id === video.id}
@@ -359,8 +365,6 @@ export default function ReviewWorkspace() {
                 />
               ))}
            </div>
-           
-
         </div>
 
         {/* CENTER COLUMN: Video Preview (~45%) */}

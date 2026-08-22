@@ -33,10 +33,10 @@ from models import UploadTask
 
 logger = logging.getLogger("watch_folder.duplicate_checker")
 
-# Statuses that indicate the video has already been actively processed
-ACTIVE_STATUSES = {"WATCHED", "REVIEW", "QUEUED", "UPLOADING", "COMPLETED", "SCHEDULED"}
-# Statuses where a re-import is considered a safe retry
-RETRY_SAFE_STATUSES = {"FAILED", "CANCELLED"}
+# Statuses that indicate the video is actively in the review or upload queue
+ACTIVE_QUEUE_STATUSES = {"WATCHED", "REVIEW", "QUEUED", "UPLOADING", "SCHEDULED"}
+# Status indicating the video has already been published to YouTube
+COMPLETED_STATUSES = {"COMPLETED"}
 
 
 @dataclass
@@ -48,103 +48,86 @@ class DuplicateCheckResult:
 
 def check(video_id: str, package_folder: str, db: Session, channel_id: str = None) -> DuplicateCheckResult:
     """
-    Run the two-stage duplicate check.
+    Run the multi-stage duplicate check.
 
-    Args:
-        video_id:       From validated metadata.json (or auto-generated RAW_id).
-        package_folder: Absolute folder path of the candidate package.
-        db:             Active SQLAlchemy session (read-only).
-        channel_id:     Optional Channel ID to scope duplicate check per-channel.
-
-    Returns:
-        DuplicateCheckResult with is_duplicate=True → caller must skip import.
+    Rules:
+    1. If the video was already uploaded to YouTube (status=COMPLETED, has youtube_video_id, or CampaignAsset CONSUMED),
+       it is PERMANENTLY BLOCKED from being imported or uploaded again.
+    2. If the video is currently in the active review/upload queue (WATCHED, REVIEW, QUEUED, SCHEDULED, UPLOADING),
+       it is SKIPPED to avoid duplicate entries in the active queue.
+    3. If the video was never uploaded to YouTube (e.g. was deleted while still in review),
+       it is ALLOWED to be re-scanned and imported into review again.
     """
     import os
     if package_folder:
         package_folder = os.path.normpath(package_folder)
-    import os
-    if package_folder:
-        package_folder = os.path.normpath(package_folder)
 
     # -----------------------------------------------------------------------
-    # Step 0 — Ignored / User-Deleted Tombstone Guard
+    # Step 1 — Check if video was already uploaded to YouTube (COMPLETED)
     # -----------------------------------------------------------------------
+    # Check UploadTask COMPLETED records
+    query_completed = db.query(UploadTask).filter(
+        (UploadTask.video_id == video_id) | (UploadTask.package_folder == package_folder) | (UploadTask.video_path == package_folder),
+        UploadTask.status == "COMPLETED"
+    )
+    if channel_id:
+        query_completed = query_completed.filter(UploadTask.channel_id == channel_id)
+    
+    completed_task = query_completed.first()
+    if completed_task:
+        logger.info(
+            f"[DUPLICATE] Video already uploaded to YouTube (COMPLETED) | "
+            f"video_id={video_id!r} | folder={package_folder!r} | task={completed_task.id} | yt_id={completed_task.youtube_video_id}"
+        )
+        return DuplicateCheckResult(
+            is_duplicate=True,
+            reason=f"Video already uploaded to YouTube (Task: {completed_task.id})",
+            existing_task_id=completed_task.id,
+        )
+
+    # Check CampaignAsset CONSUMED records
     try:
-        from models import IgnoredVideo
-        query_ignored = db.query(IgnoredVideo).filter(
-            (IgnoredVideo.video_id == video_id) | (IgnoredVideo.video_path == package_folder)
+        from models import CampaignAsset, CampaignAssetState
+        query_asset = db.query(CampaignAsset).filter(
+            (CampaignAsset.filepath == package_folder) | (CampaignAsset.filename == os.path.basename(package_folder)),
+            CampaignAsset.status == CampaignAssetState.CONSUMED
         )
         if channel_id:
-            query_ignored = query_ignored.filter(IgnoredVideo.channel_id == channel_id)
-        if query_ignored.first():
-            logger.info(f"[IGNORED] Skipping re-import of user-deleted video: video_id={video_id!r}, path={package_folder!r}")
+            query_asset = query_asset.filter(CampaignAsset.channel_id == channel_id)
+        consumed_asset = query_asset.first()
+        if consumed_asset:
+            logger.info(f"[DUPLICATE] CampaignAsset already CONSUMED | folder={package_folder!r}")
             return DuplicateCheckResult(
                 is_duplicate=True,
-                reason="video explicitly deleted by user",
-                existing_task_id=None
+                reason="Video already uploaded via Campaign Engine (CONSUMED)",
+                existing_task_id=consumed_asset.id
             )
-    except Exception as e:
-        logger.warning(f"[DUPLICATE] IgnoredVideo check failed: {e}")
+    except Exception:
+        pass
 
     # -----------------------------------------------------------------------
-    # Step 1 — Primary: video_id lookup
+    # Step 2 — Check if video is currently in the active review/upload queue
     # -----------------------------------------------------------------------
-    query_vid = db.query(UploadTask).filter(UploadTask.video_id == video_id)
+    query_active = db.query(UploadTask).filter(
+        (UploadTask.video_id == video_id) | (UploadTask.package_folder == package_folder) | (UploadTask.video_path == package_folder),
+        UploadTask.status.in_(ACTIVE_QUEUE_STATUSES)
+    )
     if channel_id:
-        query_vid = query_vid.filter(UploadTask.channel_id == channel_id)
-    existing_tasks = query_vid.all()
+        query_active = query_active.filter(UploadTask.channel_id == channel_id)
 
-    if existing_tasks:
-        # Check if ANY of the tasks are in an active status (including COMPLETED)
-        for existing in existing_tasks:
-            if existing.status in ACTIVE_STATUSES:
-                logger.warning(
-                    f"[DUPLICATE] Duplicate Skipped | "
-                    f"video_id={video_id!r} | "
-                    f"folder={package_folder!r} | "
-                    f"existing_task={existing.id} | "
-                    f"status={existing.status}"
-                )
-                return DuplicateCheckResult(
-                    is_duplicate=True,
-                    reason=f"video_id already imported (status={existing.status})",
-                    existing_task_id=existing.id,
-                )
-
-        # If we get here, all existing tasks are in RETRY_SAFE_STATUSES (FAILED/CANCELLED)
-        logger.info(
-            f"[DUPLICATE] Previous imports FAILED/CANCELLED — re-import allowed | "
-            f"video_id={video_id!r} | folder={package_folder!r}"
+    active_task = query_active.first()
+    if active_task:
+        logger.debug(
+            f"[DUPLICATE] Video already in active queue | "
+            f"video_id={video_id!r} | folder={package_folder!r} | task={active_task.id} | status={active_task.status}"
         )
-        # Fall through — safe to re-import
-
-    # -----------------------------------------------------------------------
-    # Step 2 — Secondary: package_folder rescan guard
-    # -----------------------------------------------------------------------
-    query_path = db.query(UploadTask).filter(UploadTask.package_folder == package_folder)
-    if channel_id:
-        query_path = query_path.filter(UploadTask.channel_id == channel_id)
-    existing_by_path = query_path.all()
-
-    if existing_by_path:
-        for existing in existing_by_path:
-            if existing.status in ACTIVE_STATUSES:
-                logger.debug(
-                    f"[DUPLICATE] Folder already in DB (rescan guard) | "
-                    f"folder={package_folder!r} | task={existing.id}"
-                )
-                return DuplicateCheckResult(
-                    is_duplicate=True,
-                    reason="package_folder already imported",
-                    existing_task_id=existing.id,
-                )
-        
-        logger.info(
-            f"[DUPLICATE] Previous folder imports FAILED/CANCELLED — re-import allowed | "
-            f"folder={package_folder!r}"
+        return DuplicateCheckResult(
+            is_duplicate=True,
+            reason=f"Video already in active queue (status={active_task.status})",
+            existing_task_id=active_task.id,
         )
 
     # -----------------------------------------------------------------------
-    # Clear — safe to import
+    # Step 3 — Clear: Video has NOT been uploaded yet and is NOT in active queue
     # -----------------------------------------------------------------------
     return DuplicateCheckResult(is_duplicate=False, reason="CLEAR")

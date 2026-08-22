@@ -180,6 +180,51 @@ def create_task(
             except Exception:
                 rec_date = None
 
+    # Calculate planned upload schedule (Date & Time)
+    import pytz
+    from datetime import timedelta, time
+
+    automation_strategy = str(p_config.get("automation_strategy", "continuous")).lower()
+    exec_source = "CAMPAIGN" if automation_strategy == "campaign" else "CONTINUOUS"
+
+    tz_str = getattr(channel, "publish_timezone", None) or "Asia/Jakarta"
+    try:
+        tz = pytz.timezone(tz_str)
+    except Exception:
+        tz = pytz.timezone("Asia/Jakarta")
+
+    now_local = datetime.now(tz)
+    try:
+        daily_limit_val = int(p_config.get("daily_limit", 1) or 1)
+    except Exception:
+        daily_limit_val = 1
+    if daily_limit_val <= 0:
+        daily_limit_val = 1
+
+    day_offset = today_intake // daily_limit_val
+    time_slot_str = str(schedule_list[today_intake % len(schedule_list)])
+
+    try:
+        parts = time_slot_str.split(":")
+        slot_hour = int(parts[0])
+        slot_minute = int(parts[1]) if len(parts) > 1 else 0
+    except Exception:
+        slot_hour = 9
+        slot_minute = 0
+
+    target_date = now_local.date() + timedelta(days=day_offset)
+    target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
+    if day_offset == 0 and target_dt_local <= now_local:
+        target_date = target_date + timedelta(days=1)
+        target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
+
+    if humanize_enabled and humanize_min <= humanize_max and humanize_max > 0:
+        import random
+        jitter = random.randint(humanize_min, humanize_max)
+        target_dt_local += timedelta(minutes=jitter)
+
+    calculated_scheduled_at = target_dt_local.astimezone(pytz.UTC).replace(tzinfo=None)
+
     task = UploadTask(
         id=str(uuid.uuid4()),
 
@@ -191,6 +236,7 @@ def create_task(
         status="WATCHED",
         metadata_source="RENDERER",           # Always RENDERER for Watch Folder imports
         source_type=channel.source_type if (channel.source_type and channel.source_type in ["M1_VIDEO_SPLITTER", "M3_PLAYLIST_BUILDER"]) else "M1_VIDEO_SPLITTER",
+        execution_source=exec_source,
 
         # Package paths
         package_folder=result.package_folder,
@@ -224,13 +270,13 @@ def create_task(
 
         # Timestamps
         created_at=datetime.utcnow(),
-        scheduled_at=None,
+        scheduled_at=calculated_scheduled_at,
         recording_date=rec_date,
         
         # Scheduling Metadata (Phase 5)
         pipeline_type=pipeline_type,
         schedule_mode=p_config.get("schedule_mode", "application"),
-        schedule_time=assigned_schedule_time,
+        schedule_time=target_dt_local.strftime("%H:%M"),
         humanize_enabled=humanize_enabled,
         humanize_min=humanize_min,
         humanize_max=humanize_max,

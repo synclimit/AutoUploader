@@ -384,6 +384,9 @@ class ChannelService:
             # Update pending tasks schedules to match new pipelines
             try:
                 import json
+                import pytz
+                import random
+                from datetime import datetime, timedelta, time
                 from models import UploadTask
                 from schemas import QueueStatusEnum
                 
@@ -400,11 +403,66 @@ class ChannelService:
                         pkey = pt.pipeline_type or "long"
                         grouped[pkey].append(pt)
                         
+                    tz_str = getattr(channel, "publish_timezone", None) or "Asia/Jakarta"
+                    try:
+                        tz = pytz.timezone(tz_str)
+                    except Exception:
+                        tz = pytz.timezone("Asia/Jakarta")
+
+                    now_local = datetime.now(tz)
+
                     for pkey, tasks_in_pipe in grouped.items():
-                        schedule_list = pipelines_dict.get(pkey, {}).get("schedule")
-                        if schedule_list and isinstance(schedule_list, list) and len(schedule_list) > 0:
-                            for idx, pt in enumerate(tasks_in_pipe):
-                                pt.schedule_time = str(schedule_list[idx % len(schedule_list)])
+                        p_cfg = pipelines_dict.get(pkey, {})
+                        schedule_list = p_cfg.get("schedule") or ["09:00"]
+                        if not isinstance(schedule_list, list) or len(schedule_list) == 0:
+                            schedule_list = ["09:00"]
+                        
+                        try:
+                            daily_limit_val = int(p_cfg.get("daily_limit", 1) or 1)
+                        except Exception:
+                            daily_limit_val = 1
+                        if daily_limit_val <= 0:
+                            daily_limit_val = 1
+
+                        h_cfg = p_cfg.get("humanize") or {}
+                        h_enabled = bool(h_cfg.get("enabled", False))
+                        try:
+                            h_min = int(h_cfg.get("min_delay_minutes", 0) or 0)
+                        except Exception:
+                            h_min = 0
+                        try:
+                            h_max = int(h_cfg.get("max_delay_minutes", 0) or 0)
+                        except Exception:
+                            h_max = 0
+
+                        for idx, pt in enumerate(tasks_in_pipe):
+                            day_offset = idx // daily_limit_val
+                            time_slot_str = str(schedule_list[idx % len(schedule_list)])
+                            try:
+                                parts = time_slot_str.split(":")
+                                slot_hour = int(parts[0])
+                                slot_minute = int(parts[1]) if len(parts) > 1 else 0
+                            except Exception:
+                                slot_hour = 9
+                                slot_minute = 0
+
+                            target_date = now_local.date() + timedelta(days=day_offset)
+                            target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
+                            if day_offset == 0 and target_dt_local <= now_local:
+                                target_date = target_date + timedelta(days=1)
+                                target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
+
+                            if h_enabled and h_min <= h_max and h_max > 0:
+                                jitter = random.randint(h_min, h_max)
+                                target_dt_local += timedelta(minutes=jitter)
+
+                            pt.scheduled_at = target_dt_local.astimezone(pytz.UTC).replace(tzinfo=None)
+                            pt.schedule_time = target_dt_local.strftime("%H:%M")
+                            pt.schedule_mode = p_cfg.get("schedule_mode", "youtube")
+                            pt.humanize_enabled = h_enabled
+                            pt.humanize_min = h_min
+                            pt.humanize_max = h_max
+                            pt.execution_source = "CAMPAIGN" if p_cfg.get("automation_strategy") == "campaign" else "CONTINUOUS"
             except Exception as e:
                 import logging
                 logging.getLogger("ChannelService").error(f"Failed to update pending tasks schedule: {e}")
@@ -423,8 +481,7 @@ class ChannelService:
             # Immediately trigger watch / campaign folder scan for this channel
             try:
                 from services.watch_folder_service import WatchFolderService
-                from models import IgnoredVideo, UploadTask
-                db.query(IgnoredVideo).filter(IgnoredVideo.channel_id == channel_id).delete()
+                from models import UploadTask
                 db.query(UploadTask).filter(
                     UploadTask.channel_id == channel_id,
                     UploadTask.status.in_(["CANCELLED", "FAILED"])
@@ -446,6 +503,21 @@ class ChannelService:
         channel = db.query(Channel).filter(Channel.id == channel_id).first()
         if not channel:
             raise HTTPException(status_code=404, detail="Channel not found")
+        
+        # Clean up related tables to prevent FK errors or orphaned rows
+        from sqlalchemy import text
+        from models import UploadTask, IgnoredVideo, CampaignUploadPlan, CampaignReviewSession, CampaignAsset
+        try:
+            db.query(UploadTask).filter(UploadTask.channel_id == channel_id).delete(synchronize_session=False)
+            db.query(IgnoredVideo).filter(IgnoredVideo.channel_id == channel_id).delete(synchronize_session=False)
+            db.query(CampaignUploadPlan).filter(CampaignUploadPlan.channel_id == channel_id).delete(synchronize_session=False)
+            db.query(CampaignReviewSession).filter(CampaignReviewSession.channel_id == channel_id).delete(synchronize_session=False)
+            db.query(CampaignAsset).filter(CampaignAsset.channel_id == channel_id).delete(synchronize_session=False)
+            db.execute(text("DELETE FROM accounts WHERE id = :id"), {"id": channel_id})
+        except Exception as cleanup_err:
+            import logging
+            logging.getLogger("ChannelService").warning(f"Channel cascade cleanup notice: {cleanup_err}")
+
         db.delete(channel)
         db.commit()
 

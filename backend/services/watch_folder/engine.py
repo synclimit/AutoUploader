@@ -305,8 +305,40 @@ class WatchFolderEngine(EngineBase):
             p_dupes = 0
             p_errors = 0
 
+            # Target Videos Limit check (Campaign Engine Total Target Videos)
+            raw_target = p_config.get("videos_to_upload")
+            target_limit = None
+            if raw_target is not None:
+                try:
+                    target_limit = int(raw_target)
+                except (ValueError, TypeError):
+                    target_limit = None
+
+            active_count = 0
+            if target_limit is not None and target_limit > 0:
+                active_count = db.query(UploadTask).filter(
+                    UploadTask.channel_id == channel_id,
+                    UploadTask.pipeline_type == p_key,
+                    UploadTask.status.in_([
+                        QueueStatusEnum.watched, 
+                        QueueStatusEnum.review, 
+                        QueueStatusEnum.scheduled, 
+                        QueueStatusEnum.queued, 
+                        QueueStatusEnum.uploading, 
+                        QueueStatusEnum.completed
+                    ])
+                ).count()
+                if active_count >= target_limit:
+                    health_service.record_log(channel_id, p_key, "PASS", f"Target Limit Reached ({active_count}/{target_limit})")
+                    continue
+
             for folder_entry in valid_candidates:
                 if not is_manual and not self._running:
+                    break
+
+                if target_limit is not None and target_limit > 0 and (active_count + p_imported) >= target_limit:
+                    logger.info(f"[ENGINE] Target videos limit reached ({target_limit}) for {channel_id}:{p_key}. Stopping import.")
+                    health_service.record_log(channel_id, p_key, "PASS", f"Target Videos Limit Reached ({target_limit})")
                     break
 
                 folder_path = folder_entry if isinstance(folder_entry, str) else folder_entry.get("path")
