@@ -13,8 +13,8 @@ OutputBaseFilename=RaynzPitStop_Setup
 Compression=lzma2/fast
 SolidCompression=yes
 SetupIconFile=..\assets\icon.ico
-UninstallDisplayIcon={app}\RaynzPitStop.exe
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=commandline
 CloseApplications=yes
 CloseApplicationsFilter=*RaynzPitStop*,*AutoUploader*
 

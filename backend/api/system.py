@@ -192,6 +192,9 @@ WshShell.Run "powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -Exe
             creationflags=DETACHED_FLAGS,
             close_fds=True
         )
+        # Give wscript 1.5 seconds to spin up, then exit this process so files can be replaced
+        time.sleep(1.5)
+        os._exit(0)
     except Exception as e:
         print("Failed to execute update script:", e)
 
