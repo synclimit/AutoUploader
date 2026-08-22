@@ -587,7 +587,7 @@ if __name__ == "__main__":
     _is_exiting = False
 
     def exit_application():
-        nonlocal _is_exiting
+        global _is_exiting
         if _is_exiting:
             return
         _is_exiting = True
