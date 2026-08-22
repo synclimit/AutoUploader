@@ -202,8 +202,31 @@ def create_task(
     if daily_limit_val <= 0:
         daily_limit_val = 1
 
-    day_offset = today_intake // daily_limit_val
-    slot_idx_in_day = today_intake % daily_limit_val
+    try:
+        from schemas import QueueStatusEnum
+        existing_task_count = db.query(UploadTask).filter(
+            UploadTask.channel_id == channel.id,
+            UploadTask.pipeline_type == pipeline_type,
+            UploadTask.status.in_([QueueStatusEnum.watched, QueueStatusEnum.review, QueueStatusEnum.scheduled, QueueStatusEnum.queued])
+        ).count()
+    except Exception:
+        existing_task_count = today_intake
+
+    queue_index = existing_task_count
+
+    try:
+        first_parts = str(schedule_list[0]).split(":")
+        first_h = int(first_parts[0])
+        first_m = int(first_parts[1]) if len(first_parts) > 1 else 0
+    except Exception:
+        first_h = 9
+        first_m = 0
+
+    today_first_dt = tz.localize(datetime.combine(now_local.date(), time(first_h, first_m)))
+    base_day_shift = 1 if today_first_dt <= now_local else 0
+
+    day_offset = base_day_shift + (queue_index // daily_limit_val)
+    slot_idx_in_day = queue_index % daily_limit_val
 
     if slot_idx_in_day < len(schedule_list):
         time_slot_str = str(schedule_list[slot_idx_in_day])
@@ -224,9 +247,6 @@ def create_task(
 
     target_date = now_local.date() + timedelta(days=day_offset)
     target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
-    if day_offset == 0 and target_dt_local <= now_local:
-        target_date = target_date + timedelta(days=1)
-        target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
 
     if humanize_enabled and humanize_min <= humanize_max and humanize_max > 0:
         import random

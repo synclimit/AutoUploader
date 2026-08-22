@@ -443,10 +443,22 @@ class ChannelService:
                         except Exception:
                             h_max = 0
 
+                        # Check if first slot today has already passed; if so, start sequence from tomorrow
+                        try:
+                            first_parts = str(schedule_list[0]).split(":")
+                            first_h = int(first_parts[0])
+                            first_m = int(first_parts[1]) if len(first_parts) > 1 else 0
+                        except Exception:
+                            first_h = 9
+                            first_m = 0
+
+                        today_first_dt = tz.localize(datetime.combine(now_local.date(), time(first_h, first_m)))
+                        base_day_shift = 1 if today_first_dt <= now_local else 0
+
                         used_slots_per_day = {}
 
                         for idx, pt in enumerate(tasks_in_pipe):
-                            day_offset = idx // daily_limit_val
+                            day_offset = base_day_shift + (idx // daily_limit_val)
                             slot_idx_in_day = idx % daily_limit_val
 
                             if slot_idx_in_day < len(schedule_list):
@@ -468,9 +480,6 @@ class ChannelService:
 
                             target_date = now_local.date() + timedelta(days=day_offset)
                             target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
-                            if day_offset == 0 and target_dt_local <= now_local:
-                                target_date = target_date + timedelta(days=1)
-                                target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
 
                             if h_enabled and h_min <= h_max and h_max > 0:
                                 jitter = random.randint(h_min, h_max)
