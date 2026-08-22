@@ -296,6 +296,14 @@ class ChannelService:
         )
         try:
             db.add(db_account)
+            try:
+                from sqlalchemy import text
+                db.execute(
+                    text("INSERT OR IGNORE INTO accounts (id, channel_name) VALUES (:id, :name)"),
+                    {"id": db_account.id, "name": db_account.alias_name}
+                )
+            except Exception:
+                pass
             db.commit()
             logger.info(f"[ChannelService] Database Commit Success for {db_account.id}")
             db.refresh(db_account)
@@ -656,6 +664,14 @@ class ChannelService:
         logger.info(f"[ChannelService] OAuth Success for Channel {channel.id}")
         
         try:
+            try:
+                from sqlalchemy import text
+                db.execute(
+                    text("INSERT OR IGNORE INTO accounts (id, channel_name) VALUES (:id, :name)"),
+                    {"id": channel.id, "name": getattr(channel, "alias_name", channel.channel_name)}
+                )
+            except Exception:
+                pass
             db.commit()
             logger.info(f"[ChannelService] Database Commit Success for {channel.id}")
         except Exception as e:

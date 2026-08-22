@@ -30,17 +30,11 @@ def ensure_schema_migrations(target_engine):
         from sqlalchemy import inspect, text
         inspector = inspect(target_engine)
         
-        # 1. One-time legacy migration: Only copy from accounts to channels if channels is empty
+        # 1. Bidirectional sync: Ensure every channel exists in accounts (and vice versa) for legacy FK compatibility
         if inspector.has_table("channels") and inspector.has_table("accounts"):
             with target_engine.begin() as conn:
-                count_channels = conn.execute(text("SELECT COUNT(*) FROM channels")).scalar()
-                if count_channels == 0:
-                    acc_cols = set(c["name"] for c in inspector.get_columns("accounts"))
-                    chn_cols = set(c["name"] for c in inspector.get_columns("channels"))
-                    shared = [c for c in acc_cols if c in chn_cols and c not in ("id", "alias_name", "channel_name")]
-                    sel = "id, channel_name" + (", " + ", ".join(shared) if shared else "")
-                    ins = "id, alias_name" + (", " + ", ".join(shared) if shared else "")
-                    conn.execute(text(f"INSERT OR IGNORE INTO channels ({ins}) SELECT {sel} FROM accounts WHERE id IS NOT NULL"))
+                conn.execute(text("INSERT OR IGNORE INTO accounts (id, channel_name) SELECT id, COALESCE(alias_name, 'Channel') FROM channels WHERE id IS NOT NULL"))
+                conn.execute(text("INSERT OR IGNORE INTO channels (id, alias_name) SELECT id, COALESCE(channel_name, 'Channel') FROM accounts WHERE id IS NOT NULL"))
 
         # 2. Sync upload_tasks columns and legacy channel_id / account_id mappings
         if inspector.has_table("upload_tasks"):

@@ -291,6 +291,17 @@ def create_task(
     )
 
     try:
+        # Guarantee legacy accounts table has channel ID to satisfy any legacy SQLite FK constraints
+        try:
+            from sqlalchemy import text
+            db.execute(
+                text("INSERT OR IGNORE INTO accounts (id, channel_name) VALUES (:id, :name)"),
+                {"id": channel.id, "name": getattr(channel, "alias_name", getattr(channel, "channel_name", "Channel"))}
+            )
+            db.flush()
+        except Exception:
+            pass
+
         db.add(task)
         db.commit()
         db.refresh(task)
