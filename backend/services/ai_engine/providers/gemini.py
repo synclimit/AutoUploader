@@ -18,7 +18,7 @@ class GeminiProvider(BaseAIProvider):
         "gemini-1.5-flash-latest"
     ]
 
-    def _get_url(self, endpoint: str, model_override: str = None, stream: bool = False) -> str:
+    def _get_url(self, endpoint: str, model_override: str = None, api_version: str = "v1beta", stream: bool = False) -> str:
         base = self.base_url.rstrip("/") if self.base_url else "https://generativelanguage.googleapis.com"
         model = model_override or self.model or "gemini-1.5-flash"
         if model in ["gemini-flash-latest", "gemini-flash"]:
@@ -26,9 +26,10 @@ class GeminiProvider(BaseAIProvider):
         elif model in ["gemini-pro-latest", "gemini-pro"]:
             model = "gemini-1.5-pro"
             
+        clean_key = str(self.api_key or "").strip()
         if stream:
-            return f"{base}/v1beta/models/{model}:streamGenerateContent?key={self.api_key}"
-        return f"{base}/v1beta/models/{model}:generateContent?key={self.api_key}"
+            return f"{base}/{api_version}/models/{model}:streamGenerateContent?key={clean_key}"
+        return f"{base}/{api_version}/models/{model}:generateContent?key={clean_key}"
 
     def _build_payload(self, task: str, prompt: str, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         system_content = f"You are a helpful AI assistant performing the following task: {task}"
@@ -65,24 +66,25 @@ class GeminiProvider(BaseAIProvider):
                 models_to_try.append(fb)
                 
         last_error = None
-        for m in models_to_try:
-            url = self._get_url("", model_override=m, stream=False)
-            try:
-                response = await AIHttpClient.post(url, headers=headers, json=payload)
-                if response.status_code == 200:
-                    data = response.json()
-                    content = ""
-                    if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
-                        content = data["candidates"][0]["content"]["parts"][0]["text"]
-                    return {
-                        "content": content,
-                        "raw": data,
-                        "model": m
-                    }
-                else:
-                    last_error = f"HTTP {response.status_code}: {response.text}"
-            except Exception as e:
-                last_error = str(e)
+        for ver in ["v1beta", "v1"]:
+            for m in models_to_try:
+                url = self._get_url("", model_override=m, api_version=ver, stream=False)
+                try:
+                    response = await AIHttpClient.post(url, headers=headers, json=payload)
+                    if response.status_code == 200:
+                        data = response.json()
+                        content = ""
+                        if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
+                            content = data["candidates"][0]["content"]["parts"][0]["text"]
+                        return {
+                            "content": content,
+                            "raw": data,
+                            "model": m
+                        }
+                    else:
+                        last_error = f"HTTP {response.status_code}: {response.text}"
+                except Exception as e:
+                    last_error = str(e)
                 
         raise RuntimeError(f"Gemini API Error (Tried models: {', '.join(models_to_try)}): {last_error}")
 

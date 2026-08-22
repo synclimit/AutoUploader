@@ -162,7 +162,11 @@ class APIUploader(BaseUploader):
                 status["publishAt"] = dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
             if getattr(task, "license", None):
-                status["license"] = task.license
+                raw_license = str(task.license).strip().lower()
+                if raw_license in ["creative_commons", "creative commons", "creativecommon", "cc"]:
+                    status["license"] = "creativeCommon"
+                else:
+                    status["license"] = "youtube"
 
             request_body = {
                 "snippet": snippet,
