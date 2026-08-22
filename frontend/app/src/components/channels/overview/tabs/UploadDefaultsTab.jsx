@@ -58,7 +58,36 @@ export default function UploadDefaultsTab({ draft, original, onChange, playlists
     { id: 'ai_generated', label: 'AI-generated Content (YouTube label)', type: 'toggle', helpText: 'Wajib dinyalakan jika video/audio berisi deepfake atau AI realistis.' }
   ]
 
+  const LANGUAGE_OPTIONS = [
+    { label: 'Pilih', value: '' },
+    { label: 'Indonesian (Bahasa Indonesia)', value: 'id' },
+    { label: 'English (United States)', value: 'en' },
+    { label: 'English (United Kingdom)', value: 'en-GB' },
+    { label: 'Malay (Bahasa Melayu)', value: 'ms' },
+    { label: 'Arabic (العربية)', value: 'ar' },
+    { label: 'Japanese (日本語)', value: 'ja' },
+    { label: 'Korean (한국어)', value: 'ko' },
+    { label: 'Chinese (Simplified)', value: 'zh-Hans' },
+    { label: 'Chinese (Traditional)', value: 'zh-Hant' },
+    { label: 'Spanish (Español)', value: 'es' },
+    { label: 'Portuguese (Português)', value: 'pt' },
+    { label: 'Portuguese (Brazil)', value: 'pt-BR' },
+    { label: 'French (Français)', value: 'fr' },
+    { label: 'German (Deutsch)', value: 'de' },
+    { label: 'Russian (Русский)', value: 'ru' },
+    { label: 'Hindi (हिन्दी)', value: 'hi' },
+    { label: 'Thai (ไทย)', value: 'th' },
+    { label: 'Vietnamese (Tiếng Việt)', value: 'vi' },
+    { label: 'Filipino / Tagalog', value: 'tl' },
+    { label: 'Turkish (Türkçe)', value: 'tr' },
+    { label: 'Italian (Italiano)', value: 'it' },
+    { label: 'Dutch (Nederlands)', value: 'nl' },
+    { label: 'Polish (Polski)', value: 'pl' }
+  ]
+
   const advancedFields = [
+    { id: 'audio_language', label: 'Bahasa Video', type: 'select', searchable: true, helpText: 'Bahasa audio/suara yang digunakan di dalam video.', options: LANGUAGE_OPTIONS },
+    { id: 'default_language', label: 'Bahasa Judul dan Deskripsi', type: 'select', searchable: true, helpText: 'Bahasa yang digunakan untuk judul dan deskripsi video.', options: LANGUAGE_OPTIONS },
     { id: 'allow_comments', label: 'Allow Comments', type: 'toggle', helpText: 'Izinkan penonton memberikan komentar.' },
     { id: 'notify_subscribers', label: 'Notify Subscribers', type: 'toggle', helpText: 'Kirim notifikasi ke subscriber saat video dirilis.' },
     { id: 'embeddable', label: 'Allow Embedding', type: 'toggle', helpText: 'Izinkan video dipasang (di-embed) di website lain.' },

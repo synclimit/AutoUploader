@@ -121,8 +121,10 @@ class UploadService:
                 if data.audience is None and p_defaults.get("audience"): data.audience = p_defaults.get("audience")
                 if p_defaults.get("ai_generated") is not None: data.ai_use = "YES" if p_defaults.get("ai_generated") else "NO"
                 if data.tags is None and p_defaults.get("tags"): data.tags = p_defaults.get("tags")
-                if data.category_id is None and p_defaults.get("category"): data.category_id = int(p_defaults.get("category"))
-                if data.default_language is None and p_defaults.get("language"): data.default_language = p_defaults.get("language")
+                if data.default_language is None and (p_advanced.get("default_language") or p_defaults.get("default_language") or p_defaults.get("language")): 
+                    data.default_language = p_advanced.get("default_language") or p_defaults.get("default_language") or p_defaults.get("language")
+                if data.audio_language is None and (p_advanced.get("audio_language") or p_defaults.get("audio_language") or p_defaults.get("language")): 
+                    data.audio_language = p_advanced.get("audio_language") or p_defaults.get("audio_language") or p_defaults.get("language")
                 if data.privacy_status == "private" and p_defaults.get("visibility"): data.privacy_status = p_defaults.get("visibility")
                 if data.license is None and p_defaults.get("license"): data.license = p_defaults.get("license")
                 

@@ -11,20 +11,22 @@ class GeminiProvider(BaseAIProvider):
     """
     
     FALLBACK_MODELS = [
-        "gemini-1.5-flash",
-        "gemini-2.0-flash",
-        "gemini-1.5-pro",
+        "gemini-3.6-flash",
+        "gemini-3.7-flash",
+        "gemini-3.5-flash",
+        "gemini-flash-latest",
         "gemini-2.5-flash",
-        "gemini-1.5-flash-latest"
+        "gemini-2.5-pro",
+        "gemini-1.5-flash"
     ]
 
     def _get_url(self, endpoint: str, model_override: str = None, api_version: str = "v1beta", stream: bool = False) -> str:
         base = self.base_url.rstrip("/") if self.base_url else "https://generativelanguage.googleapis.com"
-        model = model_override or self.model or "gemini-1.5-flash"
-        if model in ["gemini-flash-latest", "gemini-flash"]:
-            model = "gemini-1.5-flash"
-        elif model in ["gemini-pro-latest", "gemini-pro"]:
-            model = "gemini-1.5-pro"
+        model = model_override or self.model or "gemini-3.6-flash"
+        if model in ["gemini-flash-latest", "gemini-flash", "gemini-1.5-flash", "gemini-2.0-flash"]:
+            model = "gemini-3.6-flash"
+        elif model in ["gemini-pro-latest", "gemini-pro", "gemini-1.5-pro", "gemini-2.0-pro"]:
+            model = "gemini-2.5-pro"
             
         clean_key = str(self.api_key or "").strip()
         if stream:

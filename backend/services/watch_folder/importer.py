@@ -133,11 +133,11 @@ def create_task(
     final_license = result.license
     if not final_license and p_defaults.get("license"): final_license = p_defaults.get("license")
     
-    final_lang = result.default_language if result.default_language else result.language
-    if not final_lang and p_defaults.get("language"): final_lang = p_defaults.get("language")
+    final_lang = result.default_language if result.default_language else (p_advanced.get("default_language") or p_defaults.get("default_language") or p_defaults.get("language") or getattr(channel, "language", None))
+    if not final_lang: final_lang = None
 
-    final_audio_lang = result.audio_language if result.audio_language else result.language
-    if not final_audio_lang and p_defaults.get("language"): final_audio_lang = p_defaults.get("language")
+    final_audio_lang = result.audio_language if result.audio_language else (p_advanced.get("audio_language") or p_defaults.get("audio_language") or p_defaults.get("language") or getattr(channel, "language", None))
+    if not final_audio_lang: final_audio_lang = None
 
     final_notify = result.notify_subscribers if result.notify_subscribers is not None else True
     if p_advanced.get("notify_subscribers") is not None: final_notify = p_advanced.get("notify_subscribers")
