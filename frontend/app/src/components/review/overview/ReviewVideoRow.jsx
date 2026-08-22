@@ -102,9 +102,13 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
           {video.title}
         </div>
         
-        {/* Line 2: Channel & Mode */}
+        {/* Line 2: Channel & Pipeline & Mode */}
         <div className="flex items-center gap-2 text-[11px] text-white/50">
           <span className="truncate max-w-[100px] text-white/70 font-medium">{video.channelName}</span>
+          <span className="text-white/20">•</span>
+          <span className={`text-[10px] font-semibold uppercase tracking-wider ${video.pipeline_type === 'shorts' ? 'text-amber-400' : 'text-blue-400'}`}>
+            {video.pipeline_type === 'shorts' ? 'Shorts' : 'Long'}
+          </span>
           <span className="text-white/20">•</span>
           <span className={`text-[10px] font-semibold uppercase tracking-wider ${isCampaign ? 'text-purple-400' : 'text-cyan-400'}`}>
             {isCampaign ? 'Campaign' : 'Continuous'}

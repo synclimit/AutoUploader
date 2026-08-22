@@ -469,8 +469,8 @@ class ChannelService:
                             pt.schedule_mode = p_cfg.get("schedule_mode", "youtube")
                             pt.humanize_enabled = h_enabled
                             pt.humanize_min = h_min
-                            pt.humanize_max = h_max
-                            pt.execution_source = "CAMPAIGN" if p_cfg.get("automation_strategy") == "campaign" else "CONTINUOUS"
+                            has_camp = bool(p_cfg.get("automation_strategy") == "campaign" or p_cfg.get("campaign_folder"))
+                            pt.execution_source = "CAMPAIGN" if has_camp else "CONTINUOUS"
             except Exception as e:
                 import logging
                 logging.getLogger("ChannelService").error(f"Failed to update pending tasks schedule: {e}")
