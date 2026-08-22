@@ -356,6 +356,8 @@ class UploadTaskUpdate(BaseModel):
     failure_reason: Optional[str] = None
     upload_mode: Optional[str] = None
     ai_metadata_generated: Optional[bool] = None
+    pipeline_type: Optional[str] = None
+    execution_source: Optional[str] = None
 
 class UploadTaskResponse(UploadTaskBase):
     id: str

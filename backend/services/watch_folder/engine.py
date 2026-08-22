@@ -220,12 +220,14 @@ class WatchFolderEngine(EngineBase):
             if target_pipeline and p_key != target_pipeline:
                 continue
 
-            raw_watch = p_config.get("watch_folder") or p_config.get("campaign_folder") or (channel.watch_folder if p_key == "long" else None)
-            if not raw_watch or not str(raw_watch).strip():
+            if p_config.get("enabled") is False:
                 continue
 
-            # If folder is configured, treat pipeline as enabled unless explicitly disabled without folder
-            if p_config.get("enabled") is False and not (p_config.get("watch_folder") or p_config.get("campaign_folder")):
+            raw_watch = p_config.get("watch_folder") or p_config.get("campaign_folder")
+            if not raw_watch and p_key == "long" and not channel.pipelines:
+                raw_watch = channel.watch_folder
+
+            if not raw_watch or not str(raw_watch).strip():
                 continue
 
             from services.system.path_service import PathService
