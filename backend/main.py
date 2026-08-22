@@ -584,44 +584,80 @@ if __name__ == "__main__":
             except Exception as err:
                 print(f"[Tray] Error showing window: {err}")
 
+    _is_exiting = False
+
     def exit_application():
+        nonlocal _is_exiting
+        if _is_exiting:
+            return
+        _is_exiting = True
+
         global tray_service_instance
         if tray_service_instance:
             try:
                 tray_service_instance.stop()
             except Exception:
                 pass
-        if webview.windows:
-            try:
-                webview.windows[0].destroy()
-            except Exception:
-                pass
-        os._exit(0)
+
+        import threading
+        def _force_exit():
+            import time
+            time.sleep(0.15)
+            os._exit(0)
+
+        threading.Thread(target=_force_exit, daemon=True).start()
 
     class Api:
         def close(self):
+            # If System Tray is running, minimize window to tray in background
+            global tray_service_instance
+            if tray_service_instance and tray_service_instance._is_running:
+                if webview.windows:
+                    try:
+                        webview.windows[0].hide()
+                        tray_service_instance.notify_hidden()
+                        return
+                    except Exception:
+                        pass
             exit_application()
+
         def minimize(self):
             if webview.windows:
-                webview.windows[0].minimize()
+                try:
+                    webview.windows[0].minimize()
+                except Exception:
+                    pass
+
         def maximize(self):
             if webview.windows:
-                webview.windows[0].toggle_fullscreen()
+                try:
+                    webview.windows[0].toggle_fullscreen()
+                except Exception:
+                    pass
+
         def exit_app(self):
             exit_application()
+
         def select_files(self):
             if webview.windows:
-                result = webview.windows[0].create_file_dialog(
-                    webview.OPEN_DIALOG, 
-                    allow_multiple=True, 
-                    file_types=("Video files (*.mp4;*.mkv;*.mov;*.avi)", "All files (*.*)")
-                )
-                return result if result else []
+                try:
+                    result = webview.windows[0].create_file_dialog(
+                        webview.OPEN_DIALOG, 
+                        allow_multiple=True, 
+                        file_types=("Video files (*.mp4;*.mkv;*.mov;*.avi)", "All files (*.*)")
+                    )
+                    return result if result else []
+                except Exception:
+                    return []
             return []
+
         def select_folder(self):
             if webview.windows:
-                result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
-                return result if result else []
+                try:
+                    result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
+                    return result if result else []
+                except Exception:
+                    return []
             return []
 
     api = Api()
@@ -646,5 +682,4 @@ if __name__ == "__main__":
         js_api=api
     )
     window.events.closed += exit_application
-    window.events.closing += exit_application
     webview.start()

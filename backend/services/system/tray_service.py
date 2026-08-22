@@ -64,8 +64,7 @@ class TrayService:
                 pystray.MenuItem(
                     "Buka Raynz PitStop", 
                     self._handle_show, 
-                    default=True,
-                    bold=True
+                    default=True
                 ),
                 pystray.Menu.SEPARATOR,
                 pystray.MenuItem(
