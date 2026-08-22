@@ -137,50 +137,35 @@ def run_installer_async(exe_path: str):
     
     temp_dir = tempfile.gettempdir()
     bat_path = os.path.join(temp_dir, "run_update.bat")
-    ps_path = os.path.join(temp_dir, "run_update.ps1")
-    log_path = os.path.join(temp_dir, "update_installer.log")
+    vbs_path = os.path.join(temp_dir, "run_update.vbs")
     
-    ps_content = f'''$ErrorActionPreference = "SilentlyContinue"
-$rawDir = "{clean_app_dir}".TrimEnd('\\', '/')
-"[{datetime.now()}] Starting updater script for $rawDir" | Out-File -FilePath "{log_path}" -Encoding utf8
-Start-Sleep -Seconds 2
-Get-Process -Name "RaynzPitStop", "RaynzPitStop_App", "AutoUploader" -ErrorAction SilentlyContinue | Stop-Process -Force
-Start-Sleep -Seconds 2
-$installerArgs = @("/DIR=`"$rawDir`"", '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CLOSEAPPLICATIONS', '/FORCECLOSEAPPLICATIONS')
-"[{datetime.now()}] Running elevated installer: {clean_exe_path} with args: $($installerArgs -join ' ')" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-$proc = Start-Process -FilePath "{clean_exe_path}" -ArgumentList $installerArgs -WindowStyle Hidden -PassThru -Wait
-"[{datetime.now()}] Installer exit code: $($proc.ExitCode)" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-Start-Sleep -Seconds 2
-
-$targetExe = "{clean_app_exe}"
-if (-not (Test-Path -LiteralPath $targetExe)) {{
-    $fallbackExe = Join-Path "$rawDir" "RaynzPitStop.exe"
-    if (Test-Path -LiteralPath $fallbackExe) {{
-        $targetExe = $fallbackExe
-    }} else {{
-        $fallbackExe2 = Join-Path "$rawDir" "RaynzPitStop_App.exe"
-        if (Test-Path -LiteralPath $fallbackExe2) {{
-            $targetExe = $fallbackExe2
-        }}
-    }}
-}}
-
-if (Test-Path -LiteralPath $targetExe) {{
-    "[{datetime.now()}] Launching updated app: $targetExe" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-    Start-Process -FilePath "$targetExe" -WorkingDirectory "$rawDir"
-}} else {{
-    "[{datetime.now()}] App exe not found at: {clean_app_exe}" | Out-File -FilePath "{log_path}" -Append -Encoding utf8
-}}
+    bat_content = f'''@echo off
+setlocal
+cd /d "%TEMP%"
+timeout /t 1 /nobreak > nul
+taskkill /f /im "RaynzPitStop.exe" > nul 2>&1
+taskkill /f /im "RaynzPitStop_App.exe" > nul 2>&1
+taskkill /f /im "AutoUploader.exe" > nul 2>&1
+timeout /t 1 /nobreak > nul
+"{clean_exe_path}" /DIR="{clean_app_dir}" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS
+timeout /t 2 /nobreak > nul
+if exist "{clean_app_exe}" (
+    start "" "{clean_app_exe}"
+) else if exist "{clean_app_dir}\\RaynzPitStop.exe" (
+    start "" "{clean_app_dir}\\RaynzPitStop.exe"
+) else if exist "{clean_app_dir}\\RaynzPitStop_App.exe" (
+    start "" "{clean_app_dir}\\RaynzPitStop_App.exe"
+)
+exit
 '''
 
-    vbs_path = os.path.join(temp_dir, "run_update.vbs")
     vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
-WshShell.Run "powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ""{ps_path}""", 0, False
+WshShell.Run "cmd.exe /c """"{bat_path}""""", 0, False
 '''
 
     try:
-        with open(ps_path, "w", encoding="utf-8") as f_ps:
-            f_ps.write(ps_content)
+        with open(bat_path, "w", encoding="utf-8") as f_bat:
+            f_bat.write(bat_content)
         with open(vbs_path, "w", encoding="utf-8") as f_vbs:
             f_vbs.write(vbs_content)
             
@@ -192,8 +177,7 @@ WshShell.Run "powershell.exe -WindowStyle Hidden -NoProfile -NonInteractive -Exe
             creationflags=DETACHED_FLAGS,
             close_fds=True
         )
-        # Give wscript 1.5 seconds to spin up, then exit this process so files can be replaced
-        time.sleep(1.5)
+        time.sleep(1)
         os._exit(0)
     except Exception as e:
         print("Failed to execute update script:", e)
