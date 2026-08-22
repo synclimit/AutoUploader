@@ -203,7 +203,16 @@ def create_task(
         daily_limit_val = 1
 
     day_offset = today_intake // daily_limit_val
-    time_slot_str = str(schedule_list[today_intake % len(schedule_list)])
+    slot_idx_in_day = today_intake % daily_limit_val
+
+    if slot_idx_in_day < len(schedule_list):
+        time_slot_str = str(schedule_list[slot_idx_in_day])
+    else:
+        start_hour = 9
+        end_hour = 21
+        step = (end_hour - start_hour) / max(1, daily_limit_val - 1)
+        slot_h = int(start_hour + slot_idx_in_day * step)
+        time_slot_str = f"{slot_h:02d}:00"
 
     try:
         parts = time_slot_str.split(":")
@@ -223,6 +232,23 @@ def create_task(
         import random
         jitter = random.randint(humanize_min, humanize_max)
         target_dt_local += timedelta(minutes=jitter)
+
+    # Avoid same-minute collision with existing tasks on the same day for this channel
+    try:
+        from schemas import QueueStatusEnum
+        day_start_utc = target_dt_local.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+        day_end_utc = target_dt_local.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.UTC).replace(tzinfo=None)
+        existing_tasks = db.query(UploadTask.schedule_time).filter(
+            UploadTask.channel_id == channel.id,
+            UploadTask.scheduled_at >= day_start_utc,
+            UploadTask.scheduled_at <= day_end_utc
+        ).all()
+        used_times = {t[0] for t in existing_tasks if t[0]}
+        import random
+        while target_dt_local.strftime("%H:%M") in used_times:
+            target_dt_local += timedelta(minutes=random.randint(3, 8))
+    except Exception:
+        pass
 
     calculated_scheduled_at = target_dt_local.astimezone(pytz.UTC).replace(tzinfo=None)
 

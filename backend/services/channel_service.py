@@ -443,9 +443,21 @@ class ChannelService:
                         except Exception:
                             h_max = 0
 
+                        used_slots_per_day = {}
+
                         for idx, pt in enumerate(tasks_in_pipe):
                             day_offset = idx // daily_limit_val
-                            time_slot_str = str(schedule_list[idx % len(schedule_list)])
+                            slot_idx_in_day = idx % daily_limit_val
+
+                            if slot_idx_in_day < len(schedule_list):
+                                time_slot_str = str(schedule_list[slot_idx_in_day])
+                            else:
+                                start_hour = 9
+                                end_hour = 21
+                                step = (end_hour - start_hour) / max(1, daily_limit_val - 1)
+                                slot_h = int(start_hour + slot_idx_in_day * step)
+                                time_slot_str = f"{slot_h:02d}:00"
+
                             try:
                                 parts = time_slot_str.split(":")
                                 slot_hour = int(parts[0])
@@ -464,11 +476,21 @@ class ChannelService:
                                 jitter = random.randint(h_min, h_max)
                                 target_dt_local += timedelta(minutes=jitter)
 
+                            day_key = target_dt_local.date()
+                            if day_key not in used_slots_per_day:
+                                used_slots_per_day[day_key] = set()
+
+                            while target_dt_local.strftime("%H:%M") in used_slots_per_day[day_key]:
+                                target_dt_local += timedelta(minutes=random.randint(3, 8))
+
+                            used_slots_per_day[day_key].add(target_dt_local.strftime("%H:%M"))
+
                             pt.scheduled_at = target_dt_local.astimezone(pytz.UTC).replace(tzinfo=None)
                             pt.schedule_time = target_dt_local.strftime("%H:%M")
                             pt.schedule_mode = p_cfg.get("schedule_mode", "youtube")
                             pt.humanize_enabled = h_enabled
                             pt.humanize_min = h_min
+                            pt.humanize_max = h_max
                             has_camp = bool(p_cfg.get("automation_strategy") == "campaign" or p_cfg.get("campaign_folder"))
                             pt.execution_source = "CAMPAIGN" if has_camp else "CONTINUOUS"
             except Exception as e:
