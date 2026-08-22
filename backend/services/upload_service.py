@@ -183,9 +183,9 @@ class UploadService:
         if not task:
             raise HTTPException(status_code=404, detail="Task not found")
             
-        if task.status not in [QueueStatusEnum.review, QueueStatusEnum.watched, QueueStatusEnum.scheduled, QueueStatusEnum.failed]:
-            raise HTTPException(status_code=400, detail="Only WATCHED, REVIEW, SCHEDULED, or FAILED tasks can be approved/retried")
-            
+        task.retry_count = 0
+        task.failure_reason = None
+
         # If it was scheduled, this is a manual override
         if task.status == QueueStatusEnum.scheduled:
             if task.schedule_mode != "youtube":

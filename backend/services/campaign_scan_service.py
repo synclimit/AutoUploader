@@ -44,9 +44,12 @@ class CampaignScanService:
         # Local deduplication set
         seen_fingerprints = set()
 
-        # 2. Recursively scan the folder
-        for root, _, files in os.walk(folder_path):
+        # 2. Scan the folder, skipping hidden and system directories
+        for root, dirs, files in os.walk(folder_path):
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d.lower() not in ['$recycle.bin', 'system volume information', 'node_modules', '__pycache__', 'temp']]
             for file in files:
+                if file.startswith('.') or file.startswith('~$') or file.startswith('._'):
+                    continue
                 ext = os.path.splitext(file)[1].lower()
                 if ext not in CampaignScanService.SUPPORTED_EXTENSIONS:
                     continue
