@@ -532,9 +532,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                       className="h-[40px] rounded-[10px] bg-[#05080e] border border-white/[0.08] px-3 text-[14px] text-white outline-none focus:border-[var(--accent-500)] transition-colors" 
                     />
                   </div>
-                  <div className="flex-[2] flex flex-col gap-2">
+                  <div className="flex-1 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Total Target Videos</label>
+                      <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Total Target</label>
                       {renderTooltip('Batas maksimal video yang akan ditarik dari campaign folder ini.')}
                       {renderDirtyIndicator(key, 'videos_to_upload')}
                     </div>
@@ -544,6 +544,29 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                       onChange={(e) => updatePipeline(key, 'videos_to_upload', parseInt(e.target.value) || 0)}
                       className="w-full h-[40px] rounded-[10px] bg-[#05080e] border border-white/[0.08] px-3 text-[14px] text-white outline-none focus:border-[var(--accent-500)] transition-colors"
                     />
+                  </div>
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Upload Mode</label>
+                      {renderTooltip('Pilih apakah video campaign langsung diupload otomatis atau masuk ke daftar review terlebih dahulu.')}
+                      {renderDirtyIndicator(key, 'require_approval')}
+                    </div>
+                    <div className="flex bg-black/40 p-1 rounded-[8px] border border-white/10 h-[40px]">
+                      <button
+                        type="button"
+                        onClick={() => updatePipeline(key, 'require_approval', false)}
+                        className={`flex-1 flex items-center justify-center gap-1 rounded-[6px] text-[11px] font-bold transition-all ${p.require_approval === false ? 'bg-purple-500/20 text-purple-300' : 'text-white/40 hover:text-white/80'}`}
+                      >
+                        Auto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updatePipeline(key, 'require_approval', true)}
+                        className={`flex-1 flex items-center justify-center gap-1 rounded-[6px] text-[11px] font-bold transition-all ${p.require_approval !== false ? 'bg-amber-500/20 text-amber-400' : 'text-white/40 hover:text-white/80'}`}
+                      >
+                        Review
+                      </button>
+                    </div>
                   </div>
                 </div>
               </>
@@ -801,26 +824,37 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                     <ListVideo size={14} className="text-purple-400" />
                     <span className="text-[13px] font-bold text-purple-100 tracking-wide">Campaign Summary</span>
                   </div>
-                  {isScanning[key] && <div className="text-[10px] text-purple-400 animate-pulse font-bold">SCANNING...</div>}
+                  <div className="flex items-center gap-2">
+                    {isScanning[key] && <div className="text-[10px] text-purple-400 animate-pulse font-bold">SCANNING...</div>}
+                    <button
+                      type="button"
+                      disabled={isScanning[key] || !p.campaign_folder}
+                      onClick={() => triggerScan(key, p.campaign_folder)}
+                      className={`h-[24px] px-2.5 rounded-[6px] bg-purple-500/20 text-purple-300 text-[10px] font-bold hover:bg-purple-500/30 transition-all flex items-center gap-1 border border-purple-500/30 ${isScanning[key] || !p.campaign_folder ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      title="Scan ulang isi folder campaign sekarang secara realtime"
+                    >
+                      <span>↻</span> Rescan
+                    </button>
+                  </div>
                 </div>
 
                 {/* STATS GRID */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-white/[0.02]">
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Detected</span>
-                    <span className="text-[20px] font-mono font-bold text-white">{scanData.detected || 0}</span>
+                    <span className="text-[20px] font-mono font-bold text-white" title="Total file video di folder">{scanData.detected || 0}</span>
                   </div>
                   <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-white/[0.02]">
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Available (New)</span>
-                    <span className="text-[20px] font-mono font-bold text-green-400">{scanData.available || 0}</span>
+                    <span className="text-[20px] font-mono font-bold text-green-400" title="Video baru yang belum pernah diupload">{scanData.available || 0}</span>
                   </div>
                   <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-white/[0.02]">
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Selected</span>
-                    <span className="text-[20px] font-mono font-bold text-cyan-400">{scanData.selected || 0}</span>
+                    <span className="text-[20px] font-mono font-bold text-cyan-400" title="Target video yang dipilih">{scanData.selected || 0}</span>
                   </div>
                   <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-white/[0.02]">
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Invalid / Dup</span>
-                    <span className="text-[20px] font-mono font-bold text-amber-400">{(scanData.invalid || 0) + (scanData.duplicate || 0)}</span>
+                    <span className="text-[20px] font-mono font-bold text-amber-400" title="File corrupt atau sudah pernah diupload sebelumnya">{(scanData.invalid || 0) + (scanData.duplicate || 0)}</span>
                   </div>
                 </div>
 
