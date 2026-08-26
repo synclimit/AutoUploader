@@ -121,6 +121,7 @@ async def upload_thumbnail(upload_task_id: str, file: UploadFile = File(...), db
     """
     Upload a custom thumbnail for an UploadTask.
     Supported formats: jpg, jpeg, png, webp, jfif.
+    Automatically trims baked-in black bars and fits to 16:9 (1280x720) YouTube standard.
     """
     task = db.query(UploadTask).filter(UploadTask.id == upload_task_id).first()
     if not task:
@@ -130,17 +131,24 @@ async def upload_thumbnail(upload_task_id: str, file: UploadFile = File(...), db
     if ext not in [".jpg", ".jpeg", ".png", ".webp", ".jfif"]:
         raise HTTPException(status_code=400, detail=f"Unsupported file format: {ext}")
 
+    content = await file.read()
+
     # Ensure thumbnails directory exists
     from services.system.path_service import PathService
+    from services.media.thumbnail_processor import fit_thumbnail_to_16_9
+
     thumbnails_dir = os.path.join(PathService.get_temp_dir(), "thumbnails")
     os.makedirs(thumbnails_dir, exist_ok=True)
 
-    # Save file securely
-    safe_filename = f"thumb_{upload_task_id}{ext}"
+    # Save processed 16:9 thumbnail securely
+    safe_filename = f"thumb_{upload_task_id}.jpg"
     dest_path = os.path.join(thumbnails_dir, safe_filename)
 
-    with open(dest_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        fit_thumbnail_to_16_9(content, output_path=dest_path)
+    except Exception as e:
+        with open(dest_path, "wb") as buffer:
+            buffer.write(content)
 
     # Update database
     task.thumbnail_path = dest_path

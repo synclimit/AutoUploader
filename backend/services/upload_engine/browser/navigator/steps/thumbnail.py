@@ -15,6 +15,12 @@ class ThumbnailStep(BaseStep):
 
         context.logger.info("[ThumbnailStep] Uploading thumbnail...")
         try:
+            from services.media.thumbnail_processor import fit_thumbnail_to_16_9
+            try:
+                fit_thumbnail_to_16_9(task.thumbnail_path, output_path=task.thumbnail_path)
+            except Exception as fit_err:
+                context.logger.warning(f"[ThumbnailStep] Warning fitting thumbnail: {fit_err}")
+
             file_input = LocatorResolver.resolve(page, [
                 {"type": "css", "selector": 'input#file-loader'},
                 {"type": "css", "selector": 'input[type="file"][accept="image/jpeg,image/png"]'}

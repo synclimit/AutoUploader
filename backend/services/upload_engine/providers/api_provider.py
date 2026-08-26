@@ -274,10 +274,16 @@ class APIUploader(BaseUploader):
             if task.thumbnail_path and os.path.exists(task.thumbnail_path):
                 context.logger.info(f"[APIUploader] Uploading thumbnail...")
                 try:
+                    from services.media.thumbnail_processor import fit_thumbnail_to_16_9
+                    try:
+                        fit_thumbnail_to_16_9(task.thumbnail_path, output_path=task.thumbnail_path)
+                    except Exception as fit_err:
+                        context.logger.warning(f"[APIUploader] Thumbnail fit warning: {fit_err}")
+
                     import mimetypes
                     thumb_mimetype, _ = mimetypes.guess_type(task.thumbnail_path)
                     if not thumb_mimetype:
-                        thumb_mimetype = 'image/*'
+                        thumb_mimetype = 'image/jpeg'
                         
                     youtube.thumbnails().set(
                         videoId=video_id,
