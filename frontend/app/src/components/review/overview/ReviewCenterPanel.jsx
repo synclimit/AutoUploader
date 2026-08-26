@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2 } from 'lucide-react'
+import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2, Download } from 'lucide-react'
 import { showToast } from '../../common/NotificationToast'
 import apiClient from '../../../api/client'
 import { useQueueStore } from '../../../store/upload/uploadStore'
@@ -18,6 +18,7 @@ export default function ReviewCenterPanel({ video }) {
   }
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const fileInputRef = useRef(null);
   
   // Use relative URL so it works in both Vite proxy (dev) and FastAPI static serving (prod)
@@ -30,6 +31,39 @@ export default function ReviewCenterPanel({ video }) {
   const handleUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+
+  const handleDownloadThumbnail = async () => {
+    if (!video?.id) return;
+    try {
+      setIsDownloading(true);
+      showToast('Downloading thumbnail...', 'info', 2000);
+      const res = await fetch(`/api/v1/media/thumbnail/${video.id}?t=${Date.now()}`);
+      if (!res.ok) throw new Error('Thumbnail not found');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      let ext = 'jpg';
+      if (blob.type.includes('png')) ext = 'png';
+      else if (blob.type.includes('webp')) ext = 'webp';
+      else if (blob.type.includes('jfif')) ext = 'jfif';
+
+      const safeTitle = (video.title || 'thumbnail').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 40);
+      a.download = `${safeTitle}_thumbnail.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      showToast('Thumbnail downloaded successfully', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to download thumbnail', 'error');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -102,10 +136,25 @@ export default function ReviewCenterPanel({ video }) {
 
       {/* Expanded Thumbnails Strip */}
       <div className="flex flex-col gap-1.5 shrink-0 pt-1">
-        <h4 className="text-[12px] font-bold text-white/90">Thumbnails</h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-[12px] font-bold text-white/90">Thumbnails</h4>
+          <button
+            onClick={handleDownloadThumbnail}
+            disabled={isDownloading}
+            title="Download thumbnail saat ini ke komputer"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white border border-white/[0.08] text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed neon-interactive"
+          >
+            {isDownloading ? (
+              <Loader2 size={12} className="animate-spin text-[var(--accent-400)]" />
+            ) : (
+              <Download size={12} className="text-[var(--accent-400)]" />
+            )}
+            <span>Download Thumbnail</span>
+          </button>
+        </div>
         <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
           {/* Active Thumbnail */}
-          <div className="relative h-[80px] aspect-video rounded-[8px] overflow-hidden border-2 border-[var(--accent-500)] cursor-pointer shadow-[0_0_15px_var(--color-primary-cyan)] shrink-0 bg-black">
+          <div className="relative group/thumb h-[80px] aspect-video rounded-[8px] overflow-hidden border-2 border-[var(--accent-500)] cursor-pointer shadow-[0_0_15px_var(--color-primary-cyan)] shrink-0 bg-black">
             {video.thumbnail_path ? (
               <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover" />
             ) : videoUrl ? (
@@ -113,10 +162,26 @@ export default function ReviewCenterPanel({ video }) {
             ) : (
               <div className="absolute inset-0 bg-cyan-900/40"></div>
             )}
-            <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--accent-500)] flex items-center justify-center shadow-md">
+            <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[var(--accent-500)] flex items-center justify-center shadow-md z-10">
               <Check size={10} className="text-black stroke-[3]" />
             </div>
+
+            {/* Quick hover download button on thumbnail */}
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDownloadThumbnail();
+              }}
+              title="Download thumbnail"
+              className="absolute inset-0 bg-black/60 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-20"
+            >
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-500)] text-black text-[10px] font-bold shadow-lg hover:scale-105 transition-transform">
+                <Download size={12} strokeWidth={2.5} />
+                <span>Download</span>
+              </div>
+            </div>
           </div>
+
           {/* Upload Custom */}
           <div 
             onClick={!isUploading ? handleUploadClick : undefined}
@@ -131,12 +196,28 @@ export default function ReviewCenterPanel({ video }) {
               {isUploading ? 'Uploading...' : 'Upload Custom'}
             </span>
           </div>
+
+          {/* Download Card */}
+          <div 
+            onClick={handleDownloadThumbnail}
+            title="Download thumbnail ke penyimpanan lokal"
+            className="relative h-[80px] aspect-video rounded-[8px] overflow-hidden border border-white/10 hover:border-[var(--accent-500)]/50 hover:bg-[var(--accent-500)]/[0.02] bg-white/[0.02] cursor-pointer transition-all flex flex-col items-center justify-center shrink-0 neon-interactive group"
+          >
+            {isDownloading ? (
+              <Loader2 size={16} className="text-[var(--accent-400)] animate-spin mb-0.5" />
+            ) : (
+              <Download size={16} className="text-white/40 group-hover:text-[var(--accent-400)] mb-0.5 transition-colors" />
+            )}
+            <span className="text-[10px] font-bold text-white/40 group-hover:text-[var(--accent-400)] transition-colors">
+              {isDownloading ? 'Downloading...' : 'Download'}
+            </span>
+          </div>
           
           <input 
             type="file" 
             ref={fileInputRef} 
             onChange={handleFileChange} 
-            accept=".jpg,.jpeg,.png,.webp" 
+            accept=".jpg,.jpeg,.png,.webp,.jfif" 
             className="hidden" 
           />
         </div>

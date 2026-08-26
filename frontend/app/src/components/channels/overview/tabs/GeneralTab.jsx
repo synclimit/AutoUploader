@@ -533,17 +533,54 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                     />
                   </div>
                   <div className="flex-1 flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Total Target</label>
-                      {renderTooltip('Batas maksimal video yang akan ditarik dari campaign folder ini.')}
-                      {renderDirtyIndicator(key, 'videos_to_upload')}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <label className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Total Target</label>
+                        {renderTooltip('Batas maksimal video yang akan ditarik dari folder ini. Pilih "Tak Terbatas" agar setiap ada video baru yang masuk ke folder langsung otomatis diproses ke review/jadwal tanpa henti.')}
+                        {renderDirtyIndicator(key, 'videos_to_upload')}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (p.videos_to_upload === 0) {
+                            updatePipeline(key, 'videos_to_upload', scanData?.available || 50);
+                          } else {
+                            updatePipeline(key, 'videos_to_upload', 0);
+                          }
+                        }}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-[4px] border transition-all cursor-pointer ${
+                          p.videos_to_upload === 0
+                            ? 'bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30'
+                            : 'bg-white/5 text-white/50 border-white/10 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        {p.videos_to_upload === 0 ? '∞ Tak Terbatas' : 'Set Tak Terbatas'}
+                      </button>
                     </div>
-                    <input 
-                      type="number" min="0" max="10000" 
-                      value={p.videos_to_upload !== undefined ? p.videos_to_upload : (scanData?.available ?? scanData?.summary?.available ?? 0)} 
-                      onChange={(e) => updatePipeline(key, 'videos_to_upload', parseInt(e.target.value) || 0)}
-                      className="w-full h-[40px] rounded-[10px] bg-[#05080e] border border-white/[0.08] px-3 text-[14px] text-white outline-none focus:border-[var(--accent-500)] transition-colors"
-                    />
+
+                    {p.videos_to_upload === 0 ? (
+                      <div 
+                        onClick={() => updatePipeline(key, 'videos_to_upload', scanData?.available || 50)}
+                        className="w-full h-[40px] rounded-[10px] bg-green-500/10 border border-green-500/30 px-3 flex items-center justify-between cursor-pointer hover:bg-green-500/15 transition-all group"
+                        title="Klik untuk mengubah kembali ke target angka tertentu"
+                      >
+                        <span className="text-[13px] font-bold text-green-300 flex items-center gap-2">
+                          <span className="text-[16px]">∞</span> Tak Terbatas (Unlimited)
+                        </span>
+                        <span className="text-[10px] text-green-400/60 group-hover:text-green-300 font-medium">Ubah ke Angka</span>
+                      </div>
+                    ) : (
+                      <div className="relative flex items-center">
+                        <input 
+                          type="number" min="0" max="10000" 
+                          value={p.videos_to_upload !== undefined ? p.videos_to_upload : (scanData?.available ?? scanData?.summary?.available ?? 0)} 
+                          onChange={(e) => updatePipeline(key, 'videos_to_upload', parseInt(e.target.value) || 0)}
+                          className="w-full h-[40px] rounded-[10px] bg-[#05080e] border border-white/[0.08] px-3 text-[14px] text-white outline-none focus:border-[var(--accent-500)] transition-colors pr-16"
+                        />
+                        <span className="absolute right-3 text-[11px] text-white/30 font-medium pointer-events-none">video</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
@@ -850,7 +887,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   </div>
                   <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-white/[0.02]">
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Selected</span>
-                    <span className="text-[20px] font-mono font-bold text-cyan-400" title="Target video yang dipilih">{scanData.selected || 0}</span>
+                    <span className="text-[20px] font-mono font-bold text-cyan-400" title="Target video yang dipilih">
+                      {p.videos_to_upload === 0 ? '∞ (All New)' : (scanData.selected || 0)}
+                    </span>
                   </div>
                   <div className="flex flex-col gap-1.5 p-3 rounded-[8px] bg-white/[0.02]">
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">Invalid / Dup</span>
@@ -863,7 +902,9 @@ export default function GeneralTab({ draft, original, onChange, states, channelS
                   <div className="flex justify-between items-center group/tooltip relative">
                     <span className="text-[11px] font-bold text-white/40">Est. Coverage</span>
                     <span className="text-[12px] font-mono text-purple-300 font-bold">
-                      {p.daily_limit ? `${Math.ceil((scanData.selected || 0) / p.daily_limit)} days` : '0 days'}
+                      {p.videos_to_upload === 0 
+                        ? 'Continuous (∞)' 
+                        : (p.daily_limit ? `${Math.ceil((scanData.selected || 0) / p.daily_limit)} days` : '0 days')}
                     </span>
                   </div>
                   <div className="flex justify-between items-center group/tooltip relative">

@@ -81,7 +81,7 @@ def serve_file(path: str, db: Session = Depends(get_db)):
             (CampaignReviewAsset.thumbnail == abs_path)
         ).first()
         
-    is_media_ext = abs_path.lower().endswith((".mp4", ".mov", ".mkv", ".jpg", ".jpeg", ".png", ".webp"))
+    is_media_ext = abs_path.lower().endswith((".mp4", ".mov", ".mkv", ".jpg", ".jpeg", ".png", ".webp", ".jfif"))
     
     if not (is_upload or is_thumbnail or is_test or asset_registered or is_media_ext):
         raise HTTPException(status_code=403, detail="Access denied")

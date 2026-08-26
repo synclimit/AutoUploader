@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, Plus, Sparkles, Save, Check, X, Search, MonitorPlay, Copy, ExternalLink, Activity, History } from 'lucide-react'
+import { ChevronDown, Plus, Sparkles, Save, Check, X, Search, MonitorPlay, Copy, ExternalLink, Activity, History, Loader2, RefreshCw } from 'lucide-react'
 import { useQueueStore } from '../../../store/upload/uploadStore'
 import { showToast } from '../../common/NotificationToast'
 import { YOUTUBE_CATEGORIES } from '../../../constants/youtubeCategories'
@@ -18,6 +18,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
   const [aiSeoMode, setAiSeoMode] = useState('SEO Maximum')
   const [aiContentType, setAiContentType] = useState('General')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isRephrasingDesc, setIsRephrasingDesc] = useState(false)
   const [generatingStage, setGeneratingStage] = useState('')
   const [suggestion, setSuggestion] = useState(null)
   
@@ -223,6 +224,49 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     }
   }
 
+  const handleRephraseDescription = async () => {
+    const keywordToUse = aiKeyword.trim() || currentTitleStr.trim() || video?.title || 'General'
+    
+    if (!keywordToUse && !currentDescStr.trim()) {
+      showToast('Please enter a target keyword or title/description first', 'error', 2500)
+      return
+    }
+
+    setIsRephrasingDesc(true)
+    try {
+      const apiClient = (await import('../../../api/client')).default
+      const payload = {
+        keyword: keywordToUse,
+        language: aiLanguage,
+        seo_mode: aiSeoMode,
+        content_type: aiContentType,
+        target: 'description',
+        current_title: currentTitleStr,
+        current_description: currentDescStr,
+        current_tags: currentTagsStr
+      }
+
+      const data = await apiClient.post(`/queue/${video.id}/generate-metadata`, payload)
+
+      if (data.success) {
+        const newDesc = data.data?.description || data.data?.alternatives?.descriptions?.[0]
+        if (newDesc) {
+          handleChange('description', newDesc)
+          showToast('Description rephrased successfully', 'success')
+        } else {
+          showToast('No description returned by AI', 'error')
+        }
+      } else {
+        showToast(data.message || 'Failed to rephrase description', 'error')
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.detail || err.response?.data?.message || err.message || 'Error rephrasing description'
+      showToast(errMsg, 'error')
+    } finally {
+      setIsRephrasingDesc(false)
+    }
+  }
+
   const handleApplySuggestion = () => {
     if (suggestion) {
       // Handle the new nested structure (alternatives) or fallback to backward compatible single fields
@@ -294,12 +338,12 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     <div className="w-[400px] h-full flex flex-col border-l border-white/[0.04] shrink-0 bg-[#05080e]/60 backdrop-blur-md">
       
       {/* Tabs */}
-      <div className="flex items-center px-6 border-b border-white/[0.04] shrink-0">
+      <div className="flex items-center px-4 border-b border-white/[0.04] shrink-0">
         {['Basic Information', 'Advanced Settings'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`py-4 px-2 text-[12px] font-bold tracking-wide relative whitespace-nowrap mr-6 transition-colors ${
+            className={`py-2.5 px-2 text-[12px] font-bold tracking-wide relative whitespace-nowrap mr-5 transition-colors ${
               activeTab === tab ? 'text-white' : 'text-white/40 hover:text-white/80'
             }`}
           >
@@ -312,47 +356,47 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5">
         
         {activeTab === 'Basic Information' && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2.5">
             
             {/* AI Assistant Panel (Only visible when ON) */}
-            <div className={`overflow-hidden transition-all duration-300 ${aiAssistantEnabled ? 'max-h-[4000px] opacity-100 mb-4' : 'max-h-0 opacity-0 mb-0'}`}>
-               <div className="bg-[#151f2e] border border-[var(--accent-500)]/30 rounded-xl p-4 shadow-[0_4px_20px_rgba(34,211,238,0.05)] flex flex-col gap-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Sparkles size={14} className="text-[var(--accent-400)]" />
-                    <span className="text-[12px] font-bold text-[var(--accent-400)]">AI Metadata Assistant</span>
+            <div className={`overflow-hidden transition-all duration-300 ${aiAssistantEnabled ? 'max-h-[4000px] opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
+               <div className="bg-[#151f2e] border border-[var(--accent-500)]/30 rounded-xl p-3 shadow-[0_4px_20px_rgba(34,211,238,0.05)] flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <Sparkles size={13} className="text-[var(--accent-400)]" />
+                    <span className="text-[11.5px] font-bold text-[var(--accent-400)]">AI Metadata Assistant</span>
                   </div>
                   
                   {/* Keyword */}
                   <div>
-                    <label className="block text-[11px] text-white/60 mb-1.5 font-medium">Target Keyword <span className="text-red-400">*</span></label>
+                    <label className="block text-[10.5px] text-white/60 mb-1 font-medium">Target Keyword <span className="text-red-400">*</span></label>
                     <input
                       type="text"
                       value={aiKeyword}
                       onChange={(e) => setAiKeyword(e.target.value)}
                       placeholder="Masukkan keyword utama video..."
-                      className="w-full h-[36px] rounded-lg bg-white/[0.03] border border-[var(--accent-500)]/20 px-3 text-[12px] text-white/90 outline-none focus:border-[var(--accent-500)]/50 transition-all"
+                      className="w-full h-[32px] rounded-lg bg-white/[0.03] border border-[var(--accent-500)]/20 px-2.5 text-[11.5px] text-white/90 outline-none focus:border-[var(--accent-500)]/50 transition-all"
                     />
                   </div>
                   
                   {/* Realtime Analysis */}
                   {aiKeyword.trim() && !suggestion && (
-                    <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      <div className="bg-black/20 p-2 rounded-[6px] border border-white/5 flex justify-between items-center">
+                    <div className="grid grid-cols-2 gap-1.5 text-[9.5px]">
+                      <div className="bg-black/20 p-1.5 rounded-[5px] border border-white/5 flex justify-between items-center">
                         <span className="text-white/40">Title SEO</span>
                         <span className="text-white/90 font-medium">{aiAnalysis.title.keyword_position}</span>
                       </div>
-                      <div className="bg-black/20 p-2 rounded-[6px] border border-white/5 flex justify-between items-center">
+                      <div className="bg-black/20 p-1.5 rounded-[5px] border border-white/5 flex justify-between items-center">
                         <span className="text-white/40">Desc Length</span>
                         <span className="text-white/90 font-medium">{aiAnalysis.description.character_count} chars</span>
                       </div>
-                      <div className="bg-black/20 p-2 rounded-[6px] border border-[var(--accent-500)]/20 flex justify-between items-center">
+                      <div className="bg-black/20 p-1.5 rounded-[5px] border border-[var(--accent-500)]/20 flex justify-between items-center">
                         <span className="text-[var(--accent-400)]/60">Keyword Present</span>
                         <span className="text-[var(--accent-400)] font-bold">{aiAnalysis.description.keyword_presence ? 'Yes' : 'No'}</span>
                       </div>
-                      <div className="bg-black/20 p-2 rounded-[6px] border border-[var(--accent-500)]/20 flex justify-between items-center">
+                      <div className="bg-black/20 p-1.5 rounded-[5px] border border-[var(--accent-500)]/20 flex justify-between items-center">
                         <span className="text-[var(--accent-400)]/60">Long Tail Tags</span>
                         <span className="text-[var(--accent-400)] font-bold">{aiAnalysis.tags.long_tail_percentage}%</span>
                       </div>
@@ -360,12 +404,12 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   )}
 
                   {/* Config */}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     <div>
                       <select
                         value={aiLanguage}
                         onChange={(e) => setAiLanguage(e.target.value)}
-                        className="w-full h-[32px] rounded-lg bg-white/[0.03] border border-[var(--accent-500)]/20 px-2 text-[11px] text-white/80 outline-none focus:border-[var(--accent-500)]/30 transition-all appearance-none cursor-pointer"
+                        className="w-full h-[28px] rounded-lg bg-white/[0.03] border border-[var(--accent-500)]/20 px-2 text-[10.5px] text-white/80 outline-none focus:border-[var(--accent-500)]/30 transition-all appearance-none cursor-pointer"
                       >
                         <option value="Auto">Language: Auto</option>
                         <option value="Indonesia">Indonesia</option>
@@ -376,7 +420,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                       <select
                         value={aiContentType}
                         onChange={(e) => setAiContentType(e.target.value)}
-                        className="w-full h-[32px] rounded-lg bg-white/[0.03] border border-[var(--accent-500)]/20 px-2 text-[11px] text-white/80 outline-none focus:border-[var(--accent-500)]/30 transition-all appearance-none cursor-pointer"
+                        className="w-full h-[28px] rounded-lg bg-white/[0.03] border border-[var(--accent-500)]/20 px-2 text-[10.5px] text-white/80 outline-none focus:border-[var(--accent-500)]/30 transition-all appearance-none cursor-pointer"
                       >
                         <option value="General">Type: General</option>
                         <option value="Music">Music</option>
@@ -392,7 +436,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   <button
                     onClick={() => handleGenerateAI('all')}
                     disabled={!aiKeyword.trim() || isGenerating}
-                    className={`h-[40px] rounded-lg font-bold text-[12px] flex items-center justify-center gap-2 transition-all border ${
+                    className={`h-[34px] rounded-lg font-bold text-[11.5px] flex items-center justify-center gap-2 transition-all border ${
                       !aiKeyword.trim()
                         ? 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
                         : isGenerating 
@@ -404,7 +448,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   >
                     {isGenerating ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                         <span className="animate-pulse">{generatingStage || '✨ AI is thinking...'}</span>
                       </>
                     ) : (
@@ -449,114 +493,112 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                         {/* Body - Scrollable */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 flex flex-col gap-6">
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Left Column - Meta & SEO */}
-                            <div className="flex flex-col gap-4">
-                              {/* Confidence Score */}
-                              {suggestion.confidence && (
-                                <div className={`p-4 rounded-xl border ${
-                                  suggestion.confidence.level?.toLowerCase() === 'high' ? 'border-green-500/20 bg-green-500/5 text-green-400' :
-                                  suggestion.confidence.level?.toLowerCase() === 'medium' ? 'border-yellow-500/20 bg-yellow-500/5 text-yellow-400' :
-                                  'border-red-500/20 bg-red-500/5 text-red-400'
-                                }`}>
-                                  <div className="flex items-center justify-between mb-1.5">
-                                    <span className="text-[13px] font-bold">Confidence: {suggestion.confidence.level}</span>
-                                  </div>
-                                  <div className="text-[12px] opacity-80 leading-relaxed">
-                                    {suggestion.confidence.reason}
-                                  </div>
-                                </div>
-                              )}
+                          {/* Top: AI Analysis (2x2 Grid) */}
+                          {suggestion.analysis && (
+                            <div className="grid grid-cols-2 gap-3 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+                              <div>
+                                <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">Title SEO Hook</div>
+                                <div className="text-[12px] text-white/80 font-mono bg-black/20 p-2 rounded border border-white/5">{suggestion.analysis.title_hook}</div>
+                              </div>
+                              <div>
+                                <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">Description CTR Reason</div>
+                                <div className="text-[12px] text-white/80 font-mono bg-black/20 p-2 rounded border border-white/5">{suggestion.analysis.description_ctr}</div>
+                              </div>
+                              <div>
+                                <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">Target Keyword Fit</div>
+                                <div className="text-[12px] text-white/80 font-mono bg-black/20 p-2 rounded border border-white/5">{suggestion.analysis.keyword_match}</div>
+                              </div>
+                              <div>
+                                <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">Confidence Score</div>
+                                <div className="text-[12px] text-[var(--accent-400)] font-mono bg-black/20 p-2 rounded border border-white/5">{suggestion.analysis.confidence_score || suggestion.confidence_score}</div>
+                              </div>
+                            </div>
+                          )}
 
-                              {/* Keyword Expansion Data */}
-                              {suggestion.keyword_expansion && (
-                                <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-500/5">
-                                  <div className="text-[13px] font-bold text-purple-400 mb-3">Structured Keyword Expansion</div>
-                                  <div className="grid grid-cols-1 gap-3 text-[12px]">
-                                    <div>
-                                      <span className="text-purple-300/60 block mb-0.5">Primary Keyword:</span>
-                                      <span className="text-purple-200">{suggestion.keyword_expansion.primary}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-purple-300/60 block mb-0.5">Search Intents:</span>
-                                      <span className="text-purple-200">{suggestion.keyword_expansion.intent?.join(', ')}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-purple-300/60 block mb-0.5">Related:</span>
-                                      <span className="text-purple-200">{suggestion.keyword_expansion.related?.join(', ')}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-purple-300/60 block mb-0.5">Long Tail:</span>
-                                      <span className="text-purple-200">{suggestion.keyword_expansion.long_tail?.join(', ')}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
+                          {/* Middle: Selection Cards */}
+                          <div className="flex flex-col gap-6">
+                            
+                            {/* Titles Section */}
+                            <div>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="text-[11px] font-bold text-white/80 uppercase tracking-wider">Select Best Title</div>
+                                <div className="text-[10px] text-white/40">Click one to choose</div>
+                              </div>
                               
-                              {/* Local SEO Analyzer Data */}
-                              {(() => {
-                                 const postAnalysis = analyzeSEO(suggestion, aiKeyword);
-                                 return (
-                                   <div className="grid grid-cols-2 gap-3 text-[12px]">
-                                      <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col justify-center">
-                                        <span className="text-white/40 mb-1">Title Uppercase</span>
-                                        <span className="text-white/90 font-medium text-[14px]">{postAnalysis.title.uppercase_ratio}%</span>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {suggestion.alternatives?.titles ? (
+                                  suggestion.alternatives.titles.map((titleStr, idx) => (
+                                    <div 
+                                      key={idx}
+                                      onClick={() => setSelectedTitleIdx(idx)}
+                                      className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                        selectedTitleIdx === idx 
+                                          ? 'bg-[var(--accent-500)]/10 border-[var(--accent-500)]/40 shadow-[0_0_15px_rgba(34,211,238,0.1)]' 
+                                          : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04]'
+                                      }`}
+                                    >
+                                      <div className="text-[13px] text-white font-medium mb-3 leading-snug">{titleStr}</div>
+                                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] text-white/40 font-mono">
+                                        <span>{titleStr.length}/100 chars</span>
+                                        {selectedTitleIdx === idx && (
+                                          <span className="text-[var(--accent-400)] font-bold flex items-center gap-1">
+                                            <Check size={12} /> Selected
+                                          </span>
+                                        )}
                                       </div>
-                                      <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col justify-center">
-                                        <span className="text-white/40 mb-1">Desc CTAs</span>
-                                        <span className="text-white/90 font-medium text-[14px]">{postAnalysis.description.cta_detection ? 'Yes' : 'No'}</span>
-                                      </div>
-                                      <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col justify-center">
-                                        <span className="text-white/40 mb-1">Desc Hashtags</span>
-                                        <span className="text-white/90 font-medium text-[14px]">{postAnalysis.description.hashtag_count}</span>
-                                      </div>
-                                      <div className="bg-[var(--accent-500)]/5 p-3 rounded-xl border border-[var(--accent-500)]/20 flex flex-col justify-center">
-                                        <span className="text-[var(--accent-400)]/60 mb-1">Keyword in Tags</span>
-                                        <span className="text-[var(--accent-400)] font-bold text-[14px]">{postAnalysis.tags.keyword_coverage ? 'Yes' : 'No'}</span>
-                                      </div>
-                                   </div>
-                                 );
-                              })()}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="p-3.5 rounded-xl border bg-[var(--accent-500)]/10 border-[var(--accent-500)]/40 col-span-2">
+                                    <div className="text-[13px] text-white font-medium">{suggestion.title}</div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
-                            {/* Right Column - Generation Alternatives */}
-                            <div className="flex flex-col gap-5">
-                              {/* Title Alternatives */}
-                              <div>
-                                <div className="text-[10px] text-white/40 mb-2 uppercase tracking-widest font-bold">Title Alternatives</div>
-                                <div className="flex flex-col gap-2">
-                                  {suggestion.alternatives?.titles ? suggestion.alternatives.titles.map((t, idx) => (
-                                    <label key={idx} className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors border ${selectedTitleIdx === idx ? 'bg-[var(--accent-500)]/10 border-[var(--accent-500)]/30' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
-                                      <input type="radio" name="ai_title" checked={selectedTitleIdx === idx} onChange={() => setSelectedTitleIdx(idx)} className="mt-1" />
-                                      <span className={`text-[13px] leading-snug ${selectedTitleIdx === idx ? 'text-[var(--accent-400)] font-medium' : 'text-white/70'}`}>{t}</span>
-                                    </label>
-                                  )) : (
-                                    <div className="text-[13px] text-white/90 p-3 rounded-xl bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/20">{suggestion.title}</div>
-                                  )}
-                                </div>
+                            {/* Descriptions Section */}
+                            <div>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="text-[11px] font-bold text-white/80 uppercase tracking-wider">Select Best Description</div>
+                                <div className="text-[10px] text-white/40">Click one to choose</div>
                               </div>
                               
-                              {/* Description Alternatives */}
-                              <div>
-                                <div className="text-[10px] text-white/40 mb-2 uppercase tracking-widest font-bold">Description Alternatives</div>
-                                <div className="flex flex-col gap-2">
-                                  {suggestion.alternatives?.descriptions ? suggestion.alternatives.descriptions.map((d, idx) => (
-                                    <label key={idx} className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors border ${selectedDescIdx === idx ? 'bg-[var(--accent-500)]/10 border-[var(--accent-500)]/30' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
-                                      <input type="radio" name="ai_desc" checked={selectedDescIdx === idx} onChange={() => setSelectedDescIdx(idx)} className="mt-1" />
-                                      <span className={`text-[12px] leading-relaxed max-h-[150px] overflow-y-auto custom-scrollbar whitespace-pre-wrap ${selectedDescIdx === idx ? 'text-[var(--accent-400)] font-medium' : 'text-white/70'}`}>{d}</span>
-                                    </label>
-                                  )) : (
-                                    <div className="text-[12px] text-white/80 p-3 rounded-xl bg-[var(--accent-500)]/10 border border-[var(--accent-500)]/20 max-h-[150px] overflow-y-auto custom-scrollbar whitespace-pre-wrap">{suggestion.description}</div>
-                                  )}
-                                </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {suggestion.alternatives?.descriptions ? (
+                                  suggestion.alternatives.descriptions.map((descStr, idx) => (
+                                    <div 
+                                      key={idx}
+                                      onClick={() => setSelectedDescIdx(idx)}
+                                      className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                        selectedDescIdx === idx 
+                                          ? 'bg-[var(--accent-500)]/10 border-[var(--accent-500)]/40 shadow-[0_0_15px_rgba(34,211,238,0.1)]' 
+                                          : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04]'
+                                      }`}
+                                    >
+                                      <div className="text-[12px] text-white/80 mb-3 whitespace-pre-wrap line-clamp-6 leading-relaxed">{descStr}</div>
+                                      <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] text-white/40 font-mono">
+                                        <span>{descStr.length}/5000 chars</span>
+                                        {selectedDescIdx === idx && (
+                                          <span className="text-[var(--accent-400)] font-bold flex items-center gap-1">
+                                            <Check size={12} /> Selected
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="p-3.5 rounded-xl border bg-[var(--accent-500)]/10 border-[var(--accent-500)]/40 col-span-2">
+                                    <div className="text-[12px] text-white/80 whitespace-pre-wrap">{suggestion.description}</div>
+                                  </div>
+                                )}
                               </div>
-                              
-                              {/* Tags */}
-                              <div>
-                                <div className="text-[10px] text-white/40 mb-2 uppercase tracking-widest font-bold">Suggested Tags</div>
-                                <div className="text-[12px] text-[var(--accent-400)]/80 p-3 rounded-xl bg-[var(--accent-500)]/5 border border-[var(--accent-500)]/10 leading-relaxed">
-                                  {suggestion.alternatives?.tags ? suggestion.alternatives.tags.join(', ') : suggestion.tags}
-                                </div>
+                            </div>
+                            
+                            {/* Tags */}
+                            <div>
+                              <div className="text-[10px] text-white/40 mb-2 uppercase tracking-widest font-bold">Suggested Tags</div>
+                              <div className="text-[12px] text-[var(--accent-400)]/80 p-3 rounded-xl bg-[var(--accent-500)]/5 border border-[var(--accent-500)]/10 leading-relaxed">
+                                {suggestion.alternatives?.tags ? suggestion.alternatives.tags.join(', ') : suggestion.tags}
                               </div>
                             </div>
                           </div>
@@ -581,7 +623,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
 
             
             {/* Title */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <label className="text-[11px] font-bold text-white/80">Title <span className="text-red-400">*</span></label>
@@ -595,13 +637,14 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                     </button>
                   )}
                 </div>
+                <div className="text-[9.5px] text-white/40 font-mono">{currentTitleStr.length}/100</div>
               </div>
               <div className="relative group neon-interactive">
                 <input 
                   type="text" 
                   value={currentTitleStr}
                   onChange={(e) => handleChange('title', e.target.value)}
-                  className="w-full bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] px-3 py-2.5 text-[13px] text-white focus:outline-none focus:border-[var(--accent-500)]/50 pr-10"
+                  className="w-full bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] px-3 py-2 text-[12.5px] text-white focus:outline-none focus:border-[var(--accent-500)]/50 pr-10"
                 />
                 {aiAssistantEnabled && (
                   <button 
@@ -610,49 +653,57 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                     disabled={isGenerating || !aiKeyword.trim()}
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded flex items-center justify-center text-[var(--accent-400)] hover:bg-[var(--accent-500)]/20 hover:shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-[#0a0f1a]"
                   >
-                    <Sparkles size={14} />
+                    <Sparkles size={13} />
                   </button>
                 )}
               </div>
-              <div className="text-[10px] text-white/40 text-right font-mono">{currentTitleStr.length}/100</div>
             </div>
 
             {/* Description */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-white/80">Description <span className="text-red-400">*</span></label>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-white/80">Description <span className="text-red-400">*</span></label>
+                <div className="flex items-center gap-2">
+                  <button 
+                    type="button"
+                    onClick={handleRephraseDescription}
+                    disabled={isGenerating || isRephrasingDesc}
+                    title="Rephrase Description dengan AI"
+                    className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-[5px] bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:bg-purple-500/25 hover:text-purple-200 transition-all text-[10px] font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_10px_rgba(168,85,247,0.15)]"
+                  >
+                    {isRephrasingDesc ? (
+                      <Loader2 size={11} className="animate-spin text-purple-400" />
+                    ) : (
+                      <Sparkles size={11} className="text-purple-400" />
+                    )}
+                    <span>Rephrase</span>
+                  </button>
+                  <span className="text-[9.5px] text-white/40 font-mono">{currentDescStr.length}/5000</span>
+                </div>
+              </div>
               <div className="relative group neon-interactive">
                 <textarea 
-                  rows={4}
+                  rows={7}
                   value={currentDescStr}
                   onChange={(e) => handleChange('description', e.target.value)}
-                  className="w-full bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] px-3 py-2.5 text-[13px] text-white/80 focus:outline-none focus:border-[var(--accent-500)]/50 resize-none custom-scrollbar pr-10"
+                  placeholder="Enter video description..."
+                  className="w-full min-h-[150px] bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] px-3 py-2 text-[12.5px] text-white/90 focus:outline-none focus:border-[var(--accent-500)]/50 resize-y custom-scrollbar leading-relaxed"
                 />
-                {aiAssistantEnabled && (
-                  <button 
-                    onClick={() => handleGenerateAI('description')}
-                    title="Generate Description"
-                    disabled={isGenerating || !aiKeyword.trim()}
-                    className="absolute right-2 top-2 w-6 h-6 rounded flex items-center justify-center text-[var(--accent-400)] hover:bg-[var(--accent-500)]/20 hover:shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-[#0a0f1a]"
-                  >
-                    <Sparkles size={14} />
-                  </button>
-                )}
               </div>
-              <div className="text-[10px] text-white/40 text-right font-mono">{currentDescStr.length}/5000</div>
             </div>
 
             {/* Tags */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               <label className="text-[11px] font-bold text-white/80">Tags</label>
-              <div className="flex flex-wrap gap-2 items-center bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] p-2 min-h-[44px] neon-interactive relative pr-10">
+              <div className="flex flex-wrap gap-1.5 items-center bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] p-2 min-h-[40px] neon-interactive relative pr-10">
                 {tagsArray.map(tag => (
-                  <div key={tag} className="flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] bg-white/[0.05] border border-white/[0.05] text-[11px] text-white/80 hover:bg-white/[0.1] transition-colors cursor-pointer group" onClick={() => handleRemoveTag(tag)}>
+                  <div key={tag} className="flex items-center gap-1.5 px-2 py-0.5 rounded-[5px] bg-white/[0.05] border border-white/[0.05] text-[11px] text-white/80 hover:bg-white/[0.1] transition-colors cursor-pointer group" onClick={() => handleRemoveTag(tag)}>
                     {tag}
                     <div className="opacity-40 group-hover:opacity-100 hover:text-red-400 transition-all">&times;</div>
                   </div>
                 ))}
                 <div className="flex items-center gap-1.5 ml-1">
-                  <Plus size={12} className="text-white/40" />
+                  <Plus size={11} className="text-white/40" />
                   <input 
                     type="text" 
                     value={newTagInput}
@@ -671,44 +722,42 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                       disabled={isGenerating || !aiKeyword.trim()}
                       className="w-6 h-6 rounded flex items-center justify-center text-[var(--accent-400)] hover:bg-[var(--accent-500)]/20 hover:shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-[#0a0f1a]"
                     >
-                      <Sparkles size={14} />
+                      <Sparkles size={13} />
                     </button>
                   </div>
                 )}
               </div>
             </div>
 
-
-
             {Object.keys(edits).length > 0 && (
               <button 
                 onClick={handleSave}
-                className="mt-5 flex items-center justify-center gap-2 px-6 py-2 rounded-[8px] bg-[var(--accent-500)]/20 text-[var(--accent-400)] hover:bg-[var(--accent-500)]/30 transition-colors text-[13px] font-bold border border-[var(--accent-500)]/30"
+                className="mt-2 flex items-center justify-center gap-2 px-5 py-1.5 rounded-[8px] bg-[var(--accent-500)]/20 text-[var(--accent-400)] hover:bg-[var(--accent-500)]/30 transition-colors text-[12.5px] font-bold border border-[var(--accent-500)]/30 h-[34px]"
               >
-                <Save size={16} /> Save Changes
+                <Save size={15} /> Save Changes
               </button>
             )}
 
             {/* SEO Validation Section */}
             {currentTitleStr.trim() !== '' && currentDescStr.trim() !== '' && tagsArray.length > 0 && (
-              <div className="mt-6 border-t border-white/[0.04] pt-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-[12px] font-bold text-white/90 flex items-center gap-1.5">
-                    <Activity size={14} className="text-purple-400" />
+              <div className="mt-3 border-t border-white/[0.04] pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[11.5px] font-bold text-white/90 flex items-center gap-1.5">
+                    <Activity size={13} className="text-purple-400" />
                     External SEO Validation
                   </div>
                   
                   {/* Status Indicator */}
                   {video.youtube_video_id ? (
-                     <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-green-500/10 border border-green-500/20 text-[10px] font-bold text-green-400">
+                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-green-500/10 border border-green-500/20 text-[9.5px] font-bold text-green-400">
                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div> Uploaded
                      </div>
                   ) : video.last_seo_validation_at ? (
-                     <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-purple-500/10 border border-purple-500/20 text-[10px] font-bold text-purple-400">
-                       <Check size={10} /> Already Validated
+                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-[9.5px] font-bold text-purple-400">
+                       <Check size={9} /> Already Validated
                      </div>
                   ) : (
-                     <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-bold text-yellow-400">
+                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 text-[9.5px] font-bold text-yellow-400">
                        <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div> Ready to Validate
                      </div>
                   )}
@@ -717,26 +766,26 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                 <div className="flex items-center gap-2 relative">
                    <button 
                      onClick={() => handleValidateSEO(video.youtube_video_id ? 'studio' : 'search')}
-                     className="flex-1 h-[36px] bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-l-[8px] rounded-r-[2px] text-[12px] font-bold transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                     className="flex-1 h-[32px] bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-l-[7px] rounded-r-[2px] text-[11.5px] font-bold transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
                    >
                      {video.youtube_video_id ? (
-                        <><MonitorPlay size={14} /> Open in YouTube Studio</>
+                        <><MonitorPlay size={13} /> Open in YouTube Studio</>
                      ) : (
-                        <><Search size={14} /> Search Keyword on YouTube</>
+                        <><Search size={13} /> Search Keyword on YouTube</>
                      )}
                    </button>
                    
                    <button
                      onClick={() => setSeoDropdownOpen(!seoDropdownOpen)}
                      onBlur={() => setTimeout(() => setSeoDropdownOpen(false), 200)}
-                     className="h-[36px] px-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 border-l-0 text-purple-300 rounded-r-[8px] rounded-l-[2px] transition-all flex items-center justify-center hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                     className="h-[32px] px-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 border-l-0 text-purple-300 rounded-r-[7px] rounded-l-[2px] transition-all flex items-center justify-center hover:shadow-[0_0_15px_rgba(168,85,247,0.2)]"
                    >
-                     <ChevronDown size={14} className={`transition-transform ${seoDropdownOpen ? 'rotate-180' : ''}`} />
+                     <ChevronDown size={13} className={`transition-transform ${seoDropdownOpen ? 'rotate-180' : ''}`} />
                    </button>
 
                    {/* Split Dropdown */}
                    {seoDropdownOpen && (
-                     <div className="absolute top-[40px] right-0 w-[200px] bg-[#0a0f1a] border border-white/10 rounded-[8px] shadow-[0_5px_25px_rgba(0,0,0,0.8)] z-50 overflow-hidden flex flex-col py-1">
+                     <div className="absolute top-[36px] right-0 w-[200px] bg-[#0a0f1a] border border-white/10 rounded-[8px] shadow-[0_5px_25px_rgba(0,0,0,0.8)] z-50 overflow-hidden flex flex-col py-1">
                         <button onMouseDown={() => handleValidateSEO('studio')} className="px-3 py-2 text-[11px] text-left text-white/80 hover:bg-white/5 hover:text-[var(--accent-400)] flex items-center gap-2">
                            <MonitorPlay size={12} /> Open YouTube Studio
                         </button>
@@ -761,8 +810,8 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                 </div>
 
                 {video.last_seo_validation_at && (
-                  <div className="mt-3 flex items-center gap-2 text-[10px] text-white/40">
-                    <History size={12} /> 
+                  <div className="mt-2 flex items-center gap-2 text-[9.5px] text-white/40">
+                    <History size={11} /> 
                     Last validated: {new Date(video.last_seo_validation_at).toLocaleString()} via {video.last_seo_provider?.toUpperCase()}
                   </div>
                 )}

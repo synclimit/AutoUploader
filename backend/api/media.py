@@ -120,14 +120,14 @@ def serve_thumbnail(upload_task_id: str, db: Session = Depends(get_db)):
 async def upload_thumbnail(upload_task_id: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
     """
     Upload a custom thumbnail for an UploadTask.
-    Supported formats: jpg, jpeg, png, webp.
+    Supported formats: jpg, jpeg, png, webp, jfif.
     """
     task = db.query(UploadTask).filter(UploadTask.id == upload_task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="UploadTask not found")
 
     ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in [".jpg", ".jpeg", ".png", ".webp"]:
+    if ext not in [".jpg", ".jpeg", ".png", ".webp", ".jfif"]:
         raise HTTPException(status_code=400, detail=f"Unsupported file format: {ext}")
 
     # Ensure thumbnails directory exists

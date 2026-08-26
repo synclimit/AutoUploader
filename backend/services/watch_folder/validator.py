@@ -277,7 +277,7 @@ def _find_thumbnail(folder_path: str, video_name: str, meta_thumb: str | None) -
         if os.path.isfile(meta_path):
             return meta_path
 
-    valid_exts = {".jpg", ".jpeg", ".png", ".webp"}
+    valid_exts = {".jpg", ".jpeg", ".png", ".webp", ".jfif"}
     try:
         files = os.listdir(folder_path)
     except OSError:
@@ -288,7 +288,7 @@ def _find_thumbnail(folder_path: str, video_name: str, meta_thumb: str | None) -
         return None
 
     # Priority 1: <video_name>.*
-    for ext in [".jpg", ".jpeg", ".png", ".webp"]:
+    for ext in [".jpg", ".jpeg", ".png", ".webp", ".jfif"]:
         if f"{video_name}{ext}" in images:
             return os.path.join(folder_path, f"{video_name}{ext}")
 
