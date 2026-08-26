@@ -147,3 +147,103 @@ async def upload_thumbnail(upload_task_id: str, file: UploadFile = File(...), db
     db.commit()
 
     return {"success": True, "data": {"thumbnail_path": dest_path}}
+
+
+def open_save_file_picker(default_name: str, ext: str) -> str | None:
+    """
+    Opens OS native Save File Dialog (Explorer on Windows, Finder on macOS).
+    """
+    import sys
+    import subprocess
+    import re
+    
+    clean_ext = ext if ext.startswith(".") else f".{ext}"
+    clean_name = re.sub(r'[\\/*?:"<>|]', "_", default_name)
+    if not clean_name.lower().endswith(clean_ext.lower()):
+        clean_name = f"{clean_name}{clean_ext}"
+
+    try:
+        if sys.platform == "win32":
+            ps_script = f'''
+            Add-Type -AssemblyName System.Windows.Forms
+            $dlg = New-Object System.Windows.Forms.SaveFileDialog
+            $dlg.Title = "Save Thumbnail"
+            $dlg.FileName = "{clean_name}"
+            $dlg.Filter = "Image Files (*{clean_ext})|*{clean_ext}|All Files (*.*)|*.*"
+            $dlg.DefaultExt = "{clean_ext.lstrip('.')}"
+            $dlg.AddExtension = $true
+            $dlg.RestoreDirectory = $true
+            if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {{
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                Write-Output $dlg.FileName
+            }}
+            '''
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = 0
+            
+            cmd = ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_script]
+            out = subprocess.check_output(cmd, startupinfo=startupinfo, timeout=120)
+            chosen_path = out.decode("utf-8", errors="ignore").strip()
+            if chosen_path:
+                return os.path.normpath(chosen_path)
+        elif sys.platform == "darwin":
+            osa = f'''
+            set chosenFile to choose file name with prompt "Save Thumbnail" default name "{clean_name}"
+            POSIX path of chosenFile
+            '''
+            out = subprocess.check_output(["osascript", "-e", osa], timeout=120)
+            chosen_path = out.decode("utf-8", errors="ignore").strip()
+            if chosen_path:
+                return os.path.normpath(chosen_path)
+        else:
+            import tkinter as tk
+            from tkinter import filedialog
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            chosen_path = filedialog.asksaveasfilename(title="Save Thumbnail", initialfile=clean_name, defaultextension=clean_ext)
+            root.destroy()
+            if chosen_path:
+                return os.path.normpath(chosen_path)
+    except Exception as e:
+        print(f"Save dialog error: {e}")
+        
+    return None
+
+
+@router.post("/save-thumbnail-dialog/{upload_task_id}")
+def save_thumbnail_dialog(upload_task_id: str, db: Session = Depends(get_db)):
+    """
+    Triggers OS Explorer Save Dialog and copies the thumbnail to the chosen location.
+    """
+    task = db.query(UploadTask).filter(UploadTask.id == upload_task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="UploadTask not found")
+
+    src_path = None
+    if task.thumbnail_path and os.path.isfile(task.thumbnail_path):
+        src_path = task.thumbnail_path
+    
+    if not src_path:
+        placeholder_path = os.path.join(os.path.dirname(__file__), "..", "thumbnails", "placeholder.jpg")
+        if os.path.exists(placeholder_path):
+            src_path = placeholder_path
+
+    if not src_path:
+        raise HTTPException(status_code=404, detail="No thumbnail available to save")
+
+    ext = os.path.splitext(src_path)[1] or ".jpg"
+    safe_title = (task.title or "thumbnail").strip()
+    
+    chosen_path = open_save_file_picker(f"{safe_title}_thumbnail{ext}", ext)
+    if not chosen_path:
+        return {"success": False, "cancelled": True, "message": "Save cancelled by user"}
+
+    try:
+        os.makedirs(os.path.dirname(chosen_path), exist_ok=True)
+        shutil.copyfile(src_path, chosen_path)
+        return {"success": True, "cancelled": False, "data": {"saved_path": chosen_path}}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+

@@ -38,30 +38,40 @@ export default function ReviewCenterPanel({ video }) {
     if (!video?.id) return;
     try {
       setIsDownloading(true);
-      showToast('Downloading thumbnail...', 'info', 2000);
-      const res = await fetch(`/api/v1/media/thumbnail/${video.id}?t=${Date.now()}`);
-      if (!res.ok) throw new Error('Thumbnail not found');
+      showToast('Membuka dialog penyimpanan...', 'info', 2000);
       
-      const blob = await res.blob();
+      const res = await apiClient.post(`/media/save-thumbnail-dialog/${video.id}`);
+      if (res) {
+        if (res.cancelled) {
+          return;
+        }
+        if (res.success && res.data?.saved_path) {
+          showToast(`Thumbnail berhasil disimpan di:\n${res.data.saved_path}`, 'success', 5000);
+          return;
+        }
+      }
+      
+      // Fallback to browser blob download if needed
+      const rawRes = await fetch(`/api/v1/media/thumbnail/${video.id}?t=${Date.now()}`);
+      if (!rawRes.ok) throw new Error('Thumbnail tidak ditemukan');
+      const blob = await rawRes.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      
       let ext = 'jpg';
       if (blob.type.includes('png')) ext = 'png';
       else if (blob.type.includes('webp')) ext = 'webp';
       else if (blob.type.includes('jfif')) ext = 'jfif';
-
       const safeTitle = (video.title || 'thumbnail').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 40);
       a.download = `${safeTitle}_thumbnail.${ext}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      showToast('Thumbnail downloaded successfully', 'success');
+      showToast('Thumbnail berhasil diunduh', 'success');
     } catch (err) {
       console.error(err);
-      showToast('Failed to download thumbnail', 'error');
+      showToast(err.message || 'Gagal menyimpan thumbnail', 'error');
     } finally {
       setIsDownloading(false);
     }
