@@ -502,25 +502,43 @@ if __name__ == "__main__":
     import time
     import ctypes
     # Fix Windows Taskbar Icon
-    try:
-        myappid = 'synclimit.ryanzpitstop.app.1.0'
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-    except Exception:
-        pass
-        
-    # Prevent multiple instances with retry delay to allow previous process cleanup after auto-update
-    mutex_name = "Global\\AutoUploader_SingleInstance_Mutex"
+    # Fix Windows Taskbar Icon & Single Instance Check
     mutex = None
-    already_exists = True
-    for _ in range(5):
+    if sys.platform == 'win32':
+        try:
+            myappid = 'synclimit.ryanzpitstop.app.1.0'
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception:
+            pass
+            
+        mutex_name = "Global\\AutoUploader_SingleInstance_Mutex"
         mutex = ctypes.windll.kernel32.CreateMutexW(None, False, mutex_name)
-        if ctypes.windll.kernel32.GetLastError() != 183: # ERROR_ALREADY_EXISTS
-            already_exists = False
-            break
-        time.sleep(0.5)
-        
-    if already_exists:
-        sys.exit(0)
+        if ctypes.windll.kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
+            # Application is already running in background! Wake it up and bring to front
+            try:
+                import urllib.request
+                urllib.request.urlopen("http://127.0.0.1:8000/api/v1/system/show-window", timeout=2)
+            except Exception:
+                pass
+            
+            try:
+                user32 = ctypes.windll.user32
+                hwnd = user32.FindWindowW(None, "Raynz PitStop")
+                if hwnd:
+                    user32.ShowWindow(hwnd, 9) # SW_RESTORE
+                    user32.SetForegroundWindow(hwnd)
+            except Exception:
+                pass
+            sys.exit(0)
+    elif sys.platform == 'darwin':
+        try:
+            import urllib.request
+            res = urllib.request.urlopen("http://127.0.0.1:8000/api/v1/system/show-window", timeout=1)
+            if res.status == 200:
+                os.system("osascript -e 'tell application \"RaynzPitStop\" to activate'")
+                sys.exit(0)
+        except Exception:
+            pass
     
     # Redirect stdout and stderr to a file so we can see what's crashing
     log_path = os.path.join(tempfile.gettempdir(), "autouploader_crash.log")
@@ -572,6 +590,7 @@ if __name__ == "__main__":
         print("Failed to start backend server in time.")
         
     from services.system.tray_service import TrayService
+    from api.system import register_show_window_callback
 
     tray_service_instance = None
 
@@ -581,8 +600,19 @@ if __name__ == "__main__":
                 window = webview.windows[0]
                 window.show()
                 window.restore()
+                if sys.platform == 'win32':
+                    try:
+                        user32 = ctypes.windll.user32
+                        hwnd = user32.FindWindowW(None, "Raynz PitStop")
+                        if hwnd:
+                            user32.ShowWindow(hwnd, 9) # SW_RESTORE
+                            user32.SetForegroundWindow(hwnd)
+                    except Exception:
+                        pass
             except Exception as err:
-                print(f"[Tray] Error showing window: {err}")
+                print(f"[Window] Error showing window: {err}")
+
+    register_show_window_callback(show_window)
 
     _is_exiting = False
 
@@ -596,6 +626,13 @@ if __name__ == "__main__":
         if tray_service_instance:
             try:
                 tray_service_instance.stop()
+            except Exception:
+                pass
+
+        if sys.platform == 'win32' and mutex:
+            try:
+                ctypes.windll.kernel32.ReleaseMutex(mutex)
+                ctypes.windll.kernel32.CloseHandle(mutex)
             except Exception:
                 pass
 

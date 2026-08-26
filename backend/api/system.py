@@ -19,6 +19,24 @@ from models import UploadLog
 
 router = APIRouter(prefix="/api/v1/system", tags=["System"])
 
+_show_window_callback = None
+
+def register_show_window_callback(callback):
+    global _show_window_callback
+    _show_window_callback = callback
+
+@router.get("/show-window")
+@router.post("/show-window")
+def show_window_endpoint():
+    global _show_window_callback
+    if _show_window_callback:
+        try:
+            _show_window_callback()
+            return {"success": True, "message": "Window restored"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    return {"success": True, "message": "No callback registered"}
+
 class BrowseFolderResponse(BaseModel):
     path: Optional[str] = None
 
