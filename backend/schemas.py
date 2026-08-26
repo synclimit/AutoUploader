@@ -333,6 +333,7 @@ class UploadTaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[str] = None
+    thumbnail_path: Optional[str] = None
     privacy_status: Optional[str] = None
     made_for_kids: Optional[bool] = None
     video_id: Optional[str] = None

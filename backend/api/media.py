@@ -122,6 +122,7 @@ async def upload_thumbnail(upload_task_id: str, file: UploadFile = File(...), db
     Upload a custom thumbnail for an UploadTask.
     Supported formats: jpg, jpeg, png, webp, jfif.
     Automatically trims baked-in black bars and fits to 16:9 (1280x720) YouTube standard.
+    Syncs immediately to YouTube Studio if video was already uploaded/scheduled.
     """
     task = db.query(UploadTask).filter(UploadTask.id == upload_task_id).first()
     if not task:
@@ -152,9 +153,39 @@ async def upload_thumbnail(upload_task_id: str, file: UploadFile = File(...), db
 
     # Update database
     task.thumbnail_path = dest_path
+
+    # Save local copy alongside video if package_folder exists
+    if task.package_folder and os.path.isdir(task.package_folder):
+        try:
+            local_copy = os.path.join(task.package_folder, "thumbnail.jpg")
+            shutil.copyfile(dest_path, local_copy)
+        except Exception:
+            pass
+
     db.commit()
 
-    return {"success": True, "data": {"thumbnail_path": dest_path}}
+    # If video was already uploaded to YouTube, also update live thumbnail immediately on YouTube
+    live_updated = False
+    if task.youtube_video_id and task.channel_id:
+        try:
+            from services.oauth_core.oauth_repository import OAuthRepository
+            from services.oauth_core.oauth_client import OAuthClient
+            from googleapiclient.discovery import build
+            from googleapiclient.http import MediaFileUpload
+            
+            token = OAuthRepository.load_token(db, task.channel_id)
+            if token:
+                creds = OAuthClient.build_credentials(token, task.channel_id)
+                youtube = build("youtube", "v3", credentials=creds, static_discovery=False)
+                youtube.thumbnails().set(
+                    videoId=task.youtube_video_id,
+                    media_body=MediaFileUpload(dest_path, mimetype="image/jpeg")
+                ).execute()
+                live_updated = True
+        except Exception as live_err:
+            print(f"Notice: live thumbnail update on YouTube: {live_err}")
+
+    return {"success": True, "data": {"thumbnail_path": dest_path, "live_updated": live_updated}}
 
 
 def open_save_file_picker(default_name: str, ext: str) -> str | None:

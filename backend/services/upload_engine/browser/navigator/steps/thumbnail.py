@@ -23,7 +23,11 @@ class ThumbnailStep(BaseStep):
 
             file_input = LocatorResolver.resolve(page, [
                 {"type": "css", "selector": 'input#file-loader'},
-                {"type": "css", "selector": 'input[type="file"][accept="image/jpeg,image/png"]'}
+                {"type": "css", "selector": 'ytcp-thumbnails-compact-editor-uploader input[type="file"]'},
+                {"type": "css", "selector": 'input[type="file"][accept*="image"]'},
+                {"type": "css", "selector": 'input[type="file"][accept="image/jpeg,image/png"]'},
+                {"type": "css", "selector": '#uploader input[type="file"]'},
+                {"type": "css", "selector": 'input[type="file"]'}
             ], timeout=10000)
             
             file_input.set_input_files(task.thumbnail_path)

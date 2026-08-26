@@ -188,6 +188,19 @@ class CampaignReviewService:
                 ).first()
                 if not existing_task:
                     import os
+                    package_folder = os.path.dirname(review_asset.filepath)
+                    video_stem = os.path.splitext(review_asset.filename)[0]
+                    discovered_thumb = None
+                    for thumb_candidate in [
+                        f"{video_stem}.jpg", f"{video_stem}.png", f"{video_stem}.jpeg", f"{video_stem}.webp", f"{video_stem}.jfif",
+                        "thumbnail.jpg", "thumbnail.png", "thumbnail.jpeg", "thumbnail.webp", "thumbnail.jfif",
+                        "cover.jpg", "cover.png", "cover.jpeg", "cover.webp", "cover.jfif"
+                    ]:
+                        cand_path = os.path.join(package_folder, thumb_candidate)
+                        if os.path.isfile(cand_path):
+                            discovered_thumb = cand_path
+                            break
+
                     task = UploadTask(
                         id=str(uuid.uuid4()),
                         channel_id=channel_id,
@@ -196,11 +209,12 @@ class CampaignReviewService:
                         status="WATCHED",
                         metadata_source="RENDERER",
                         source_type="M1_VIDEO_SPLITTER",
-                        package_folder=os.path.dirname(review_asset.filepath),
+                        package_folder=package_folder,
                         video_path=review_asset.filepath,
+                        thumbnail_path=discovered_thumb,
                         file_name=review_asset.filename,
                         file_size=int(review_asset.filesize or 0),
-                        title=review_asset.title or review_asset.filename.rsplit('.', 1)[0],
+                        title=review_asset.title or video_stem,
                         privacy_status="private",
                         pipeline_type=pipeline_type,
                         upload_mode="Waiting For Approval",

@@ -95,7 +95,11 @@ export default function ReviewCenterPanel({ video }) {
       setIsUploading(true);
       const res = await apiClient.post(`/media/upload-thumbnail/${video.id}`, formData);
       if (res) {
-        showToast('Thumbnail updated successfully', 'success');
+        if (res.live_updated) {
+          showToast('Thumbnail berhasil diperbarui & disinkronkan langsung ke YouTube!', 'success');
+        } else {
+          showToast('Thumbnail berhasil diperbarui (Format 16:9 HD)', 'success');
+        }
         setThumbBuster(Date.now()); // Force image refresh
         
         // Update task list and active task to reflect the new thumbnail_path
