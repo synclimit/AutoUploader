@@ -49,30 +49,33 @@ export default function ReviewWorkspace() {
     };
   }, [activeTask?.id, activeTask?.status, fetchTask, fetchTaskLogs]);
 
-  // Automated Toast Notifications with detailed failure reasons
+  // Automated Toast Notifications strictly for live active upload transitions
+  const prevTaskIdRef = useRef(activeTask?.id);
   const prevStatusRef = useRef(activeTask?.status);
   const prevFailureRef = useRef(activeTask?.failure_reason);
+
   useEffect(() => {
-    if (activeTask) {
+    // ONLY check transitions if it is strictly the SAME task actively running (never on video select or page switch)
+    if (activeTask && prevTaskIdRef.current === activeTask.id) {
       if (prevStatusRef.current && prevStatusRef.current !== activeTask.status) {
-        if (activeTask.status === 'QUEUED') showToast('Task Approved & Queued', 'success');
-        else if (activeTask.status === 'UPLOADING') showToast('Upload Dimulai...', 'info');
-        else if (activeTask.status === 'COMPLETED') showToast('Upload Berhasil ke YouTube!', 'success', 5000);
-        else if (activeTask.status === 'FAILED') {
+        if (prevStatusRef.current === 'UPLOADING' && activeTask.status === 'COMPLETED') {
+          showToast('Upload Berhasil ke YouTube!', 'success', 4000);
+        } else if (prevStatusRef.current === 'UPLOADING' && activeTask.status === 'FAILED') {
           const reason = humanizeUploadError(activeTask.failure_reason);
-          showToast(reason ? `Upload Gagal: ${reason}` : 'Upload Gagal ke YouTube', 'error', 6000);
+          showToast(reason ? `Upload Gagal: ${reason}` : 'Upload Gagal ke YouTube', 'error', 5000);
         }
       }
 
-      // Also alert if a task in retry has a failure reason
-      if (activeTask.failure_reason && activeTask.failure_reason !== prevFailureRef.current && activeTask.status !== 'COMPLETED') {
+      // Also alert if active task failed during upload retry
+      if (activeTask.failure_reason && activeTask.failure_reason !== prevFailureRef.current && activeTask.status !== 'COMPLETED' && prevStatusRef.current === 'UPLOADING') {
         const reason = humanizeUploadError(activeTask.failure_reason);
-        showToast(`Kendala Upload (Retry #${activeTask.retry_count || 1}): ${reason}`, 'warning', 6000);
+        showToast(`Kendala Upload (Retry #${activeTask.retry_count || 1}): ${reason}`, 'warning', 5000);
       }
     }
+    prevTaskIdRef.current = activeTask?.id;
     prevStatusRef.current = activeTask?.status;
     prevFailureRef.current = activeTask?.failure_reason;
-  }, [activeTask?.status, activeTask?.failure_reason, activeTask?.retry_count]);
+  }, [activeTask?.id, activeTask?.status, activeTask?.failure_reason, activeTask?.retry_count]);
 
   const [selectedVideoIds, setSelectedVideoIds] = useState([])
   const [edits, setEdits] = useState({})

@@ -17,7 +17,12 @@ export default function NotificationToast() {
 
   useEffect(() => {
     const listener = (toast) => {
-      setToasts((prev) => [...prev, toast])
+      setToasts((prev) => {
+        // Remove duplicate message to prevent spam stacks
+        const filtered = prev.filter((t) => t.message !== toast.message)
+        // Keep maximum 3 toasts on screen at once
+        return [...filtered.slice(-2), toast]
+      })
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== toast.id))
       }, toast.duration)
