@@ -125,10 +125,22 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
             </div>
           )}
           {scheduleText && <span className="text-white/20">•</span>}
-          <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-400/90">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-            <span>Needs Review</span>
-          </div>
+          {video.status === 'FAILED' ? (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-red-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+              <span>Upload Gagal</span>
+            </div>
+          ) : (video.retry_count > 0 && video.failure_reason) ? (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-yellow-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+              <span>Retry #{video.retry_count}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-400/90">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span>Needs Review</span>
+            </div>
+          )}
         </div>
       </div>
 

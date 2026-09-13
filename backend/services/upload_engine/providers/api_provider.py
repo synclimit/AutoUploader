@@ -105,6 +105,33 @@ class APIUploader(BaseUploader):
                 }
                 return cat_map.get(s_val, "22")
             
+            def _sanitize_youtube_tags(raw_tags: str, max_chars: int = 490) -> list:
+                """
+                YouTube Data API v3 enforces:
+                - Maximum total tags length of 500 characters.
+                - Tags containing spaces count with surrounding double quotes plus separating commas.
+                - Disallows invalid characters like '<' or '>'.
+                """
+                if not raw_tags:
+                    return []
+                tags = []
+                current_cost = 0
+                raw_list = [t.strip().replace("<", "").replace(">", "") for t in raw_tags.split(",") if t.strip()]
+                for t in raw_list:
+                    if not t:
+                        continue
+                    tag_cost = (len(t) + 2) if " " in t else len(t)
+                    comma_cost = 1 if tags else 0
+                    if current_cost + comma_cost + tag_cost > max_chars:
+                        context.logger.warning(
+                            f"[APIUploader] Tags reached YouTube 500-character keyword limit ({current_cost} chars). "
+                            f"Safely truncated remaining {len(raw_list) - len(tags)} tags to prevent invalidTags error."
+                        )
+                        break
+                    tags.append(t)
+                    current_cost += comma_cost + tag_cost
+                return tags
+
             # 2. Prepare Video Metadata
             desc = task.description or "Uploaded via AutoUploader"
             if task.timestamps_path and os.path.exists(task.timestamps_path):
@@ -122,7 +149,9 @@ class APIUploader(BaseUploader):
                 "categoryId": _resolve_category_id(getattr(task, "category_id", None))
             }
             if task.tags:
-                snippet["tags"] = [tag.strip() for tag in task.tags.split(",") if tag.strip()]
+                clean_tags = _sanitize_youtube_tags(task.tags)
+                if clean_tags:
+                    snippet["tags"] = clean_tags
             
             if getattr(task, "default_language", None):
                 snippet["defaultLanguage"] = task.default_language

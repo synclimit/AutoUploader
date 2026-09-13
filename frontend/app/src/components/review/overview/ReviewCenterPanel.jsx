@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react'
-import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2, Download } from 'lucide-react'
+import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2, Download, AlertTriangle } from 'lucide-react'
 import { showToast } from '../../common/NotificationToast'
 import apiClient from '../../../api/client'
 import { useQueueStore } from '../../../store/upload/uploadStore'
+import { humanizeUploadError } from '../../../utils/errorHelper'
 
 export default function ReviewCenterPanel({ video }) {
   if (!video) {
@@ -118,6 +119,35 @@ export default function ReviewCenterPanel({ video }) {
   return (
     <div className="flex-1 h-full flex flex-col gap-3 min-w-0 overflow-hidden px-2 pb-2">
       
+      {/* Upload Failure / Retry Notice Banner */}
+      {(video.failure_reason || video.status === 'FAILED' || (video.retry_count > 0 && video.failure_reason)) && (
+        <div className="p-3.5 rounded-xl border border-red-500/40 bg-red-950/70 backdrop-blur-md flex items-start gap-3 shadow-[0_0_20px_rgba(239,68,68,0.2)] shrink-0 animate-in fade-in slide-in-from-top-2">
+          <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0 mt-0.5 text-red-400">
+            <AlertTriangle size={18} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[13px] font-bold text-red-300">
+                {video.status === 'FAILED' ? '⚠️ Gagal Mengunggah ke YouTube' : `⚠️ Kendala Upload (Percobaan Ulang #${video.retry_count})`}
+              </span>
+              {video.retry_count > 0 && (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                  Percobaan {video.retry_count}/3
+                </span>
+              )}
+            </div>
+            <p className="text-[12px] text-red-200/95 mt-1 leading-relaxed font-medium">
+              {humanizeUploadError(video.failure_reason)}
+            </p>
+            {video.failure_reason && (video.failure_reason.toLowerCase().includes('invalidtags') || video.failure_reason.toLowerCase().includes('keywords')) && (
+              <div className="mt-2 text-[11.5px] font-medium text-amber-200 bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                <span>💡 <strong>Solusi:</strong> Hapus beberapa tag di panel Tags sebelah kanan hingga di bawah 500 karakter, lalu klik tombol Simpan & Retry.</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Video Player Area */}
       <div className="flex-1 w-full min-h-0 flex items-center justify-center bg-black/40 rounded-[16px] border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative group overflow-hidden">
         {/* Actual 16:9 Player Frame */}

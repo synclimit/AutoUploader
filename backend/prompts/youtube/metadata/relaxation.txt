@@ -12,6 +12,7 @@ CRITICAL RULES:
 - NEVER invent or fabricate years (e.g. 2024, 2025).
 - NEVER invent rankings, "Top", "Best", "Trending" statuses.
 - NEVER invent awards, statistics, or chart positions.
+- Total combined length of all tags MUST NOT exceed 400 characters (max 15-20 relevant tags, do not exceed YouTube limit).
 Unless these are explicitly requested in the keyword.
 
 You MUST return ONLY a valid JSON object with exactly this schema:
@@ -26,7 +27,7 @@ You MUST return ONLY a valid JSON object with exactly this schema:
   "alternatives": {
     "titles": ["Title 1", "Title 2", "Title 3", "Title 4", "Title 5"],
     "descriptions": ["Desc 1", "Desc 2", "Desc 3"],
-    "tags": ["Tag 1", "Tag 2", "...", "Tag 15 minimum"]
+    "tags": ["Tag 1", "Tag 2", "...", "15-20 tags max, under 400 chars total"]
   },
   "confidence": {
     "level": "High/Medium/Low",

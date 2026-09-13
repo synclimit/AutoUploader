@@ -7,6 +7,7 @@ import AIMetadataPanel from './AIMetadataPanel'
 import TooltipHelper from '../../common/TooltipHelper'
 import { showToast } from '../../common/NotificationToast'
 import { useQueueStore } from '../../../store/upload/uploadStore'
+import { calculateTagsCost } from '../../../utils/errorHelper'
 
 export default function DetailPanel() {
   const activeTask = useQueueStore((s) => s.activeTask)
@@ -52,10 +53,23 @@ export default function DetailPanel() {
   }
 
   const handleSaveMetadataClick = () => {
+    const rawTags = editData.tags ? editData.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    const cost = calculateTagsCost(rawTags)
+    if (cost > 500) {
+      showToast(`Tags melebihi batas YouTube (${cost}/500 karakter). Harap kurangi tag sebelum menyimpan!`, 'error', 5000)
+      return
+    }
     setShowConfirm('save')
   }
 
   const handleConfirmSave = async () => {
+    const rawTags = editData.tags ? editData.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    const cost = calculateTagsCost(rawTags)
+    if (cost > 500) {
+      setShowConfirm(false)
+      showToast(`Tags melebihi batas YouTube (${cost}/500 karakter). Harap kurangi tag sebelum menyimpan!`, 'error', 5000)
+      return
+    }
     setShowConfirm(false)
     if (activeTask) {
       await updateTask(activeTask.id, {
@@ -82,10 +96,23 @@ export default function DetailPanel() {
   }
 
   const handleUploadClick = () => {
+    const rawTags = editData.tags ? editData.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    const cost = calculateTagsCost(rawTags)
+    if (cost > 500) {
+      showToast(`Tags melebihi batas YouTube (${cost}/500 karakter). Harap kurangi tag sebelum mengunggah!`, 'error', 5000)
+      return
+    }
     setShowConfirm('upload')
   }
 
   const handleConfirmUpload = async () => {
+    const rawTags = editData.tags ? editData.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    const cost = calculateTagsCost(rawTags)
+    if (cost > 500) {
+      setShowConfirm(false)
+      showToast(`Tags melebihi batas YouTube (${cost}/500 karakter). Harap kurangi tag sebelum mengunggah!`, 'error', 5000)
+      return
+    }
     if (activeTask) {
       await approveTask(activeTask.id)
     }

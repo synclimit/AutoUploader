@@ -4,6 +4,7 @@ import { ChevronDown, Plus, Sparkles, Save, Check, X, Search, MonitorPlay, Copy,
 import { useQueueStore } from '../../../store/upload/uploadStore'
 import { showToast } from '../../common/NotificationToast'
 import { YOUTUBE_CATEGORIES } from '../../../constants/youtubeCategories'
+import { calculateTagsCost } from '../../../utils/errorHelper'
 import Select from '../../common/Select'
 import { analyzeSEO } from '../../../utils/seoAnalyzer'
 import apiClient from '../../../api/client'
@@ -88,6 +89,10 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
 
   const handleSave = async () => {
     if (Object.keys(edits).length > 0) {
+      if (tagsCharCost > 500) {
+        showToast(`Tags melebihi batas YouTube (${tagsCharCost}/500 karakter). Harap kurangi tag sebelum menyimpan!`, 'error', 5000);
+        return;
+      }
       try {
         await updateTask(video.id, edits)
         setEdits({})
@@ -104,6 +109,7 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
   const currentDescStr = edits.description !== undefined ? edits.description : (video?.description || '')
   const currentTagsStr = edits.tags !== undefined ? edits.tags : (video?.tags || '');
   const tagsArray = currentTagsStr ? currentTagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+  const tagsCharCost = calculateTagsCost(tagsArray);
   
   const [newTagInput, setNewTagInput] = useState('');
 
@@ -114,7 +120,19 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
 
   const handleAddTag = (newTag) => {
     if (!newTag.trim()) return;
-    const newTags = [...tagsArray, newTag.trim()];
+    const cleanTag = newTag.trim().replace(/[<>]/g, '');
+    if (!cleanTag) return;
+    if (tagsArray.includes(cleanTag)) {
+      showToast('Tag sudah ada di dalam daftar.', 'info', 2000);
+      setNewTagInput('');
+      return;
+    }
+    const newTags = [...tagsArray, cleanTag];
+    const newCost = calculateTagsCost(newTags);
+    if (newCost > 500) {
+      showToast(`Tag tidak dapat ditambahkan! Total karakter akan melebihi batas maksimal YouTube 500 karakter (${newCost}/500).`, 'error', 4500);
+      return;
+    }
     handleChange('tags', newTags.join(','));
     setNewTagInput('');
   }
@@ -134,11 +152,12 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     // Split by comma, semicolon, or newline
     const pastedTags = pasteData
       .split(/[,;\n]+/)
-      .map(t => t.trim())
+      .map(t => t.trim().replace(/[<>]/g, ''))
       .filter(t => t.length > 0);
 
     if (pastedTags.length > 0) {
-      const newTagsList = [...tagsArray];
+      let newTagsList = [...tagsArray];
+      let droppedCount = 0;
       pastedTags.forEach(tag => {
         // cleanup trailing 'X' if copied from UI accidentally
         let cleanTag = tag;
@@ -146,11 +165,19 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
         else if (cleanTag.endsWith(' x')) cleanTag = cleanTag.slice(0, -2).trim();
         
         if (cleanTag && !newTagsList.includes(cleanTag)) {
-          newTagsList.push(cleanTag);
+          const candidateList = [...newTagsList, cleanTag];
+          if (calculateTagsCost(candidateList) <= 500) {
+            newTagsList = candidateList;
+          } else {
+            droppedCount++;
+          }
         }
       });
       handleChange('tags', newTagsList.join(', '));
       setNewTagInput('');
+      if (droppedCount > 0) {
+        showToast(`Sebanyak ${droppedCount} tag tidak dimasukkan karena melebihi batas maksimal 500 karakter YouTube.`, 'warning', 5000);
+      }
     }
   };
 
@@ -694,8 +721,13 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
 
             {/* Tags */}
             <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-bold text-white/80">Tags</label>
-              <div className="flex flex-wrap gap-1.5 items-center bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] p-2 min-h-[40px] neon-interactive relative pr-10">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-white/80">Tags</label>
+                <span className={`text-[9.5px] font-mono ${tagsCharCost > 500 ? 'text-red-400 font-bold' : 'text-white/40'}`}>
+                  {tagsCharCost}/500 {tagsCharCost > 500 ? '(Melebihi limit YouTube!)' : 'chars'}
+                </span>
+              </div>
+              <div className={`flex flex-wrap gap-1.5 items-center bg-[#0a0f1a]/50 border ${tagsCharCost > 500 ? 'border-red-500/50' : 'border-[var(--accent-500)]/20'} rounded-[8px] p-2 min-h-[40px] neon-interactive relative pr-10`}>
                 {tagsArray.map(tag => (
                   <div key={tag} className="flex items-center gap-1.5 px-2 py-0.5 rounded-[5px] bg-white/[0.05] border border-white/[0.05] text-[11px] text-white/80 hover:bg-white/[0.1] transition-colors cursor-pointer group" onClick={() => handleRemoveTag(tag)}>
                     {tag}
@@ -727,6 +759,14 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                   </div>
                 )}
               </div>
+              {tagsCharCost > 500 && (
+                <div className="text-[11px] text-red-300 bg-red-950/50 border border-red-500/30 rounded-lg p-2.5 flex items-start gap-2 mt-1">
+                  <span className="text-red-400 font-bold shrink-0">⚠️ Peringatan:</span>
+                  <span className="leading-snug">
+                    Total karakter tags ({tagsCharCost}/500) melebihi batas resmi YouTube! Video tidak akan dapat di-upload jika melebihi 500 karakter. Kurangi minimal <strong>{tagsCharCost - 500}</strong> karakter.
+                  </span>
+                </div>
+              )}
             </div>
 
             {Object.keys(edits).length > 0 && (

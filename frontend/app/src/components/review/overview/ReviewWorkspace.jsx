@@ -9,6 +9,7 @@ import { useQueueStore } from '../../../store/upload/uploadStore'
 import { showToast } from '../../common/NotificationToast'
 import Select from '../../common/Select'
 import WatchFolderDiagnosticModal from '../../common/WatchFolderDiagnosticModal'
+import { humanizeUploadError, calculateTagsCost } from '../../../utils/errorHelper'
 
 export default function ReviewWorkspace() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -23,43 +24,55 @@ export default function ReviewWorkspace() {
 
   useEffect(() => {
     fetchAccounts()
-    // Default whitelist for Review Workspace with chronological schedule ordering
-    setFilters({ ...filters, status: ['WATCHED', 'REVIEW', 'WAITING', 'WAITING_AI', 'SCHEDULED', 'QUEUED'], sort_by: 'scheduled_at', sort_order: 'asc' })
-    fetchTasks()
-    // eslint-disable-next-line
   }, [])
 
-  // Background Auto-Refresh for newly discovered videos
   useEffect(() => {
-    const pollInterval = setInterval(() => {
-      fetchTasks();
-    }, 5000);
-    return () => clearInterval(pollInterval);
-  }, [fetchTasks]);
+    fetchTasks()
+  }, [])
 
-  // Runtime Polling & State Watcher
+  // Refetch active task data and logs periodically or on state change
   useEffect(() => {
-    let intervalId;
-    if (activeTask && (activeTask.status === 'QUEUED' || activeTask.status === 'UPLOADING' || activeTask.status === 'SCHEDULED')) {
-      intervalId = setInterval(() => {
+    if (!activeTask?.id) return;
+    fetchTask(activeTask.id);
+    fetchTaskLogs(activeTask.id);
+    
+    // Poll active task status if uploading
+    let interval = null;
+    if (activeTask.status === 'UPLOADING' || activeTask.status === 'QUEUED') {
+      interval = setInterval(() => {
         fetchTask(activeTask.id);
         fetchTaskLogs(activeTask.id);
-      }, 3000);
+      }, 2000);
     }
-    return () => clearInterval(intervalId);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [activeTask?.id, activeTask?.status, fetchTask, fetchTaskLogs]);
 
-  // Automated Toast Notifications
+  // Automated Toast Notifications with detailed failure reasons
   const prevStatusRef = useRef(activeTask?.status);
+  const prevFailureRef = useRef(activeTask?.failure_reason);
   useEffect(() => {
-    if (activeTask && prevStatusRef.current && prevStatusRef.current !== activeTask.status) {
-      if (activeTask.status === 'QUEUED') showToast('Task Approved & Queued', 'success');
-      else if (activeTask.status === 'UPLOADING') showToast('Upload Started...', 'info');
-      else if (activeTask.status === 'COMPLETED') showToast('Upload Completed Successfully', 'success');
-      else if (activeTask.status === 'FAILED') showToast('Upload Failed', 'error');
+    if (activeTask) {
+      if (prevStatusRef.current && prevStatusRef.current !== activeTask.status) {
+        if (activeTask.status === 'QUEUED') showToast('Task Approved & Queued', 'success');
+        else if (activeTask.status === 'UPLOADING') showToast('Upload Dimulai...', 'info');
+        else if (activeTask.status === 'COMPLETED') showToast('Upload Berhasil ke YouTube!', 'success', 5000);
+        else if (activeTask.status === 'FAILED') {
+          const reason = humanizeUploadError(activeTask.failure_reason);
+          showToast(`Upload Gagal: ${reason || 'Terjadi kesalahan saat upload'}`, 'error', 8000);
+        }
+      }
+
+      // Also alert if a task in retry has a failure reason
+      if (activeTask.failure_reason && activeTask.failure_reason !== prevFailureRef.current && activeTask.status !== 'COMPLETED') {
+        const reason = humanizeUploadError(activeTask.failure_reason);
+        showToast(`Kendala Upload (Retry ${activeTask.retry_count || 1}): ${reason}`, 'error', 8000);
+      }
     }
     prevStatusRef.current = activeTask?.status;
-  }, [activeTask?.status]);
+    prevFailureRef.current = activeTask?.failure_reason;
+  }, [activeTask?.status, activeTask?.failure_reason, activeTask?.retry_count]);
 
   const [selectedVideoIds, setSelectedVideoIds] = useState([])
   const [edits, setEdits] = useState({})
@@ -462,15 +475,22 @@ export default function ReviewWorkspace() {
              return (
                <button 
                  disabled={disabled}
-                 onClick={async () => {
-                   if(status === 'WATCHED' || status === 'REVIEW' || status === 'FAILED' || status === 'SCHEDULED') {
-                     if (Object.keys(edits).length > 0) {
-                       await updateTask(activeTask.id, edits);
-                       setEdits({});
-                     }
-                     approveTask(activeTask.id);
-                   }
-                 }}
+                  onClick={async () => {
+                    if(status === 'WATCHED' || status === 'REVIEW' || status === 'FAILED' || status === 'SCHEDULED') {
+                      const currentTags = edits.tags !== undefined ? edits.tags : (activeTask.tags || '');
+                      const tagsArr = currentTags ? currentTags.split(',').map(t => t.trim()).filter(Boolean) : [];
+                      const cost = calculateTagsCost(tagsArr);
+                      if (cost > 500) {
+                        showToast(`Tags melebihi batas YouTube (${cost}/500 karakter). Harap kurangi tag sebelum memulai upload!`, 'error', 5000);
+                        return;
+                      }
+                      if (Object.keys(edits).length > 0) {
+                        await updateTask(activeTask.id, edits);
+                        setEdits({});
+                      }
+                      approveTask(activeTask.id);
+                    }
+                  }}
                  className={`h-[40px] px-8 rounded-[8px] font-bold text-[13px] hover:brightness-110 transition-all flex items-center gap-2 relative overflow-hidden group neon-scale ${buttonClass}`}>
                  {status === 'UPLOADING' && (
                    <div className="absolute inset-y-0 left-0 bg-white/40 transition-all duration-500 ease-out z-0" style={{ width: `${activeTask.upload_progress || 0}%` }}></div>

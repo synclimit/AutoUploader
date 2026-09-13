@@ -234,10 +234,33 @@ class UploadEngine(EngineBase):
                             return True
                         return False
 
-                    # For AutoUploader desktop client, we aggressively retry all errors up to the user's setting, except auth errors
                     err_str = str(e)
+                    err_lower = err_str.lower()
+                    
+                    def _get_friendly_error(raw_err: str) -> str:
+                        low = raw_err.lower()
+                        if "invalidtags" in low or "invalid video keywords" in low:
+                            return "Tags video melebihi batas maksimal YouTube (500 karakter). Harap kurangi tag pada editor metadata."
+                        if "quotaexceeded" in low or "ratelimitexceeded" in low:
+                            return "Kuota harian YouTube Data API channel ini telah habis. Tunggu reset kuota besok atau beralih ke provider Browser."
+                        if "deleted_client" in low:
+                            return "Client OAuth di Google Cloud terhapus. Silakan unggah ulang client_secret.json di menu Saluran/Channels."
+                        if "invalid_grant" in low:
+                            return "Sesi autentikasi Google kedaluwarsa atau dicabut. Silakan Hubungkan ulang (reconnect) di menu Saluran."
+                        if "auth_required" in low or "oauth token not found" in low:
+                            return "Channel belum terhubung dengan akun YouTube. Harap hubungkan akun di menu Saluran/Channels."
+                        if "source file not found" in low or "file not found" in low:
+                            return "File video tidak ditemukan di komputer. Pastikan drive/flashdisk terhubung."
+                        if "source file not readable" in low:
+                            return "File video tidak dapat dibaca karena izin file atau drive terputus."
+                        return raw_err
+
+                    friendly_error = _get_friendly_error(err_str)
                     is_retryable = True
-                    if "AUTH_REQUIRED" in err_str or "unauthorized" in err_str.lower() or "oauth token not found" in err_str.lower():
+                    # Non-retryable errors: metadata validation errors (like invalid tags) and credential deletion
+                    if ("auth_required" in err_lower or "unauthorized" in err_lower or "oauth token not found" in err_lower
+                        or "invalidtags" in err_lower or "invalid video keywords" in err_lower
+                        or "deleted_client" in err_lower):
                         is_retryable = False
                         
                     current_retry = getattr(task, 'retry_count', 0)
@@ -254,25 +277,26 @@ class UploadEngine(EngineBase):
                         task.retry_count = next_retry
                         task.status = QueueStatusEnum.scheduled
                         task.scheduled_at = datetime.utcnow() + __import__('datetime').timedelta(seconds=delay_seconds)
-                        task.failure_reason = str(e)
+                        task.failure_reason = friendly_error
                         
                         delay_mins = delay_seconds // 60
-                        log_msg = f"Attempt {next_retry}/{MAX_RETRIES} | Retry in {delay_mins} minutes | Reason: {str(e)}"
+                        log_msg = f"Attempt {next_retry}/{MAX_RETRIES} | Retry in {delay_mins} minutes | Reason: {friendly_error}"
                         db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.scheduled.value, message=log_msg))
                         db.commit()
-                        logger.info(f"[UPLOAD_ENGINE] Task {task.id} SCHEDULED for retry {next_retry}/{MAX_RETRIES} in {delay_mins}m")
+                        logger.info(f"[UPLOAD_ENGINE] Task {task.id} SCHEDULED for retry {next_retry}/{MAX_RETRIES} in {delay_mins}m: {friendly_error}")
+                        NotificationService.notify_upload_failed(task.title or "Unknown Video", f"Percobaan {next_retry} gagal: {friendly_error}")
                     else:
                         # Non-retryable or max retries exceeded
                         task.status = QueueStatusEnum.failed
                         if current_retry >= MAX_RETRIES and is_retryable:
-                            task.failure_reason = f"MAX_RETRIES_EXCEEDED: {str(e)}"
+                            task.failure_reason = f"MAX_RETRIES_EXCEEDED: {friendly_error}"
                         else:
-                            task.failure_reason = str(e)
+                            task.failure_reason = friendly_error
                             
                         task.completed_at = datetime.utcnow()
                         db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.failed.value, message=f"Task failed: {task.failure_reason}"))
                         db.commit()
-                        logger.info(f"[UPLOAD_ENGINE] Task {task.id} marked as FAILED")
+                        logger.info(f"[UPLOAD_ENGINE] Task {task.id} marked as FAILED: {task.failure_reason}")
                         
                         NotificationService.notify_upload_failed(task.title or "Unknown Video", task.failure_reason)
                 except Exception as inner_e:

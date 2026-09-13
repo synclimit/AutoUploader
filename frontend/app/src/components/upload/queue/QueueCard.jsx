@@ -1,6 +1,7 @@
 import QueueStatusBadge from './QueueStatusBadge'
 
 import TooltipHelper from '../../common/TooltipHelper'
+import { humanizeUploadError } from '../../../utils/errorHelper'
 
 
 const statusColor = {
@@ -113,6 +114,13 @@ export default function QueueCard({ item, isActive, onClick }) {
               {item.retry_count > 0 && (
                 <div className="mt-1.5 inline-flex items-center px-2.5 py-1 rounded-lg border border-yellow-500/20 bg-yellow-500/10 text-yellow-300 text-[10px] font-medium">
                   Retry: {item.retry_count}/3
+                </div>
+              )}
+
+              {item.failure_reason && (
+                <div className="mt-2 p-2 rounded-lg border border-red-500/30 bg-red-950/40 text-red-200 text-[10.5px] leading-snug flex items-start gap-1.5">
+                  <span className="text-red-400 font-bold shrink-0">⚠️ Error:</span>
+                  <span className="break-words line-clamp-3 font-medium">{humanizeUploadError(item.failure_reason)}</span>
                 </div>
               )}
 
