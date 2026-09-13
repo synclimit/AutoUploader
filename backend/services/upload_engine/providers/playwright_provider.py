@@ -143,8 +143,10 @@ class PlaywrightUploader(BaseUploader):
                     browser_context.close()
                     
         except Exception as e:
+            import traceback
+            logger.error(f"[PlaywrightUploader] Error: {e}\n{traceback.format_exc()}")
             return UploadResult(
                 success=False,
                 error_code="PLAYWRIGHT_UPLOAD_ERROR",
-                error_message=str(e) + "\n" + traceback.format_exc()
+                error_message=str(e)
             )

@@ -238,7 +238,11 @@ class UploadEngine(EngineBase):
                     err_lower = err_str.lower()
                     
                     def _get_friendly_error(raw_err: str) -> str:
+                        if not raw_err:
+                            return "Terjadi kendala saat proses upload."
                         low = raw_err.lower()
+                        if "uploadlimitexceeded" in low or "exceeded the number of videos" in low:
+                            return "Batas upload harian YouTube untuk channel ini sudah habis (Daily Limit Exceeded). YouTube membatasi jumlah video per hari. Silakan coba lagi besok (24 jam) atau gunakan channel lain."
                         if "invalidtags" in low or "invalid video keywords" in low:
                             return "Tags video melebihi batas maksimal YouTube (500 karakter). Harap kurangi tag pada editor metadata."
                         if "quotaexceeded" in low or "ratelimitexceeded" in low:
@@ -253,14 +257,34 @@ class UploadEngine(EngineBase):
                             return "File video tidak ditemukan di komputer. Pastikan drive/flashdisk terhubung."
                         if "source file not readable" in low:
                             return "File video tidak dapat dibaca karena izin file atau drive terputus."
-                        return raw_err
+                        if "connectionreseterror" in low or "10054" in low:
+                            return "Koneksi internet terputus saat proses upload."
+                        if "timed out" in low or "timeouterror" in low:
+                            return "Waktu koneksi upload habis (Timeout). Periksa kestabilan internet Anda."
+
+                        # Aggressive cleanup of raw code/traceback for any unknown error
+                        import re
+                        cleaned = raw_err.split("Traceback (most recent call last):")[0].strip()
+                        msg_match = re.search(r"['\"]message['\"]\s*:\s*['\"]([^'\"]+)['\"]", cleaned)
+                        if msg_match:
+                            return msg_match.group(1)
+                        ret_match = re.search(r'returned\s+"([^"]+)"', cleaned)
+                        if ret_match:
+                            return ret_match.group(1)
+                        
+                        cleaned = re.sub(r'^(API_UPLOAD_ERROR|PLAYWRIGHT_UPLOAD_ERROR|Exception):\s*', '', cleaned, flags=re.IGNORECASE)
+                        cleaned = re.sub(r'<HttpError \d+ when requesting [^>]+>', '', cleaned).strip()
+                        if "File \"" in cleaned or "line " in cleaned or len(cleaned) == 0:
+                            return "Terjadi kendala saat upload. Silakan coba sesaat lagi."
+                        return cleaned[:160]
 
                     friendly_error = _get_friendly_error(err_str)
                     is_retryable = True
-                    # Non-retryable errors: metadata validation errors (like invalid tags) and credential deletion
+                    # Non-retryable errors: daily upload limit, metadata validation errors, auth issues
                     if ("auth_required" in err_lower or "unauthorized" in err_lower or "oauth token not found" in err_lower
                         or "invalidtags" in err_lower or "invalid video keywords" in err_lower
-                        or "deleted_client" in err_lower):
+                        or "deleted_client" in err_lower
+                        or "uploadlimitexceeded" in err_lower or "exceeded the number of videos" in err_lower):
                         is_retryable = False
                         
                     current_retry = getattr(task, 'retry_count', 0)
@@ -280,18 +304,15 @@ class UploadEngine(EngineBase):
                         task.failure_reason = friendly_error
                         
                         delay_mins = delay_seconds // 60
-                        log_msg = f"Attempt {next_retry}/{MAX_RETRIES} | Retry in {delay_mins} minutes | Reason: {friendly_error}"
+                        log_msg = f"Percobaan {next_retry}/{MAX_RETRIES} | Retry dalam {delay_mins} menit | Alasan: {friendly_error}"
                         db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.scheduled.value, message=log_msg))
                         db.commit()
                         logger.info(f"[UPLOAD_ENGINE] Task {task.id} SCHEDULED for retry {next_retry}/{MAX_RETRIES} in {delay_mins}m: {friendly_error}")
-                        NotificationService.notify_upload_failed(task.title or "Unknown Video", f"Percobaan {next_retry} gagal: {friendly_error}")
+                        NotificationService.notify_upload_failed(task.title or "Unknown Video", f"Percobaan {next_retry} tertunda: {friendly_error}")
                     else:
-                        # Non-retryable or max retries exceeded
+                        # Non-retryable or max retries reached
                         task.status = QueueStatusEnum.failed
-                        if current_retry >= MAX_RETRIES and is_retryable:
-                            task.failure_reason = f"MAX_RETRIES_EXCEEDED: {friendly_error}"
-                        else:
-                            task.failure_reason = friendly_error
+                        task.failure_reason = friendly_error
                             
                         task.completed_at = datetime.utcnow()
                         db.add(UploadLog(task_id=task.id, status=QueueStatusEnum.failed.value, message=f"Task failed: {task.failure_reason}"))

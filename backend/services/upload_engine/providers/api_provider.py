@@ -380,5 +380,5 @@ class APIUploader(BaseUploader):
             return UploadResult(
                 success=False,
                 error_code="API_UPLOAD_ERROR",
-                error_message=str(e) + "\n" + traceback.format_exc()
+                error_message=str(e)
             )

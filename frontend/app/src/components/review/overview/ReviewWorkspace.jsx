@@ -60,14 +60,14 @@ export default function ReviewWorkspace() {
         else if (activeTask.status === 'COMPLETED') showToast('Upload Berhasil ke YouTube!', 'success', 5000);
         else if (activeTask.status === 'FAILED') {
           const reason = humanizeUploadError(activeTask.failure_reason);
-          showToast(`Upload Gagal: ${reason || 'Terjadi kesalahan saat upload'}`, 'error', 8000);
+          showToast(reason ? `Upload Gagal: ${reason}` : 'Upload Gagal ke YouTube', 'error', 6000);
         }
       }
 
       // Also alert if a task in retry has a failure reason
       if (activeTask.failure_reason && activeTask.failure_reason !== prevFailureRef.current && activeTask.status !== 'COMPLETED') {
         const reason = humanizeUploadError(activeTask.failure_reason);
-        showToast(`Kendala Upload (Retry ${activeTask.retry_count || 1}): ${reason}`, 'error', 8000);
+        showToast(`Kendala Upload (Retry #${activeTask.retry_count || 1}): ${reason}`, 'warning', 6000);
       }
     }
     prevStatusRef.current = activeTask?.status;
@@ -219,9 +219,9 @@ export default function ReviewWorkspace() {
                   </div>
                 )}
                 {activeTask.failure_reason && (
-                  <div className="flex justify-between text-red-400 mt-2 p-2 bg-red-500/10 rounded-[4px] border border-red-500/20">
-                    <span className="font-bold mr-2">Error:</span>
-                    <span className="break-all">{activeTask.failure_reason}</span>
+                  <div className="flex flex-col text-red-300 mt-2 p-2.5 bg-red-500/10 rounded-lg border border-red-500/20 text-xs gap-1">
+                    <span className="font-bold text-red-400">Kendala Upload:</span>
+                    <span className="leading-relaxed font-medium">{humanizeUploadError(activeTask.failure_reason)}</span>
                   </div>
                 )}
               </div>

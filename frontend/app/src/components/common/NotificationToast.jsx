@@ -52,25 +52,34 @@ export default function NotificationToast() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`pointer-events-auto rounded-xl border px-4 py-3 shadow-2xl transition-all duration-300 ${typeStyles[toast.type]} flex flex-col gap-2 min-w-[300px] max-w-[420px] backdrop-blur-xl animate-in slide-in-from-bottom-5`}
+          className={`pointer-events-auto rounded-xl border px-3.5 py-2.5 shadow-2xl transition-all duration-300 ${typeStyles[toast.type]} flex flex-col gap-1.5 min-w-[280px] max-w-[380px] backdrop-blur-xl animate-in slide-in-from-bottom-3`}
         >
-          <div className="flex items-start gap-3">
-            <span className="text-sm font-bold mt-0.5">{typeIcons[toast.type]}</span>
-            <div className="flex-1 flex flex-col gap-1">
-              <span className="text-[13px] font-medium leading-snug">{toast.message}</span>
+          <div className="flex items-start gap-2.5">
+            <span className="text-sm font-bold mt-0.5 shrink-0">{typeIcons[toast.type]}</span>
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <span className="text-[12.5px] font-medium leading-relaxed break-words">{toast.message}</span>
               
               {toast.errorId && (
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-[10px] font-mono bg-red-500/20 text-red-300 font-bold px-2 py-0.5 rounded border border-red-500/30">
-                    Error ID: {toast.errorId}
+                    ID: {toast.errorId}
                   </span>
                 </div>
               )}
             </div>
+            
+            {/* Dismiss X button */}
+            <button
+              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+              className="text-white/40 hover:text-white transition-colors text-xs p-1 -mr-1 -mt-0.5 rounded hover:bg-white/10 shrink-0"
+              title="Tutup notifikasi"
+            >
+              ✕
+            </button>
           </div>
 
-          {(toast.type === 'error' || toast.errorId) && (
-            <div className="flex items-center justify-end pt-1 border-t border-white/10 mt-1">
+          {toast.errorId && (
+            <div className="flex items-center justify-end pt-1 border-t border-white/10 mt-0.5">
               <button
                 onClick={() => handleOpenDiagnostic(toast.errorId)}
                 className="text-[11px] font-bold text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 rounded border border-cyan-500/30 transition-all flex items-center gap-1"

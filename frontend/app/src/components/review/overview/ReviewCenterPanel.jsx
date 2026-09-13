@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react'
-import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2, Download, AlertTriangle } from 'lucide-react'
+import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2, Download, AlertTriangle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { showToast } from '../../common/NotificationToast'
 import apiClient from '../../../api/client'
 import { useQueueStore } from '../../../store/upload/uploadStore'
 import { humanizeUploadError } from '../../../utils/errorHelper'
 
 export default function ReviewCenterPanel({ video }) {
+  const [showTechDetail, setShowTechDetail] = useState(false);
   if (!video) {
     return (
       <div className="flex-1 h-full flex flex-col items-center justify-center border border-white/[0.04] rounded-[16px] bg-[#05080e]/40 backdrop-blur-sm">
@@ -119,32 +120,51 @@ export default function ReviewCenterPanel({ video }) {
   return (
     <div className="flex-1 h-full flex flex-col gap-3 min-w-0 overflow-hidden px-2 pb-2">
       
-      {/* Upload Failure / Retry Notice Banner */}
+      {/* Upload Failure / Retry Notice Banner — Sleek, Compact, and Informative */}
       {(video.failure_reason || video.status === 'FAILED' || (video.retry_count > 0 && video.failure_reason)) && (
-        <div className="p-3.5 rounded-xl border border-red-500/40 bg-red-950/70 backdrop-blur-md flex items-start gap-3 shadow-[0_0_20px_rgba(239,68,68,0.2)] shrink-0 animate-in fade-in slide-in-from-top-2">
-          <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0 mt-0.5 text-red-400">
-            <AlertTriangle size={18} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[13px] font-bold text-red-300">
-                {video.status === 'FAILED' ? '⚠️ Gagal Mengunggah ke YouTube' : `⚠️ Kendala Upload (Percobaan Ulang #${video.retry_count})`}
-              </span>
-              {video.retry_count > 0 && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-                  Percobaan {video.retry_count}/3
+        <div className="px-3.5 py-2.5 rounded-xl border border-red-500/25 bg-red-500/[0.08] backdrop-blur-md flex flex-col gap-1.5 shrink-0 animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center justify-between gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <AlertCircle size={16} className="text-red-400 shrink-0" />
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                {video.status === 'FAILED' ? (
+                  <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-bold text-[10px] uppercase tracking-wider border border-red-500/30 shrink-0">
+                    Upload Gagal
+                  </span>
+                ) : (
+                  <span className="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-bold text-[10px] uppercase tracking-wider border border-yellow-500/30 shrink-0">
+                    Retry ({Math.min(video.retry_count || 1, 3)}/3)
+                  </span>
+                )}
+                <span className="text-[12px] font-medium text-red-200 leading-snug break-words">
+                  {humanizeUploadError(video.failure_reason)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {video.failure_reason && (video.failure_reason.toLowerCase().includes('invalidtags') || video.failure_reason.toLowerCase().includes('keywords')) && (
+                <span className="text-[10.5px] font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded">
+                  💡 Kurangi Tag &lt; 500 char
                 </span>
               )}
+              <button
+                onClick={() => setShowTechDetail(!showTechDetail)}
+                className="text-[10.5px] font-medium text-white/40 hover:text-white/80 transition-colors flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-white/5 border border-transparent hover:border-white/10"
+                title="Lihat detail teknis"
+              >
+                <span>{showTechDetail ? 'Tutup' : 'Detail'}</span>
+                {showTechDetail ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+              </button>
             </div>
-            <p className="text-[12px] text-red-200/95 mt-1 leading-relaxed font-medium">
-              {humanizeUploadError(video.failure_reason)}
-            </p>
-            {video.failure_reason && (video.failure_reason.toLowerCase().includes('invalidtags') || video.failure_reason.toLowerCase().includes('keywords')) && (
-              <div className="mt-2 text-[11.5px] font-medium text-amber-200 bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                <span>💡 <strong>Solusi:</strong> Hapus beberapa tag di panel Tags sebelah kanan hingga di bawah 500 karakter, lalu klik tombol Simpan & Retry.</span>
-              </div>
-            )}
           </div>
+
+          {/* Collapsible Technical Detail (Hidden by default) */}
+          {showTechDetail && (
+            <div className="mt-1 p-2 rounded-lg bg-black/60 border border-white/10 text-[11px] font-mono text-white/60 max-h-28 overflow-y-auto break-all select-text custom-scrollbar">
+              {video.failure_reason}
+            </div>
+          )}
         </div>
       )}
 
