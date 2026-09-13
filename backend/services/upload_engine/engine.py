@@ -33,6 +33,7 @@ class UploadEngine(EngineBase):
         self._thread = None
         self._running = False
         self._processed_tasks_count = 0
+        self._channel_daily_limits = {} # channel_id -> lockout expiry datetime
         logger.info("[UPLOAD_ENGINE] Initialized")
 
     def start(self):
@@ -99,13 +100,16 @@ class UploadEngine(EngineBase):
     def _process_queue(self):
         db = SessionLocal()
         try:
+            # Exclude channels that hit YouTube's daily upload limit today
+            now = datetime.utcnow()
+            locked_channels = [ch_id for ch_id, expiry in self._channel_daily_limits.items() if expiry > now]
+
+            query = db.query(UploadTask).filter(UploadTask.status == QueueStatusEnum.queued)
+            if locked_channels:
+                query = query.filter(~UploadTask.channel_id.in_(locked_channels))
+
             # Find the next QUEUED task
-            task = (
-                db.query(UploadTask)
-                .filter(UploadTask.status == QueueStatusEnum.queued)
-                .order_by(UploadTask.created_at.asc())
-                .first()
-            )
+            task = query.order_by(UploadTask.created_at.asc()).first()
 
             if not task:
                 return
@@ -280,12 +284,31 @@ class UploadEngine(EngineBase):
 
                     friendly_error = _get_friendly_error(err_str)
                     is_retryable = True
-                    # Non-retryable errors: daily upload limit, metadata validation errors, auth issues
-                    if ("auth_required" in err_lower or "unauthorized" in err_lower or "oauth token not found" in err_lower
+                    
+                    # Check if error is due to daily upload limit / project quota
+                    is_daily_limit = ("uploadlimitexceeded" in err_lower or "exceeded the number of videos" in err_lower
+                                      or "quotaexceeded" in err_lower or "ratelimitexceeded" in err_lower)
+
+                    # Non-retryable errors:
+                    # 1. Daily limit & API quota reached (retrying within minutes is 100% useless)
+                    # 2. Metadata validation (tags > 500, title/desc too long, duplicate video)
+                    # 3. Auth & Credentials (deleted client, expired grant, unlinked channel)
+                    # 4. Storage errors (file not found, unreadable)
+                    if (is_daily_limit
+                        or "auth_required" in err_lower or "unauthorized" in err_lower or "oauth token not found" in err_lower
                         or "invalidtags" in err_lower or "invalid video keywords" in err_lower
+                        or "titletoolong" in err_lower or "descriptiontoolong" in err_lower
+                        or "duplicate" in err_lower
                         or "deleted_client" in err_lower
-                        or "uploadlimitexceeded" in err_lower or "exceeded the number of videos" in err_lower):
+                        or "invalid_grant" in err_lower
+                        or "source file not found" in err_lower or "file not found" in err_lower):
                         is_retryable = False
+
+                    # Lock channel from uploading for the next 24h if daily limit or quota was exceeded
+                    if is_daily_limit and task and task.channel_id:
+                        from datetime import timedelta
+                        self._channel_daily_limits[task.channel_id] = datetime.utcnow() + timedelta(hours=24)
+                        logger.warning(f"[UPLOAD_ENGINE] Channel {task.channel_id} reached YouTube daily limit/quota. Pausing remaining uploads for this channel for 24h.")
                         
                     current_retry = getattr(task, 'retry_count', 0)
                     
