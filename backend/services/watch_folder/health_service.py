@@ -192,26 +192,27 @@ def _derive_from_db(channel_id: str, db: Session) -> dict:
     These values survive backend restarts because they come from the DB.
     """
     try:
-        tasks = (
-            db.query(UploadTask)
+        from sqlalchemy import func
+        rows = (
+            db.query(
+                func.coalesce(UploadTask.pipeline_type, 'long').label("p_type"),
+                func.count(UploadTask.id).label("cnt"),
+                func.max(UploadTask.created_at).label("latest")
+            )
             .filter(
                 UploadTask.channel_id == channel_id,
                 UploadTask.metadata_source == "RENDERER",
             )
+            .group_by(func.coalesce(UploadTask.pipeline_type, 'long'))
             .all()
         )
         
         pipeline_stats = {}
-        for t in tasks:
-            # Fallback legacy to 'long' if missing
-            p_type = t.pipeline_type if getattr(t, "pipeline_type", None) else "long"
-            if p_type not in pipeline_stats:
-                pipeline_stats[p_type] = {"imported_count": 0, "last_import": None}
-                
-            pipeline_stats[p_type]["imported_count"] += 1
-            if not pipeline_stats[p_type]["last_import"] or (t.created_at and t.created_at > pipeline_stats[p_type]["last_import"]):
-                pipeline_stats[p_type]["last_import"] = t.created_at
-                
+        for p_type, count, latest in rows:
+            pipeline_stats[p_type] = {
+                "imported_count": count or 0,
+                "last_import": latest
+            }
         return pipeline_stats
     except Exception as e:
         logger.error(f"[HEALTH] DB query failed for channel {channel_id!r}: {e}")

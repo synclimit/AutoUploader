@@ -1,12 +1,18 @@
-import { useState, useRef } from 'react'
-import { Play, Volume2, Settings, Maximize, Sparkles, Clock, Plus, Check, Loader2, Download, AlertTriangle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useRef, memo } from 'react'
+import { Play, Plus, Check, Loader2, Download, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { showToast } from '../../common/NotificationToast'
 import apiClient from '../../../api/client'
 import { useQueueStore } from '../../../store/upload/uploadStore'
 import { humanizeUploadError } from '../../../utils/errorHelper'
 
-export default function ReviewCenterPanel({ video }) {
+function ReviewCenterPanel({ video }) {
   const [showTechDetail, setShowTechDetail] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const fileInputRef = useRef(null);
+  // Add a cache-buster query param so if we upload a new one, the browser re-fetches
+  const [thumbBuster, setThumbBuster] = useState(0);
+
   if (!video) {
     return (
       <div className="flex-1 h-full flex flex-col items-center justify-center border border-white/[0.04] rounded-[16px] bg-[#05080e]/40 backdrop-blur-sm">
@@ -18,15 +24,9 @@ export default function ReviewCenterPanel({ video }) {
       </div>
     )
   }
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const fileInputRef = useRef(null);
   
   // Use relative URL so it works in both Vite proxy (dev) and FastAPI static serving (prod)
   const BACKEND_URL = '';
-  // Add a cache-buster query param so if we upload a new one, the browser re-fetches
-  const [thumbBuster, setThumbBuster] = useState(Date.now());
   const videoUrl = video.id ? `${BACKEND_URL}/api/v1/media/video/${video.id}` : null;
   const thumbnailUrl = video.id ? `${BACKEND_URL}/api/v1/media/thumbnail/${video.id}?t=${thumbBuster}` : null;
 
@@ -290,3 +290,21 @@ export default function ReviewCenterPanel({ video }) {
     </div>
   )
 }
+
+function arePropsEqual(prevProps, nextProps) {
+  if (prevProps.video === nextProps.video) return true;
+  if (!prevProps.video || !nextProps.video) return false;
+  return (
+    prevProps.video.id === nextProps.video.id &&
+    prevProps.video.thumbnail_path === nextProps.video.thumbnail_path &&
+    prevProps.video.video_path === nextProps.video.video_path &&
+    prevProps.video.status === nextProps.video.status &&
+    prevProps.video.failure_reason === nextProps.video.failure_reason &&
+    prevProps.video.retry_count === nextProps.video.retry_count &&
+    prevProps.video.channelName === nextProps.video.channelName &&
+    prevProps.video.channelLogo === nextProps.video.channelLogo &&
+    prevProps.video.resolution === nextProps.video.resolution
+  );
+}
+
+export default memo(ReviewCenterPanel, arePropsEqual);

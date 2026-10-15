@@ -11,22 +11,21 @@ class GeminiProvider(BaseAIProvider):
     """
     
     FALLBACK_MODELS = [
-        "gemini-3.6-flash",
-        "gemini-3.7-flash",
-        "gemini-3.5-flash",
-        "gemini-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-2.0-flash",
         "gemini-2.5-flash",
-        "gemini-2.5-pro",
-        "gemini-1.5-flash"
+        "gemini-1.5-pro",
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-pro-latest"
     ]
 
     def _get_url(self, endpoint: str, model_override: str = None, api_version: str = "v1beta", stream: bool = False) -> str:
         base = self.base_url.rstrip("/") if self.base_url else "https://generativelanguage.googleapis.com"
-        model = model_override or self.model or "gemini-3.6-flash"
-        if model in ["gemini-flash-latest", "gemini-flash", "gemini-1.5-flash", "gemini-2.0-flash"]:
-            model = "gemini-3.6-flash"
-        elif model in ["gemini-pro-latest", "gemini-pro", "gemini-1.5-pro", "gemini-2.0-pro"]:
-            model = "gemini-2.5-pro"
+        model = model_override or self.model or "gemini-1.5-flash"
+        if model in ["gemini-flash-latest", "gemini-flash"]:
+            model = "gemini-1.5-flash"
+        elif model in ["gemini-pro-latest", "gemini-pro"]:
+            model = "gemini-1.5-pro"
             
         clean_key = str(self.api_key or "").strip()
         if stream:
@@ -55,12 +54,18 @@ class GeminiProvider(BaseAIProvider):
         }
 
     async def generate(self, task: str, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        clean_key = str(self.api_key or "").strip()
+        if not clean_key:
+            raise ValueError("API Key Gemini belum tersimpan. Silakan buka Pengaturan > AI Metadata, masukkan API Key, lalu klik 'Save Changes'.")
+
         payload = self._build_payload(task, prompt, context)
         headers = {"Content-Type": "application/json"}
         
         target_model = self.model or "gemini-1.5-flash"
         if target_model in ["gemini-flash-latest", "gemini-flash"]:
             target_model = "gemini-1.5-flash"
+        elif target_model in ["gemini-pro-latest", "gemini-pro"]:
+            target_model = "gemini-1.5-pro"
             
         models_to_try = [target_model]
         for fb in self.FALLBACK_MODELS:
@@ -76,13 +81,18 @@ class GeminiProvider(BaseAIProvider):
                     if response.status_code == 200:
                         data = response.json()
                         content = ""
-                        if data.get("candidates") and data["candidates"][0].get("content", {}).get("parts"):
-                            content = data["candidates"][0]["content"]["parts"][0]["text"]
-                        return {
-                            "content": content,
-                            "raw": data,
-                            "model": m
-                        }
+                        if data.get("candidates") and len(data["candidates"]) > 0:
+                            parts = data["candidates"][0].get("content", {}).get("parts", [])
+                            if parts and len(parts) > 0:
+                                content = parts[0].get("text", "")
+                        if content:
+                            return {
+                                "content": content,
+                                "raw": data,
+                                "model": m
+                            }
+                        else:
+                            last_error = f"Model {m} returned empty response"
                     else:
                         last_error = f"HTTP {response.status_code}: {response.text}"
                 except Exception as e:

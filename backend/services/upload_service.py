@@ -151,6 +151,22 @@ class UploadService:
         update_data = data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(task, key, value)
+
+        # Sync schedule_time string if scheduled_at was modified
+        if "scheduled_at" in update_data and task.scheduled_at:
+            try:
+                import pytz
+                from models import Channel
+                channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
+                tz_str = getattr(channel, "publish_timezone", None) or "Asia/Jakarta"
+                tz = pytz.timezone(tz_str)
+                if task.scheduled_at.tzinfo is None:
+                    local_dt = pytz.UTC.localize(task.scheduled_at).astimezone(tz)
+                else:
+                    local_dt = task.scheduled_at.astimezone(tz)
+                task.schedule_time = local_dt.strftime("%H:%M")
+            except Exception:
+                task.schedule_time = task.scheduled_at.strftime("%H:%M")
             
         db.commit()
         db.refresh(task)
@@ -300,15 +316,110 @@ class UploadService:
 
         from models import Channel
         from prompts.manager import PromptManager
-        
-        prompt_meta = PromptManager.get_prompt(request.content_type)
-        prompt_name = prompt_meta.get("name", "Unknown Prompt")
-        prompt_version = prompt_meta.get("version", "v1.0")
-        
-        prompt = prompt_meta["template"].replace("{keyword}", request.keyword)\
-                                        .replace("{language}", request.language)\
-                                        .replace("{seo_mode}", request.seo_mode)
-                                        
+        import re
+
+        # Select or build prompt based on target
+        if request.target == "description":
+            prompt_name = "YouTube Description Rephrase"
+            prompt_version = "v2.0"
+            orig_desc = (request.current_description or task.description or "").strip()
+            orig_title = (request.current_title or task.title or "").strip()
+            
+            prompt = f"""You are an expert YouTube SEO copywriter.
+Your task is to rephrase and optimize the YouTube video description for high audience retention, engagement, and YouTube search ranking.
+
+Target Keyword: {request.keyword}
+Target Language: {request.language}
+SEO Strategy: {request.seo_mode}
+Video Title: {orig_title or 'N/A'}
+
+Original Description to rephrase:
+\"\"\"
+{orig_desc if orig_desc else f"Write an engaging, SEO-optimized YouTube video description about {request.keyword}."}
+\"\"\"
+
+Instructions:
+1. Rephrase the description into a captivating, professional, and well-structured format (hook, summary, key highlights, call to action).
+2. Keep any existing social media links, timestamps, or disclaimers from the original description intact.
+3. Integrate the keyword naturally for maximum SEO visibility.
+
+You MUST return ONLY a valid JSON object with EXACTLY this structure:
+{{
+  "description": "Primary polished and rephrased description...",
+  "alternatives": {{
+    "descriptions": [
+      "Alternative variation 1...",
+      "Alternative variation 2..."
+    ]
+  }}
+}}
+Return raw JSON only without markdown code blocks."""
+
+        elif request.target == "title":
+            prompt_name = "YouTube Title Generator"
+            prompt_version = "v2.0"
+            orig_title = (request.current_title or task.title or "").strip()
+            prompt = f"""You are an expert YouTube SEO and Click-Through Rate (CTR) strategist.
+Generate high-CTR YouTube video title options for:
+
+Target Keyword: {request.keyword}
+Target Language: {request.language}
+SEO Strategy: {request.seo_mode}
+Current Title: {orig_title or 'N/A'}
+
+Instructions:
+1. Generate catchy, high-CTR titles (under 95 characters) that pique curiosity while staying honest.
+2. Return 1 primary title and 5 diverse alternatives.
+
+You MUST return ONLY a valid JSON object with EXACTLY this structure:
+{{
+  "title": "Best recommended title...",
+  "alternatives": {{
+    "titles": [
+      "Title option 1...",
+      "Title option 2...",
+      "Title option 3...",
+      "Title option 4...",
+      "Title option 5..."
+    ]
+  }}
+}}
+Return raw JSON only without markdown code blocks."""
+
+        elif request.target == "tags":
+            prompt_name = "YouTube Tags Generator"
+            prompt_version = "v2.0"
+            orig_title = (request.current_title or task.title or "").strip()
+            prompt = f"""You are an expert YouTube SEO strategist.
+Generate high-ranking YouTube video tags for:
+
+Target Keyword: {request.keyword}
+Target Language: {request.language}
+SEO Strategy: {request.seo_mode}
+Video Title: {orig_title or 'N/A'}
+
+Instructions:
+1. Generate 15-20 relevant tags (broad, specific, and long-tail).
+2. Ensure combined character count of all tags separated by comma is under 400 characters (max YouTube limit is 500).
+
+You MUST return ONLY a valid JSON object with EXACTLY this structure:
+{{
+  "tags": "tag1, tag2, tag3...",
+  "alternatives": {{
+    "tags": ["tag1", "tag2", "tag3"]
+  }}
+}}
+Return raw JSON only without markdown code blocks."""
+
+        else:
+            prompt_meta = PromptManager.get_prompt(request.content_type)
+            prompt_name = prompt_meta.get("name", "Unknown Prompt")
+            prompt_version = prompt_meta.get("version", "v1.0")
+            
+            prompt = prompt_meta["template"].replace("{keyword}", request.keyword)\
+                                            .replace("{language}", request.language)\
+                                            .replace("{seo_mode}", request.seo_mode)
+                                            
         channel = db.query(Channel).filter(Channel.id == task.channel_id).first()
         if channel and channel.ai_identity:
             try:
@@ -321,17 +432,28 @@ class UploadService:
         if getattr(request, "is_evaluation_mode", False):
             prompt += "\n\nEVALUATION OVERRIDE: Ignore any previous JSON schema requirements. Return ONLY a JSON object with strictly these keys (and no alternatives, no confidence, no analysis): 'title' (string), 'description' (string), 'tags' (array of strings)."
 
+        def _parse_json_robust(content: str) -> dict:
+            content = content.strip()
+            try:
+                return json.loads(content)
+            except Exception:
+                pass
+            match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", content)
+            if match:
+                try:
+                    return json.loads(match.group(1).strip())
+                except Exception:
+                    pass
+            first_b = content.find("{")
+            last_b = content.rfind("}")
+            if first_b != -1 and last_b != -1 and last_b > first_b:
+                return json.loads(content[first_b:last_b+1])
+            raise ValueError(f"Could not parse valid JSON from AI response: {content[:100]}")
+
         async def _call_ai_and_parse(p_prompt):
             res = await AIEngineManager.generate(db=db, task="metadata generation", prompt=p_prompt)
             content = res.get("content", "").strip()
-            if content.startswith("```json"):
-                content = content[7:]
-            if content.startswith("```"):
-                content = content[3:]
-            if content.endswith("```"):
-                content = content[:-3]
-            content = content.strip()
-            return json.loads(content), res
+            return _parse_json_robust(content), res
 
         try:
             parsed, raw_res = await _call_ai_and_parse(prompt)
@@ -348,6 +470,27 @@ class UploadService:
                 return {"success": False, "message": "AI failed to return valid JSON object after repair."}
         except Exception as e:
             return {"success": False, "message": f"Failed to generate metadata: {str(e)}"}
+
+        # Ensure convenience top-level and alternative fields are synchronized
+        if isinstance(parsed, dict):
+            alts = parsed.get("alternatives")
+            if isinstance(alts, dict):
+                if not parsed.get("description") and alts.get("descriptions") and len(alts["descriptions"]) > 0:
+                    parsed["description"] = alts["descriptions"][0]
+                if not parsed.get("title") and alts.get("titles") and len(alts["titles"]) > 0:
+                    parsed["title"] = alts["titles"][0]
+                if not parsed.get("tags") and alts.get("tags"):
+                    raw_tags = alts["tags"]
+                    parsed["tags"] = ", ".join(raw_tags) if isinstance(raw_tags, list) else str(raw_tags)
+            elif not alts:
+                parsed["alternatives"] = {}
+                if parsed.get("description"):
+                    parsed["alternatives"]["descriptions"] = [parsed["description"]]
+                if parsed.get("title"):
+                    parsed["alternatives"]["titles"] = [parsed["title"]]
+                if parsed.get("tags"):
+                    t_list = [t.strip() for t in str(parsed["tags"]).split(",") if t.strip()]
+                    parsed["alternatives"]["tags"] = t_list
 
         # Determine version
         latest_history = db.query(AIGenerationHistory).filter(

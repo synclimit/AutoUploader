@@ -75,23 +75,17 @@ export default function Topbar() {
 
   return (
     <header className="px-5 pt-2 pb-0 shrink-0 relative z-40 pywebview-drag-region select-none">
-      <div className="w-full h-[56px] min-h-[56px] px-5 bg-[#05080e]/60 backdrop-blur-3xl border border-white/[0.08] rounded-[16px] flex items-center justify-between relative shadow-[0_4px_24px_rgba(0,0,0,0.3)] group neon-interactive">
+      <div className="w-full h-[56px] min-h-[56px] px-5 bg-[#070b13]/90 backdrop-blur-sm border border-white/[0.08] rounded-[16px] flex items-center justify-between relative shadow-[0_4px_24px_rgba(0,0,0,0.3)] group neon-interactive">
         
-        {/* Animated Background Effects */}
+        {/* Subtle Hardware-Accelerated Ambient Glows */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-900/10 via-[#05080e]/20 to-[#05080e]/60 z-0 pointer-events-none"></div>
-        <div className="absolute top-[-50%] left-[-10%] w-[300px] h-[300px] bg-[var(--accent-400)]/15 blur-[100px] rounded-full z-0 pointer-events-none animate-aurora"></div>
-        <div className="absolute bottom-[-50%] right-[10%] w-[200px] h-[200px] bg-teal-400/10 blur-[80px] rounded-full z-0 pointer-events-none animate-aurora" style={{ animationDelay: '5s' }}></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(34,211,238,0.08),transparent_60%)] z-0 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(20,184,166,0.06),transparent_60%)] z-0 pointer-events-none"></div>
         
-        {/* Abstract Vector Wave */}
-        <svg className="absolute inset-0 w-full h-full opacity-60 z-0 pointer-events-none animate-wave-float" viewBox="0 0 1000 100" preserveAspectRatio="none">
-          <path d="M0,50 Q250,90 500,50 T1000,50" fill="none" stroke="#22d3ee" strokeWidth="1" opacity="0.3" filter="url(#glowTopbar)"/>
+        {/* Abstract Vector Wave (Lightweight, No GPU Filter Overhead) */}
+        <svg className="absolute inset-0 w-full h-full opacity-40 z-0 pointer-events-none" viewBox="0 0 1000 100" preserveAspectRatio="none">
+          <path d="M0,50 Q250,90 500,50 T1000,50" fill="none" stroke="#22d3ee" strokeWidth="1" opacity="0.3"/>
           <path d="M0,60 Q250,20 500,60 T1000,60" fill="none" stroke="#22d3ee" strokeWidth="0.5" opacity="0.15"/>
-          <defs>
-            <filter id="glowTopbar" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
         </svg>
 
         {/* Minimal Particles/Dots */}

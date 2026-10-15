@@ -1,9 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
-import apiClient from '../../../api/client'
 import { useAppStore } from '../../../store/app/appStore'
 import { useAccountsStore } from '../../../store/accounts/accountsStore'
 import { useQueueStore } from '../../../store/upload/uploadStore'
-import { showToast } from '../../common/NotificationToast'
 import ChannelPickerDialog from './ChannelPickerDialog'
 import UploadDropZone from './UploadDropZone'
 import UploadQueueItem from './UploadQueueItem'
@@ -43,9 +41,9 @@ export default function UploadsOverviewPanel() {
   return (
     <div className="flex-1 h-full overflow-hidden px-6 pb-6 pt-2 flex flex-col gap-4 relative">
       
-      {/* Global Dashboard Glow */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-[var(--accent-500)]/5 blur-[150px] rounded-full z-0 pointer-events-none"></div>
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-900/10 blur-[150px] rounded-full z-0 pointer-events-none"></div>
+      {/* Global Dashboard Glow (Hardware Accelerated) */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(6,182,212,0.06)_0%,transparent_70%)] rounded-full z-0 pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(30,58,138,0.08)_0%,transparent_70%)] rounded-full z-0 pointer-events-none"></div>
 
       {isPickerOpen && (
         <ChannelPickerDialog 
@@ -59,20 +57,14 @@ export default function UploadsOverviewPanel() {
       <div className="relative z-10 flex flex-col h-full min-h-0">
         
         {/* Header / Hero */}
-        <div className="relative w-full min-h-[90px] rounded-[24px] overflow-hidden flex items-center bg-[#05080e]/60 backdrop-blur-2xl border border-[var(--accent-500)]/20 shadow-[0_8px_32px_rgba(34,211,238,0.05)] shrink-0 my-2 transition-all duration-500">
+        <div className="relative w-full min-h-[90px] rounded-[24px] overflow-hidden flex items-center bg-[#070b13]/90 border border-[var(--accent-500)]/20 shadow-[0_8px_32px_rgba(34,211,238,0.05)] shrink-0 my-2 transition-all duration-500">
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1a]/80 via-[#0d1624]/60 to-[#0a141e]/80 z-0 transition-colors duration-500"></div>
           
-          <div className={`absolute top-[-50%] right-[0%] w-[400px] h-[400px] bg-[var(--accent-400)]/15 blur-[120px] rounded-full z-0 pointer-events-none transition-opacity duration-500 ${selectedChannel ? 'opacity-100' : 'opacity-30'}`}></div>
+          <div className={`absolute top-[-50%] right-[0%] w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(34,211,238,0.15)_0%,transparent_70%)] rounded-full z-0 pointer-events-none transition-opacity duration-500 ${selectedChannel ? 'opacity-100' : 'opacity-30'}`}></div>
           
-          <svg className="absolute inset-0 w-full h-full opacity-60 z-0 pointer-events-none" viewBox="0 0 1000 110" preserveAspectRatio="none">
-            <path d="M0,55 Q250,100 500,55 T1000,55" fill="none" stroke="#22d3ee" strokeWidth="2" opacity="0.4" filter="url(#glowImport)" className="transition-all duration-500"/>
-            <path d="M0,75 Q250,25 500,75 T1000,75" fill="none" stroke="#22d3ee" strokeWidth="1" opacity="0.2" className="transition-all duration-500"/>
-            <defs>
-              <filter id="glowImport" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
+          <svg className="absolute inset-0 w-full h-full opacity-40 z-0 pointer-events-none" viewBox="0 0 1000 110" preserveAspectRatio="none">
+            <path d="M0,55 Q250,100 500,55 T1000,55" fill="none" stroke="#22d3ee" strokeWidth="1.5" opacity="0.4" className="transition-all duration-500"/>
+            <path d="M0,75 Q250,25 500,75 T1000,75" fill="none" stroke="#22d3ee" strokeWidth="0.75" opacity="0.2" className="transition-all duration-500"/>
           </svg>
 
           <div className="relative z-10 px-8 flex-1 flex flex-col justify-center h-full">

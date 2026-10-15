@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import CompletedTableRow from './CompletedTableRow'
 import { useAccountsStore } from "../../../store/accounts/accountsStore";
 import { useQueueStore } from "../../../store/upload/uploadStore";
@@ -17,7 +17,10 @@ export default function CompletedTable({ search, channelFilter, statusFilter }) 
     const interval = setInterval(() => {
       fetchTasks()
     }, 10000)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      useQueueStore.getState().setFilters({ ...useQueueStore.getState().filters, status: [] })
+    }
     // eslint-disable-next-line
   }, [])
 

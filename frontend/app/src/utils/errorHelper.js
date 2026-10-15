@@ -106,7 +106,7 @@ export function humanizeUploadError(err) {
     .replace(/^(API_UPLOAD_ERROR|PLAYWRIGHT_UPLOAD_ERROR|Exception):\s*/i, '')
     .replace(/^<HttpError \d+ [^>]+ returned "/i, '')
     .replace(/\. Details: "\[.*$/is, '')
-    .replace(/"\>$/, '')
+    .replace(/">$/, '')
     .replace(/^"+|"+$/g, '')
     .trim();
 

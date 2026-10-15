@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, Plus, Sparkles, Save, Check, X, Search, MonitorPlay, Copy, ExternalLink, Activity, History, Loader2, RefreshCw } from 'lucide-react'
+import { ChevronDown, Plus, Sparkles, Save, Check, X, Search, MonitorPlay, Copy, ExternalLink, Activity, History, Loader2, RefreshCw, Clock, Calendar } from 'lucide-react'
 import { useQueueStore } from '../../../store/upload/uploadStore'
 import { showToast } from '../../common/NotificationToast'
 import { YOUTUBE_CATEGORIES } from '../../../constants/youtubeCategories'
@@ -9,7 +9,7 @@ import Select from '../../common/Select'
 import { analyzeSEO } from '../../../utils/seoAnalyzer'
 import apiClient from '../../../api/client'
 
-export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits = {}, setEdits }) {
+function ReviewMetadataPanel({ video, aiAssistantEnabled, edits = {}, setEdits }) {
   const [activeTab, setActiveTab] = useState('Basic Information')
   const { updateTask } = useQueueStore()
   
@@ -68,12 +68,44 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     }
   }
 
+  // Local input states for instant typing feedback without re-rendering parent components
+  const [localTitle, setLocalTitle] = useState(edits.title !== undefined ? edits.title : (video?.title || ''))
+  const [localDesc, setLocalDesc] = useState(edits.description !== undefined ? edits.description : (video?.description || ''))
+  const debounceTimerRef = useRef(null)
+
   useEffect(() => {
+    setLocalTitle(video?.title || '')
+    setLocalDesc(video?.description || '')
     setEdits({})
     setSuggestion(null)
     setSelectedTitleIdx(0)
     setSelectedDescIdx(0)
   }, [video?.id])
+
+  // Sync if edits has external changes (e.g. from AI suggestion applied)
+  useEffect(() => {
+    if (edits.title !== undefined && edits.title !== localTitle) {
+      setLocalTitle(edits.title)
+    }
+  }, [edits.title])
+
+  useEffect(() => {
+    if (edits.description !== undefined && edits.description !== localDesc) {
+      setLocalDesc(edits.description)
+    }
+  }, [edits.description])
+
+  const debounceSync = useCallback((field, value) => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+    debounceTimerRef.current = setTimeout(() => {
+      setEdits(prev => ({ ...prev, [field]: value }))
+    }, 200)
+  }, [setEdits])
+
+  const flushSync = useCallback((field, value) => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+    setEdits(prev => ({ ...prev, [field]: value }))
+  }, [setEdits])
 
   // Clear AI states if toggled off
   useEffect(() => {
@@ -84,17 +116,25 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
   }, [aiAssistantEnabled])
 
   const handleChange = (field, value) => {
-    setEdits(prev => ({ ...prev, [field]: value }))
+    if (field === 'title') setLocalTitle(value)
+    if (field === 'description') setLocalDesc(value)
+    flushSync(field, value)
   }
 
   const handleSave = async () => {
-    if (Object.keys(edits).length > 0) {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+    const effectiveEdits = {
+      ...edits,
+      title: localTitle,
+      description: localDesc
+    }
+    if (Object.keys(effectiveEdits).length > 0) {
       if (tagsCharCost > 500) {
         showToast(`Tags melebihi batas YouTube (${tagsCharCost}/500 karakter). Harap kurangi tag sebelum menyimpan!`, 'error', 5000);
         return;
       }
       try {
-        await updateTask(video.id, edits)
+        await updateTask(video.id, effectiveEdits)
         setEdits({})
         showToast('Metadata saved successfully', 'success')
       } catch (err) {
@@ -105,12 +145,85 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     }
   }
 
-  const currentTitleStr = edits.title !== undefined ? edits.title : (video?.title || '')
-  const currentDescStr = edits.description !== undefined ? edits.description : (video?.description || '')
+  const currentTitleStr = localTitle
+  const currentDescStr = localDesc
   const currentTagsStr = edits.tags !== undefined ? edits.tags : (video?.tags || '');
-  const tagsArray = currentTagsStr ? currentTagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+  const tagsArray = useMemo(() => {
+    return currentTagsStr ? currentTagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+  }, [currentTagsStr]);
   const tagsCharCost = calculateTagsCost(tagsArray);
   
+  const currentScheduledAt = edits.scheduled_at !== undefined ? edits.scheduled_at : video?.scheduled_at;
+  const currentScheduleTime = edits.schedule_time !== undefined ? edits.schedule_time : (video?.schedule_time || '08:00');
+
+  let dateInputValue = '';
+  if (currentScheduledAt) {
+    try {
+      const d = new Date(currentScheduledAt);
+      if (!isNaN(d.getTime())) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateInputValue = `${year}-${month}-${day}`;
+      }
+    } catch (e) {}
+  }
+
+  let timeInputValue = currentScheduleTime || '08:00';
+  if (currentScheduledAt && (!currentScheduleTime || currentScheduleTime === '08:00')) {
+    try {
+      const d = new Date(currentScheduledAt);
+      if (!isNaN(d.getTime())) {
+        const h = String(d.getHours()).padStart(2, '0');
+        const m = String(d.getMinutes()).padStart(2, '0');
+        timeInputValue = `${h}:${m}`;
+      }
+    } catch (e) {}
+  }
+
+  const handleDateChange = (newDateStr) => {
+    if (!newDateStr) return;
+    const timeParts = (timeInputValue || '08:00').split(':');
+    const h = parseInt(timeParts[0] || '8', 10);
+    const m = parseInt(timeParts[1] || '0', 10);
+    const [y, mon, d] = newDateStr.split('-').map(Number);
+    const dateObj = new Date(y, mon - 1, d, h, m, 0);
+    handleChange('scheduled_at', dateObj.toISOString());
+  };
+
+  const handleTimeChange = (newTimeStr) => {
+    if (!newTimeStr) return;
+    handleChange('schedule_time', newTimeStr);
+    if (dateInputValue) {
+      const timeParts = newTimeStr.split(':');
+      const h = parseInt(timeParts[0] || '8', 10);
+      const m = parseInt(timeParts[1] || '0', 10);
+      const [y, mon, d] = dateInputValue.split('-').map(Number);
+      const dateObj = new Date(y, mon - 1, d, h, m, 0);
+      handleChange('scheduled_at', dateObj.toISOString());
+    }
+  };
+
+  const getDisplayScheduleLabel = () => {
+    if (!currentScheduledAt) return 'Belum dijadwalkan';
+    try {
+      const d = new Date(currentScheduledAt);
+      const today = new Date();
+      const tomorrow = new Date();
+      tomorrow.setDate(today.getDate() + 1);
+
+      let dStr = '';
+      if (d.toDateString() === today.toDateString()) dStr = 'Hari ini';
+      else if (d.toDateString() === tomorrow.toDateString()) dStr = 'Besok';
+      else dStr = d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+      const tStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      return `${dStr}, ${tStr}`;
+    } catch (e) {
+      return 'Format jadwal tidak valid';
+    }
+  };
+
   const [newTagInput, setNewTagInput] = useState('');
 
   const handleRemoveTag = (tagToRemove) => {
@@ -183,8 +296,17 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
 
   const hasMetadata = currentTitleStr.trim() || currentDescStr.trim()
   
-  // Realtime Analysis using deterministic rules
-  const aiAnalysis = analyzeSEO({ title: currentTitleStr, description: currentDescStr, tags: currentTagsStr }, aiKeyword)
+  // Realtime Analysis using deterministic rules - memoized to prevent regex execution on every keystroke
+  const aiAnalysis = useMemo(() => {
+    if (!aiAssistantEnabled && !seoDropdownOpen) {
+      return {
+        title: { character_length: (localTitle || '').length, keyword_position: '-', duplicate_keyword: false, emoji_count: 0, uppercase_ratio: 0 },
+        description: { character_count: (localDesc || '').length, keyword_presence: false, cta_detection: false, hashtag_count: 0, url_count: 0 },
+        tags: { total_tags: tagsArray.length, duplicate_tags: 0, keyword_coverage: false, long_tail_percentage: 0 }
+      };
+    }
+    return analyzeSEO({ title: localTitle, description: localDesc, tags: currentTagsStr }, aiKeyword);
+  }, [aiAssistantEnabled, seoDropdownOpen, localTitle, localDesc, currentTagsStr, aiKeyword, tagsArray]);
 
   const handleGenerateAI = async (targetField = 'all') => {
     if (!aiKeyword.trim()) {
@@ -649,6 +771,48 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
             </div>
 
             
+            {/* Jadwal Publikasi (Editable Date & Time) */}
+            <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-950/20 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                    <Calendar size={13} />
+                  </div>
+                  <div>
+                    <span className="text-[12px] font-bold text-white/90">Jadwal Publikasi</span>
+                    <span className="text-[10px] text-cyan-300/70 ml-2 font-mono">({getDisplayScheduleLabel()})</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
+                  <Clock size={10} />
+                  <span>{video?.schedule_mode === 'youtube' ? 'YouTube Scheduled' : 'App Scheduler'}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-white/50">Tanggal Upload</label>
+                  <input 
+                    type="date"
+                    value={dateInputValue}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                    className="w-full bg-[#0a0f1a] border border-white/10 rounded-[6px] px-2.5 py-1.5 text-[12px] text-white focus:outline-none focus:border-cyan-400 [color-scheme:dark]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-white/50">Jam Upload (WIB/Lokal)</label>
+                  <input 
+                    type="time"
+                    value={timeInputValue}
+                    onChange={(e) => handleTimeChange(e.target.value)}
+                    className="w-full bg-[#0a0f1a] border border-white/10 rounded-[6px] px-2.5 py-1.5 text-[12px] text-white focus:outline-none focus:border-cyan-400 [color-scheme:dark]"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Title */}
             <div className="flex flex-col gap-1">
               <div className="flex items-center justify-between">
@@ -669,8 +833,13 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
               <div className="relative group neon-interactive">
                 <input 
                   type="text" 
-                  value={currentTitleStr}
-                  onChange={(e) => handleChange('title', e.target.value)}
+                  value={localTitle}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setLocalTitle(val);
+                    debounceSync('title', val);
+                  }}
+                  onBlur={() => flushSync('title', localTitle)}
                   className="w-full bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] px-3 py-2 text-[12.5px] text-white focus:outline-none focus:border-[var(--accent-500)]/50 pr-10"
                 />
                 {aiAssistantEnabled && (
@@ -705,14 +874,19 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
                     )}
                     <span>Rephrase</span>
                   </button>
-                  <span className="text-[9.5px] text-white/40 font-mono">{currentDescStr.length}/5000</span>
+                  <span className="text-[9.5px] text-white/40 font-mono">{localDesc.length}/5000</span>
                 </div>
               </div>
               <div className="relative group neon-interactive">
                 <textarea 
                   rows={7}
-                  value={currentDescStr}
-                  onChange={(e) => handleChange('description', e.target.value)}
+                  value={localDesc}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setLocalDesc(val);
+                    debounceSync('description', val);
+                  }}
+                  onBlur={() => flushSync('description', localDesc)}
                   placeholder="Enter video description..."
                   className="w-full min-h-[150px] bg-[#0a0f1a]/50 border border-[var(--accent-500)]/20 rounded-[8px] px-3 py-2 text-[12.5px] text-white/90 focus:outline-none focus:border-[var(--accent-500)]/50 resize-y custom-scrollbar leading-relaxed"
                 />
@@ -963,3 +1137,5 @@ export default function ReviewMetadataPanel({ video, aiAssistantEnabled, edits =
     </div>
   )
 }
+
+export default memo(ReviewMetadataPanel);

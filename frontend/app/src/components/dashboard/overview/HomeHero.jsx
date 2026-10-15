@@ -7,24 +7,18 @@ export default function HomeHero() {
   const { t } = useTranslation()
 
   return (
-    <div className="relative w-full h-[85px] min-h-[85px] rounded-[16px] overflow-hidden flex items-center bg-[#05080e]/60 backdrop-blur-2xl border border-[var(--accent-500)]/20 shadow-[0_4px_24px_rgba(34,211,238,0.05)] shrink-0">
+    <div className="relative w-full h-[85px] min-h-[85px] rounded-[16px] overflow-hidden flex items-center bg-[#070b13]/90 border border-[var(--accent-500)]/20 shadow-[0_4px_24px_rgba(34,211,238,0.05)] shrink-0">
       
-      {/* Background Effects */}
+      {/* Background Effects (Hardware Accelerated) */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1a]/80 via-[#0d1624]/60 to-[#0a141e]/80 z-0"></div>
-      <div className="absolute top-[-50%] right-[0%] w-[500px] h-[500px] bg-[var(--accent-400)]/15 blur-[120px] rounded-full z-0 pointer-events-none"></div>
-      <div className="absolute bottom-[-50%] left-[20%] w-[300px] h-[300px] bg-cyan-600/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
+      <div className="absolute top-[-50%] right-[0%] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(34,211,238,0.12)_0%,transparent_70%)] rounded-full z-0 pointer-events-none"></div>
+      <div className="absolute bottom-[-50%] left-[20%] w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(6,182,212,0.08)_0%,transparent_70%)] rounded-full z-0 pointer-events-none"></div>
       
       {/* Abstract Lines SVG with Depth */}
-      <svg className="absolute inset-0 w-full h-full opacity-60 z-0 pointer-events-none" viewBox="0 0 1000 85" preserveAspectRatio="none">
-        <path d="M0,45 Q250,85 500,45 T1000,45" fill="none" stroke="#22d3ee" strokeWidth="2" opacity="0.4" filter="url(#glow)"/>
-        <path d="M0,60 Q250,25 500,60 T1000,60" fill="none" stroke="#22d3ee" strokeWidth="1" opacity="0.2"/>
-        <path d="M0,30 Q250,85 500,30 T1000,30" fill="none" stroke="#67e8f9" strokeWidth="1.5" opacity="0.3"/>
-        <defs>
-          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
+      <svg className="absolute inset-0 w-full h-full opacity-40 z-0 pointer-events-none" viewBox="0 0 1000 85" preserveAspectRatio="none">
+        <path d="M0,45 Q250,85 500,45 T1000,45" fill="none" stroke="#22d3ee" strokeWidth="1.5" opacity="0.4"/>
+        <path d="M0,60 Q250,25 500,60 T1000,60" fill="none" stroke="#22d3ee" strokeWidth="0.75" opacity="0.2"/>
+        <path d="M0,30 Q250,85 500,30 T1000,30" fill="none" stroke="#67e8f9" strokeWidth="1" opacity="0.3"/>
       </svg>
 
       <div className="relative z-10 px-6 flex-1 flex justify-between items-center h-full">

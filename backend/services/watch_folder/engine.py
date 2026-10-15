@@ -237,10 +237,12 @@ class WatchFolderEngine(EngineBase):
             logger.info(f"[ENGINE] Processing Channel '{getattr(channel, 'alias_name', channel_id)}' | pipeline: '{p_key}' | raw_watch: '{raw_watch}' -> resolved: '{watch_path}' (exists: {folder_exists})")
 
             if not folder_exists:
-                logger.warning(f"[ENGINE] Watch folder does not exist on local disk: {watch_path}")
-                health_service.record_path_unavailable(channel_id, p_key)
-                health_service.record_scan_result(channel_id, p_key, "PATH_UNAVAILABLE", 0)
-                health_service.record_log(channel_id, p_key, "FAIL", "Folder Not Found")
+                health = health_service._get_or_create_pipeline(channel_id, p_key)
+                if health.status != "ERROR":
+                    logger.warning(f"[ENGINE] Watch folder does not exist on local disk: {watch_path}")
+                    health_service.record_path_unavailable(channel_id, p_key)
+                    health_service.record_scan_result(channel_id, p_key, "PATH_UNAVAILABLE", 0)
+                    health_service.record_log(channel_id, p_key, "FAIL", "Folder Not Found")
                 continue
 
             health_service.update_status(channel_id, p_key, "SCANNING")

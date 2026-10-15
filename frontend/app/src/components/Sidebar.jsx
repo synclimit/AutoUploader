@@ -46,22 +46,22 @@ export default function Sidebar() {
         }`}
       >
       
-      {/* Subtle Background Effects */}
-      <div className="absolute top-0 left-[-40px] w-[150px] h-full bg-[var(--accent-500)]/5 blur-[80px] pointer-events-none"></div>
-      <div className="absolute bottom-0 right-[-50px] w-[200px] h-[200px] bg-teal-500/5 blur-[100px] pointer-events-none"></div>
+      {/* Subtle Background Radial Highlights (Hardware Accelerated) */}
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_0%_20%,rgba(6,182,212,0.06),transparent_60%)] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-full h-[200px] bg-[radial-gradient(circle_at_100%_100%,rgba(20,184,166,0.05),transparent_60%)] pointer-events-none"></div>
       
       {/* Left Edge Accent Reflection */}
       <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent shadow-[0_0_15px_var(--color-primary-cyan)]"></div>
 
       {/* Premium Logo Area */}
       <div className="h-[140px] pt-8 pb-4 px-1 flex flex-col items-center justify-center shrink-0 relative group cursor-pointer overflow-hidden whitespace-nowrap w-full">
-        {/* Soft Ambient Glow Behind Logo */}
-        <div className="absolute top-1/2 left-1/2 w-[160px] h-[160px] -translate-x-1/2 -translate-y-1/2 bg-[var(--accent-400)]/20 blur-[30px] rounded-full opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+        {/* Soft Ambient Glow Behind Logo (Hardware Accelerated) */}
+        <div className="absolute top-1/2 left-1/2 w-[140px] h-[140px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,rgba(34,211,238,0.18)_0%,transparent_70%)] rounded-full opacity-50 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
         
         <img 
           src="/favicon.png" 
           alt="Ryanz Pitstop Logo" 
-          className={`object-contain drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] group-hover:drop-shadow-[0_0_25px_rgba(34,211,238,0.9)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[56px] h-auto group-hover/sidebar:w-[180px]' : 'w-[180px] h-auto group-hover:scale-105'}`} 
+          className={`object-contain drop-shadow-[0_0_12px_rgba(34,211,238,0.5)] group-hover:drop-shadow-[0_0_18px_rgba(34,211,238,0.8)] transition-all duration-300 z-10 relative shrink-0 ${isCompactMode ? 'w-[56px] h-auto group-hover/sidebar:w-[180px]' : 'w-[180px] h-auto group-hover:scale-105'}`} 
         />
       </div>
 

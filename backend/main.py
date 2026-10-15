@@ -549,8 +549,11 @@ if __name__ == "__main__":
     
     def free_port_8000():
         try:
-            import subprocess
-            output = subprocess.check_output('netstat -ano | findstr :8000', shell=True).decode()
+            output = subprocess.check_output(
+                'netstat -ano | findstr :8000', 
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            ).decode()
             for line in output.strip().splitlines():
                 if 'LISTENING' in line:
                     parts = line.strip().split()

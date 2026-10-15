@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { Filter, ChevronDown, Sparkles, Clock, Trash2, Save, CloudUpload, RotateCcw, Activity } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { ChevronDown, Sparkles, Clock, Trash2, Save, CloudUpload, RotateCcw, Calendar } from 'lucide-react'
 import ReviewVideoRow from './ReviewVideoRow'
 import ReviewCenterPanel from './ReviewCenterPanel'
 import ReviewMetadataPanel from './ReviewMetadataPanel'
@@ -10,44 +10,89 @@ import { showToast } from '../../common/NotificationToast'
 import Select from '../../common/Select'
 import WatchFolderDiagnosticModal from '../../common/WatchFolderDiagnosticModal'
 import { humanizeUploadError, calculateTagsCost } from '../../../utils/errorHelper'
+import apiClient from '../../../api/client'
+
+const DEFAULT_REVIEW_STATUSES = ['WATCHED', 'REVIEW', 'WAITING', 'WAITING_AI', 'SCHEDULED', 'QUEUED'];
 
 export default function ReviewWorkspace() {
-  const [searchQuery, setSearchQuery] = useState('')
   const [selectedChannelId, setSelectedChannelId] = useState(null)
   const [isChannelPickerOpen, setIsChannelPickerOpen] = useState(false)
   const [isLogOpen, setIsLogOpen] = useState(false)
   const [aiAssistantEnabled, setAiAssistantEnabled] = useState(false)
   const [isDiagnosticOpen, setIsDiagnosticOpen] = useState(false)
+  const [isRealigning, setIsRealigning] = useState(false)
 
-  const { accounts, fetchAccounts } = useAccountsStore()
-  const { tasks, fetchTasks, activeTask, setActiveTask, approveTask, updateTask, deleteTask, cancelTask, filters, setFilters, fetchTask, fetchTaskLogs } = useQueueStore()
+  const accounts = useAccountsStore(s => s.accounts)
+  const fetchAccounts = useAccountsStore(s => s.fetchAccounts)
+
+  const tasks = useQueueStore(s => s.tasks)
+  const fetchTasks = useQueueStore(s => s.fetchTasks)
+  const activeTask = useQueueStore(s => s.activeTask)
+  const setActiveTask = useQueueStore(s => s.setActiveTask)
+  const approveTask = useQueueStore(s => s.approveTask)
+  const updateTask = useQueueStore(s => s.updateTask)
+  const deleteTask = useQueueStore(s => s.deleteTask)
+  const filters = useQueueStore(s => s.filters)
+  const setFilters = useQueueStore(s => s.setFilters)
+  const fetchTask = useQueueStore(s => s.fetchTask)
+  const fetchTaskLogs = useQueueStore(s => s.fetchTaskLogs)
 
   useEffect(() => {
     fetchAccounts()
-  }, [])
-
-  useEffect(() => {
+    // Always enforce default review filter is active on mount
+    setFilters({ ...useQueueStore.getState().filters, status: DEFAULT_REVIEW_STATUSES });
     fetchTasks()
   }, [])
 
-  // Refetch active task data and logs periodically or on state change
+  const handleRealignSchedules = async () => {
+    setIsRealigning(true);
+    try {
+      const url = selectedChannelId 
+        ? `/queue/realign-schedules?channel_id=${selectedChannelId}` 
+        : '/queue/realign-schedules';
+      await apiClient.post(url);
+      await fetchTasks();
+      showToast('Jadwal berhasil dirapikan! Tidak ada lagi tanggal ganda.', 'success', 4000);
+    } catch (err) {
+      showToast('Gagal merapikan jadwal: ' + (err.message || 'Error'), 'error');
+    } finally {
+      setIsRealigning(false);
+    }
+  };
+
+  // Only fetch logs when the user opens the Activity Log drawer
+  useEffect(() => {
+    if (isLogOpen && activeTask?.id) {
+      fetchTaskLogs(activeTask.id);
+    }
+  }, [isLogOpen, activeTask?.id, fetchTaskLogs]);
+
+  // Poll active task status only when actively uploading or queued
   useEffect(() => {
     if (!activeTask?.id) return;
-    fetchTask(activeTask.id);
-    fetchTaskLogs(activeTask.id);
-    
-    // Poll active task status if uploading
     let interval = null;
     if (activeTask.status === 'UPLOADING' || activeTask.status === 'QUEUED') {
       interval = setInterval(() => {
         fetchTask(activeTask.id);
-        fetchTaskLogs(activeTask.id);
-      }, 2000);
+        if (isLogOpen) {
+          fetchTaskLogs(activeTask.id);
+        }
+      }, 3000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [activeTask?.id, activeTask?.status, fetchTask, fetchTaskLogs]);
+  }, [activeTask?.id, activeTask?.status, isLogOpen, fetchTask, fetchTaskLogs]);
+
+  // Live polling for queue task list updates when any upload is running
+  const hasLiveUploads = useMemo(() => tasks.some(t => t.status === 'UPLOADING' || t.status === 'QUEUED'), [tasks]);
+  useEffect(() => {
+    if (!hasLiveUploads) return;
+    const pollTimer = setInterval(() => {
+      fetchTasks();
+    }, 4000);
+    return () => clearInterval(pollTimer);
+  }, [hasLiveUploads, fetchTasks]);
 
   // Automated Toast Notifications strictly for live active upload transitions
   const prevTaskIdRef = useRef(activeTask?.id);
@@ -60,6 +105,7 @@ export default function ReviewWorkspace() {
       if (prevStatusRef.current && prevStatusRef.current !== activeTask.status) {
         if (prevStatusRef.current === 'UPLOADING' && activeTask.status === 'COMPLETED') {
           showToast('Upload Berhasil ke YouTube!', 'success', 4000);
+          fetchTasks();
         } else if (prevStatusRef.current === 'UPLOADING' && activeTask.status === 'FAILED') {
           const reason = humanizeUploadError(activeTask.failure_reason);
           showToast(reason ? `Upload Gagal: ${reason}` : 'Upload Gagal ke YouTube', 'error', 5000);
@@ -75,17 +121,17 @@ export default function ReviewWorkspace() {
     prevTaskIdRef.current = activeTask?.id;
     prevStatusRef.current = activeTask?.status;
     prevFailureRef.current = activeTask?.failure_reason;
-  }, [activeTask?.id, activeTask?.status, activeTask?.failure_reason, activeTask?.retry_count]);
+  }, [activeTask?.id, activeTask?.status, activeTask?.failure_reason, activeTask?.retry_count, fetchTasks]);
 
   const [selectedVideoIds, setSelectedVideoIds] = useState([])
   const [edits, setEdits] = useState({})
-
   useEffect(() => {
     setEdits({})
   }, [activeTask?.id])
 
   const filteredVideos = useMemo(() => {
-    return tasks
+    // Review Workspace strictly excludes COMPLETED and CANCELLED tasks
+    return tasks.filter(v => v.status !== 'COMPLETED' && v.status !== 'CANCELLED');
   }, [tasks])
 
   const mappedVideos = useMemo(() => {
@@ -130,16 +176,20 @@ export default function ReviewWorkspace() {
     }
   }, [filteredVideos, activeTask, setActiveTask]);
 
-  const handleToggleSelect = (id) => {
+  const handleToggleSelect = useCallback((id) => {
     setSelectedVideoIds(prev => 
       prev.includes(id) ? prev.filter(vId => vId !== id) : [...prev, id]
     )
-  }
+  }, []);
 
-  const handleRowClick = (id) => {
-    const task = tasks.find(t => t.id === id)
-    if (task) setActiveTask(task)
-  }
+  const handleRowClick = useCallback((id) => {
+    const allTasks = useQueueStore.getState().tasks
+    const task = allTasks.find(t => t.id === id)
+    if (task) {
+      setEdits({})
+      setActiveTask(task)
+    }
+  }, [setActiveTask]);
 
   const handleBulkApprove = async () => {
     if (activeTask && selectedVideoIds.includes(activeTask.id) && Object.keys(edits).length > 0) {
@@ -330,6 +380,16 @@ export default function ReviewWorkspace() {
         {/* Global Action Tools */}
         <div className="flex items-center gap-2">
           <button 
+            onClick={handleRealignSchedules}
+            disabled={isRealigning}
+            title="Rapikan Jadwal Antrean (Cegah Tanggal Ganda)"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:text-cyan-200 hover:bg-cyan-500/20 transition-colors text-[12px] font-bold neon-interactive disabled:opacity-50"
+          >
+            <Calendar size={13} className={isRealigning ? "animate-spin text-cyan-400" : "text-cyan-400"} />
+            <span>{isRealigning ? "Merapikan..." : "Rapikan Jadwal"}</span>
+          </button>
+
+          <button 
             onClick={() => { fetchTasks(); window.location.reload(); }}
             title="Refresh Halaman"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] border border-white/[0.08] bg-[#05080e]/60 text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors text-[12px] font-bold neon-interactive"
@@ -390,7 +450,7 @@ export default function ReviewWorkspace() {
 
         {/* RIGHT COLUMN: Metadata (~29%) */}
         <div className="shrink-0 h-full">
-           <ReviewMetadataPanel video={activeVideoProps} aiAssistantEnabled={aiAssistantEnabled} edits={edits} setEdits={setEdits} />
+           <ReviewMetadataPanel key={activeTask?.id || 'none'} video={activeVideoProps} aiAssistantEnabled={aiAssistantEnabled} edits={edits} setEdits={setEdits} />
         </div>
 
       </div>
@@ -424,10 +484,10 @@ export default function ReviewWorkspace() {
                    setEdits({});
                    const { showToast } = await import('../../common/NotificationToast');
                    showToast('Metadata saved successfully', 'success');
-                 } catch (err) {
-                   const { showToast } = await import('../../common/NotificationToast');
-                   showToast('Failed to save metadata', 'error');
-                 }
+                  } catch {
+                    const { showToast } = await import('../../common/NotificationToast');
+                    showToast('Failed to save metadata', 'error');
+                  }
                } else {
                  const { showToast } = await import('../../common/NotificationToast');
                  showToast('No changes to save', 'info');

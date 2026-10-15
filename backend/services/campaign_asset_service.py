@@ -53,9 +53,16 @@ class CampaignAssetService:
                 '-show_streams',
                 file_path
             ]
-            # Use subprocess to run ffprobe, this mimics the implementation in VideoMetadataService
-            # to directly get the float duration. Add timeout to prevent hang.
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15)
+            # Use subprocess to run ffprobe with hidden window flags on Windows
+            kwargs = {}
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = 0
+                kwargs["startupinfo"] = startupinfo
+                kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=15, **kwargs)
             if result.returncode == 0:
                 probe_data = json.loads(result.stdout)
                 duration_sec = 0.0

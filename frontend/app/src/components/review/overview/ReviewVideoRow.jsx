@@ -1,18 +1,7 @@
-import { useState } from 'react'
+import { memo } from 'react'
 import { Check, Image as ImageIcon, Clock } from 'lucide-react'
 
-export default function ReviewVideoRow({ index, video, isSelected, isActive, onToggleSelect, onClickRow }) {
-  const [duration, setDuration] = useState(video.duration === '00:00' ? null : video.duration);
-
-  const handleLoadedMetadata = (e) => {
-    const vid = e.target;
-    if (vid.duration && !isNaN(vid.duration)) {
-      const mins = Math.floor(vid.duration / 60);
-      const secs = Math.floor(vid.duration % 60);
-      setDuration(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
-    }
-  };
-
+function ReviewVideoRow({ index, video, isSelected, isActive, onToggleSelect, onClickRow }) {
   const isCampaign = video.execution_source === 'CAMPAIGN' || video.automation_strategy === 'campaign';
 
   // Format schedule date cleanly: "22 Agu, 12:00" or "Besok, 12:00"
@@ -33,7 +22,7 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
         } else {
           dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
         }
-      } catch (e) {
+      } catch {
         dateStr = '';
       }
     }
@@ -56,15 +45,15 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
       {/* Thumbnail */}
       <div className="relative w-[100px] h-[58px] rounded-[6px] overflow-hidden bg-black/50 shrink-0 border border-white/[0.06]">
         {video.thumbnail_path ? (
-          <>
-            <img src={`/api/v1/media/thumbnail/${video.id}`} alt="Thumbnail" className="w-full h-full object-cover" />
-            <video src={`/api/v1/media/video/${video.id}`} className="hidden" preload="metadata" onLoadedMetadata={handleLoadedMetadata} />
-          </>
-        ) : video.video_path ? (
-          <video src={`/api/v1/media/video/${video.id}#t=0.1`} className="w-full h-full object-cover" preload="metadata" muted playsInline onLoadedMetadata={handleLoadedMetadata} />
+          <img 
+            src={`/api/v1/media/thumbnail/${video.id}`} 
+            alt="Thumbnail" 
+            loading="lazy"
+            className="w-full h-full object-cover" 
+          />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-white/10">
-             <ImageIcon size={16} />
+          <div className="absolute inset-0 flex items-center justify-center text-white/20 bg-gradient-to-br from-cyan-950/20 to-black/60">
+             <ImageIcon size={18} />
           </div>
         )}
         
@@ -89,9 +78,9 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
           </div>
         </div>
 
-        {/* Duration */}
+        {/* Duration / Format Badge */}
         <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/80 rounded-[3px] text-[9px] font-mono font-semibold text-white/90">
-          {duration || '00:00'}
+          {video.duration && video.duration !== '00:00' ? video.duration : (video.pipeline_type === 'shorts' ? 'Shorts' : 'Video')}
         </div>
       </div>
 
@@ -135,6 +124,26 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
               <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
               <span>Retry #{video.retry_count}</span>
             </div>
+          ) : video.status === 'COMPLETED' ? (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-green-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+              <span>Selesai (Uploaded)</span>
+            </div>
+          ) : video.status === 'UPLOADING' ? (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-cyan-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-spin"></span>
+              <span>Mengunggah</span>
+            </div>
+          ) : video.status === 'QUEUED' ? (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-yellow-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+              <span>Queued</span>
+            </div>
+          ) : video.status === 'SCHEDULED' ? (
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-purple-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+              <span>Dijadwalkan</span>
+            </div>
           ) : (
             <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-400/90">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
@@ -147,3 +156,30 @@ export default function ReviewVideoRow({ index, video, isSelected, isActive, onT
     </div>
   )
 }
+
+function arePropsEqual(prev, next) {
+  if (prev.index !== next.index) return false;
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.isActive !== next.isActive) return false;
+  const pv = prev.video;
+  const nv = next.video;
+  if (pv === nv) return true;
+  if (!pv || !nv) return false;
+  return (
+    pv.id === nv.id &&
+    pv.title === nv.title &&
+    pv.status === nv.status &&
+    pv.upload_progress === nv.upload_progress &&
+    pv.scheduled_at === nv.scheduled_at &&
+    pv.schedule_time === nv.schedule_time &&
+    pv.thumbnail_path === nv.thumbnail_path &&
+    pv.video_path === nv.video_path &&
+    pv.retry_count === nv.retry_count &&
+    pv.failure_reason === nv.failure_reason &&
+    pv.channelName === nv.channelName &&
+    pv.pipeline_type === nv.pipeline_type &&
+    pv.duration === nv.duration
+  );
+}
+
+export default memo(ReviewVideoRow, arePropsEqual);

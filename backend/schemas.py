@@ -354,6 +354,7 @@ class UploadTaskUpdate(BaseModel):
     youtube_video_id: Optional[str] = None
     youtube_url: Optional[str] = None
     scheduled_at: Optional[datetime] = None
+    schedule_time: Optional[str] = None
     failure_reason: Optional[str] = None
     upload_mode: Optional[str] = None
     ai_metadata_generated: Optional[bool] = None

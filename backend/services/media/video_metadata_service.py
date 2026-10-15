@@ -44,7 +44,15 @@ class VideoMetadataService:
                 video_path
             ]
             
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=10)
+            kwargs = {}
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = 0
+                kwargs["startupinfo"] = startupinfo
+                kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+                
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=10, **kwargs)
             if result.returncode != 0:
                 raise RuntimeError(f"ffprobe failed: {result.stderr}")
                 

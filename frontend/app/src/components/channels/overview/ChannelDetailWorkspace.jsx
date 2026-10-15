@@ -159,11 +159,11 @@ export default function ChannelDetailWorkspace({ channel }) {
         </div>
       )}
 
-      {/* BACKGROUND DEPTH & VECTOR LINES */}
+      {/* BACKGROUND DEPTH & VECTOR LINES (Hardware Accelerated) */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-cyan-600/10 blur-[120px] rounded-full"></div>
-        <div className="absolute top-[30%] left-[-10%] w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-20%] right-[20%] w-[400px] h-[400px] bg-teal-600/5 blur-[100px] rounded-full"></div>
+        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(6,182,212,0.08)_0%,transparent_70%)] rounded-full"></div>
+        <div className="absolute top-[30%] left-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(37,99,235,0.05)_0%,transparent_70%)] rounded-full"></div>
+        <div className="absolute bottom-[-20%] right-[20%] w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(13,148,136,0.05)_0%,transparent_70%)] rounded-full"></div>
       </div>
 
       <div className="absolute top-0 left-0 w-full h-[240px] pointer-events-none z-0">

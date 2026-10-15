@@ -222,7 +222,7 @@ def open_save_file_picker(default_name: str, ext: str) -> str | None:
             startupinfo.wShowWindow = 0
             
             cmd = ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_script]
-            out = subprocess.check_output(cmd, startupinfo=startupinfo, timeout=120)
+            out = subprocess.check_output(cmd, startupinfo=startupinfo, creationflags=subprocess.CREATE_NO_WINDOW, timeout=120)
             chosen_path = out.decode("utf-8", errors="ignore").strip()
             if chosen_path:
                 return os.path.normpath(chosen_path)

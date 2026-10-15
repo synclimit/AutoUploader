@@ -37,7 +37,7 @@
   
   .neon-interactive {
     position: relative;
-    transition: all var(--anim-duration) ease;
+    transition: transform var(--anim-duration) ease, border-color var(--anim-duration) ease, background-color var(--anim-duration) ease, box-shadow var(--anim-duration) ease, color var(--anim-duration) ease;
     cursor: pointer;
   }
   

@@ -180,97 +180,17 @@ def create_task(
             except Exception:
                 rec_date = None
 
-    # Calculate planned upload schedule (Date & Time)
-    import pytz
-    from datetime import timedelta, time
-
+    # Calculate planned upload schedule (Date & Time) via ScheduleAllocator
     automation_strategy = str(p_config.get("automation_strategy", "continuous")).lower()
     has_campaign = bool(automation_strategy == "campaign" or p_config.get("campaign_folder"))
     exec_source = "CAMPAIGN" if has_campaign else "CONTINUOUS"
 
-    tz_str = getattr(channel, "publish_timezone", None) or "Asia/Jakarta"
-    try:
-        tz = pytz.timezone(tz_str)
-    except Exception:
-        tz = pytz.timezone("Asia/Jakarta")
-
-    now_local = datetime.now(tz)
-    try:
-        daily_limit_val = int(p_config.get("daily_limit", 1) or 1)
-    except Exception:
-        daily_limit_val = 1
-    if daily_limit_val <= 0:
-        daily_limit_val = 1
-
-    try:
-        from schemas import QueueStatusEnum
-        existing_task_count = db.query(UploadTask).filter(
-            UploadTask.channel_id == channel.id,
-            UploadTask.pipeline_type == pipeline_type,
-            UploadTask.status.in_([QueueStatusEnum.watched, QueueStatusEnum.review, QueueStatusEnum.scheduled, QueueStatusEnum.queued])
-        ).count()
-    except Exception:
-        existing_task_count = today_intake
-
-    queue_index = existing_task_count
-
-    try:
-        first_parts = str(schedule_list[0]).split(":")
-        first_h = int(first_parts[0])
-        first_m = int(first_parts[1]) if len(first_parts) > 1 else 0
-    except Exception:
-        first_h = 9
-        first_m = 0
-
-    today_first_dt = tz.localize(datetime.combine(now_local.date(), time(first_h, first_m)))
-    base_day_shift = 1 if today_first_dt <= now_local else 0
-
-    day_offset = base_day_shift + (queue_index // daily_limit_val)
-    slot_idx_in_day = queue_index % daily_limit_val
-
-    if slot_idx_in_day < len(schedule_list):
-        time_slot_str = str(schedule_list[slot_idx_in_day])
-    else:
-        start_hour = 9
-        end_hour = 21
-        step = (end_hour - start_hour) / max(1, daily_limit_val - 1)
-        slot_h = int(start_hour + slot_idx_in_day * step)
-        time_slot_str = f"{slot_h:02d}:00"
-
-    try:
-        parts = time_slot_str.split(":")
-        slot_hour = int(parts[0])
-        slot_minute = int(parts[1]) if len(parts) > 1 else 0
-    except Exception:
-        slot_hour = 9
-        slot_minute = 0
-
-    target_date = now_local.date() + timedelta(days=day_offset)
-    target_dt_local = tz.localize(datetime.combine(target_date, time(slot_hour, slot_minute)))
-
-    if humanize_enabled and humanize_min <= humanize_max and humanize_max > 0:
-        import random
-        jitter = random.randint(humanize_min, humanize_max)
-        target_dt_local += timedelta(minutes=jitter)
-
-    # Avoid same-minute collision with existing tasks on the same day for this channel
-    try:
-        from schemas import QueueStatusEnum
-        day_start_utc = target_dt_local.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
-        day_end_utc = target_dt_local.replace(hour=23, minute=59, second=59, microsecond=999999).astimezone(pytz.UTC).replace(tzinfo=None)
-        existing_tasks = db.query(UploadTask.schedule_time).filter(
-            UploadTask.channel_id == channel.id,
-            UploadTask.scheduled_at >= day_start_utc,
-            UploadTask.scheduled_at <= day_end_utc
-        ).all()
-        used_times = {t[0] for t in existing_tasks if t[0]}
-        import random
-        while target_dt_local.strftime("%H:%M") in used_times:
-            target_dt_local += timedelta(minutes=random.randint(3, 8))
-    except Exception:
-        pass
-
-    calculated_scheduled_at = target_dt_local.astimezone(pytz.UTC).replace(tzinfo=None)
+    from services.schedule_allocator import ScheduleAllocator
+    calculated_scheduled_at, schedule_time_str = ScheduleAllocator.allocate_slot(
+        db=db,
+        channel_id=channel.id,
+        pipeline_type=pipeline_type
+    )
 
     task = UploadTask(
         id=str(uuid.uuid4()),
@@ -323,7 +243,7 @@ def create_task(
         # Scheduling Metadata (Phase 5)
         pipeline_type=pipeline_type,
         schedule_mode=p_config.get("schedule_mode", "application"),
-        schedule_time=target_dt_local.strftime("%H:%M"),
+        schedule_time=schedule_time_str,
         humanize_enabled=humanize_enabled,
         humanize_min=humanize_min,
         humanize_max=humanize_max,

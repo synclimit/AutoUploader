@@ -40,6 +40,8 @@ class AIEngineManager:
     @staticmethod
     async def generate(db: Session, task: str, prompt: str, context: Optional[Dict[str, Any]] = None, **kwargs) -> Dict[str, Any]:
         provider = AIEngineManager.get_active_provider(db, **kwargs)
+        if not provider.api_key:
+            raise ValueError("API Key belum tersimpan di database. Silakan buka Pengaturan > AI Metadata, masukkan API Key Anda, lalu klik tombol 'Save Changes'.")
         
         # Enforce capability check
         task_lower = task.lower()

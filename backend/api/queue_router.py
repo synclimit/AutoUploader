@@ -152,4 +152,7 @@ def get_keyword_autocomplete(db: Session = Depends(get_db)):
     keywords = [row[0] for row in recent_history if row[0]]
     return {"success": True, "data": keywords}
 
-
+@router.post("/realign-schedules", response_model=List[UploadTaskResponse])
+def realign_schedules(channel_id: Optional[str] = None, pipeline_type: Optional[str] = None, db: Session = Depends(get_db)):
+    from services.schedule_allocator import ScheduleAllocator
+    return ScheduleAllocator.realign_channel_queue(db, channel_id=channel_id, pipeline_type=pipeline_type)

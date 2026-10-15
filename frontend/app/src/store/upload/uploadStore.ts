@@ -108,21 +108,33 @@ export const useQueueStore = create<QueueStoreState>((set, get) => ({
       const mappedData = safeList.map((t: any) => ({ ...t, account_id: t.channel_id || t.account_id }))
       
       const activeTask = get().activeTask
-      let newActiveTask = activeTask
+      let newActiveTask: UploadTask | null = null
       
       if (activeTask) {
         const found = mappedData.find((t: UploadTask) => t.id === activeTask.id)
-        if (found) newActiveTask = found
+        if (found) {
+          const isSame = (
+            activeTask.id === found.id &&
+            activeTask.status === found.status &&
+            activeTask.upload_progress === found.upload_progress &&
+            activeTask.failure_reason === found.failure_reason &&
+            activeTask.retry_count === found.retry_count &&
+            activeTask.title === found.title &&
+            activeTask.description === found.description &&
+            activeTask.tags === found.tags &&
+            activeTask.thumbnail_path === found.thumbnail_path &&
+            activeTask.scheduled_at === found.scheduled_at &&
+            activeTask.schedule_time === found.schedule_time
+          );
+          newActiveTask = isSame ? activeTask : found
+        } else {
+          newActiveTask = mappedData.length > 0 ? mappedData[0] : null
+        }
       } else if (mappedData.length > 0) {
         newActiveTask = mappedData[0]
       }
       
       set({ tasks: mappedData, loading: false, activeTask: newActiveTask })
-      
-      // Also fetch logs if we have an active task
-      if (newActiveTask) {
-        get().fetchTaskLogs(newActiveTask.id)
-      }
     } catch (error: any) {
       console.error("fetchTasks failed:", error)
       set({ error: error.message, loading: false })

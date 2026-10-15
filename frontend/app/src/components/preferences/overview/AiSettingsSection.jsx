@@ -169,6 +169,12 @@ export default function AiSettingsSection({ config, updateConfig }) {
                       <div className="text-white/50">Provider: <span className="text-white/90">{testResult.provider}</span></div>
                       <div className="text-white/50">Auth: <span className="text-white/90">{testResult.authentication}</span></div>
                       <div className="text-white/50">Latency: <span className="text-white/90">{testResult.latency_ms}ms</span></div>
+                      {testResult.success && !apiKeyMasked && tempApiKey && (
+                        <div className="col-span-2 mt-2 pt-2 border-t border-green-500/20 text-emerald-300/90 text-[11.5px] flex items-center gap-1.5 font-medium">
+                          <span>💡</span>
+                          <span>Jangan lupa klik tombol <strong>"Save Changes"</strong> di kanan bawah untuk menyimpan API Key ke sistem!</span>
+                        </div>
+                      )}
                       {!testResult.success && testResult.error && (
                         <div className="text-red-400/80 col-span-2 mt-2 bg-red-500/10 p-2 rounded">
                           <span className="font-semibold block mb-1">Error Details:</span>

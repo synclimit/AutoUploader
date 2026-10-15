@@ -79,7 +79,7 @@ def open_modern_folder_picker() -> str | None:
                 "-ExecutionPolicy", "Bypass",
                 "-EncodedCommand", _encoded_ps
             ]
-            out = subprocess.check_output(cmd, startupinfo=startupinfo, timeout=120)
+            out = subprocess.check_output(cmd, startupinfo=startupinfo, creationflags=subprocess.CREATE_NO_WINDOW, timeout=120)
             path = out.decode("utf-8", errors="ignore").strip()
             if path and os.path.exists(path):
                 return os.path.normpath(path)
